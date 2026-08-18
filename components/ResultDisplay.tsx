@@ -70,11 +70,21 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
       .replace(/&lt;sup&gt;/gi, "<sup>")
       .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
-    // 5. Remove weird symbols, Wingdings / Private Use Area glyphs, square box bullets (□, ■, etc.)
+    // 5. Clean weird symbols, Wingdings / Private Use Area glyphs, square box bullets (□, ■, etc.)
     clean = clean.replace(/[\uF000-\uF8FF]/g, "");
     clean = clean.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, "- ");
     
-    // 6. Remove common AI intros
+    // 6. Clean stray slashes '/', '\/', '//', and escaped backslashes
+    clean = clean
+      .replace(/\\([*#_>\-\+\[\]])/g, "$1") // unescape markdown backslashes
+      .replace(/\\\//g, "/") // unescape \/
+      .replace(/(^|\n)\s*\/+\s*(?=[A-Za-z0-9#\*\-\+IÀ-ỹ])/g, "$1") // remove leading slash before letters/headings
+      .replace(/(^|\n)(\s*[-*+]\s*)\/+\s*/g, "$1$2") // remove slash right after bullet list markers
+      .replace(/\s*\/+\s*(\n|$)/g, "$1") // remove trailing slashes at line ends
+      .replace(/(^|\n)\s*\/+\s*(\n|$)/g, "$1$2") // remove lines containing only slashes
+      .replace(/([^\w\d\s\/])\s*\/+\s*([^\w\d\s\/])/g, "$1 $2"); // remove stray isolated slashes between symbols
+
+    // 7. Remove common AI intros
     const lines = clean.split('\n');
     if (lines.length > 0) {
         const firstLine = lines[0].trim().toLowerCase();
@@ -497,10 +507,10 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
           properties: {
             page: {
               margin: {
-                top: 1134,
-                bottom: 1134,
-                left: 1418, 
-                right: 1134,
+                top: 1134, // 2.0 cm
+                bottom: 1134, // 2.0 cm
+                left: 1701, // 3.0 cm chuẩn thể thức văn bản
+                right: 1134, // 2.0 cm
               },
             },
           },
@@ -569,7 +579,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
         <div className="relative z-10">
             <h2 className="text-3xl font-extrabold tracking-tight">Xử lý thành công!</h2>
             <p className="text-indigo-100 mt-2 max-w-lg mx-auto text-lg font-light">
-                Giáo án đã được chuẩn hóa định dạng và tích hợp năng lực số.
+                Giáo án đã được chuẩn hóa định dạng và tích hợp năng lực số (Font Times New Roman 14pt chuẩn).
             </p>
         </div>
         
@@ -580,11 +590,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
             className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-white text-indigo-700 rounded-2xl text-lg font-bold hover:bg-indigo-50 transition-all shadow-lg transform hover:-translate-y-1 active:scale-95"
           >
              {isGeneratingDoc ? (
-                 <span className="animate-pulse">Đang tạo file...</span>
+                 <span className="animate-pulse">Đang tạo file DOCX...</span>
              ) : (
                  <>
                     <Download size={22} />
-                    <span>Tải về DOCX (Chuẩn)</span>
+                    <span>Tải về DOCX (Chuẩn Times New Roman 14)</span>
                  </>
              )}
           </button>
@@ -599,16 +609,18 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
             {showPreview ? (
                 <>Thu gọn <ChevronUp size={16} className="ml-2" /></>
             ) : (
-                <>Xem trước nội dung <ChevronDown size={16} className="ml-2" /></>
+                <>Xem trước nội dung (Font Times New Roman 14) <ChevronDown size={16} className="ml-2" /></>
             )}
         </button>
       </div>
 
       {showPreview && (
-        <div className="p-10 prose prose-slate max-w-none prose-p:text-slate-600 prose-headings:text-indigo-900 prose-headings:font-bold prose-strong:text-indigo-700 prose-li:text-slate-600 border-t border-slate-200 bg-white">
-            <ReactMarkdown rehypePlugins={[rehypeRaw]}>
-            {formatResultForPreview(safeResult)}
-            </ReactMarkdown>
+        <div className="p-8 sm:p-12 border-t border-slate-200 bg-white font-['Times_New_Roman',Times,serif] text-[14pt] leading-[1.6] text-slate-900 text-justify">
+            <div className="prose max-w-none prose-headings:font-['Times_New_Roman',Times,serif] prose-p:font-['Times_New_Roman',Times,serif] prose-li:font-['Times_New_Roman',Times,serif] prose-strong:font-['Times_New_Roman',Times,serif] prose-p:my-2 prose-headings:my-3">
+              <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                {formatResultForPreview(safeResult)}
+              </ReactMarkdown>
+            </div>
         </div>
       )}
     </div>

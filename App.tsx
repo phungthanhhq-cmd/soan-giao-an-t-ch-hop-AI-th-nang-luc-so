@@ -382,6 +382,28 @@ const App: React.FC = () => {
               </div>
             </div>
 
+            {/* Smart PPCT & Integration Helper Banner */}
+            {distributionContent && distributionContent.trim().length > 0 ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 text-xs flex items-start space-x-3 shadow-sm">
+                <Sparkles className="shrink-0 text-emerald-600 mt-0.5" size={18} />
+                <div className="flex-1">
+                  <p className="font-bold text-emerald-950 text-sm">🌟 Đã nhận diện Phân phối chương trình (PPCT):</p>
+                  <p className="mt-1 text-emerald-800 leading-relaxed">
+                    Hệ thống sẽ tự động quét, đối chiếu đúng bài học trong PPCT và trích xuất nguyên văn các mã NLS / AI có sẵn để tích hợp đồng bộ vào giáo án (tất cả phần tích hợp được <strong>đánh dấu bằng màu đỏ</strong>). Thầy/cô <strong>không cần phải lựa chọn mã thủ công</strong> bên dưới.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              (enableNLS || enableAI) && (
+                <div className="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3.5 text-indigo-900 text-xs flex items-center space-x-2.5">
+                  <Info className="shrink-0 text-indigo-600" size={16} />
+                  <span>
+                    💡 <strong>Lưu ý:</strong> Trường hợp chỉ tải giáo án lên (không có PPCT), hệ thống sẽ tích hợp theo đúng các mã thầy/cô tích chọn bên dưới và đánh dấu màu đỏ (tuyệt đối không tự ý thêm mã ngoài).
+                  </span>
+                </div>
+              )
+            )}
+
             {/* Horizontal Input Row for NLS and AI */}
             {(enableNLS || enableAI) && (
               <div className={`grid gap-6 ${enableNLS && enableAI ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'}`}>

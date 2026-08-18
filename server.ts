@@ -54,138 +54,174 @@ async function startServer() {
       const enableNLS = info.integrationModes ? info.integrationModes.enableNLS : true;
       const enableAI = info.integrationModes ? info.integrationModes.enableAI : false;
 
-      let distributionContext = "";
-      if (enableNLS && info.distributionContent && info.distributionContent.trim().length > 0) {
-        distributionContext = `
-        =========================================================
-        🚨 QUY TẮC TỐI THƯỢNG (KHI CÓ PPCT - STRICT MODE & ĐỒNG NHẤT 100% MÃ SỐ):
-        Người dùng ĐÃ CUNG CẤP nội dung Phân phối chương trình (PPCT).
-        Đây là văn bản pháp quy của nhà trường/tổ chuyên môn, bạn phải tuân thủ TUYỆT ĐỐI các yêu cầu sau:
+      const hasPPCT = Boolean(info.distributionContent && info.distributionContent.trim().length > 0);
+      const hasManualNLS = Boolean(enableNLS && info.manualNLS && info.manualNLS.length > 0);
+      const hasManualAI = Boolean(enableAI && info.manualAI && info.manualAI.length > 0);
 
-        1. Đọc tên bài học trong "NỘI DUNG GIÁO ÁN GỐC".
-        2. Tìm bài học tương ứng trong nội dung PPCT.
-        3. Trích xuất NGUYÊN VĂN, CHÍNH XÁC toàn bộ Mã số Năng lực số (ví dụ: NLS 1.1, NLS 2.2, NLS.TC1...) và nội dung cột "Năng lực số" (hoặc YCCĐ năng lực số) của bài học đó.
-        4. Đưa nội dung trích xuất đó vào phần Mục I.2.c (Mục tiêu Năng lực số).
-        5. ĐỒNG BỘ ĐỒNG NHẤT VỚI TIẾN TRÌNH DẠY HỌC: Trong Mục II (Tiến trình dạy học), các hoạt động tích hợp của GV và HS (Khởi động, Hình thành kiến thức, Luyện tập, Vận dụng) PHẢI PHỤC VỤ VÀ GẮN CHẶT VỚI CHÍNH CÁC MÃ SỐ TRONG PPCT ĐÃ TRÍCH XUẤT.
-        
-        ⛔ CÁC ĐIỀU CẤM (STRICTLY PROHIBITED):
-        - CẤM TUYỆT ĐỐI việc tự ý thêm bất kỳ mã năng lực số nào khác không có trong PPCT của bài học này (Trừ khi có YÊU CẦU THỦ CÔNG bên dưới).
-        - CẤM TUYỆT ĐỐI việc tự ý bớt hoặc bỏ sót bất kỳ mã nào có trong PPCT.
-        - CẤM tự ý nâng cao hay thay đổi cấp độ nếu PPCT không yêu cầu.
-        - CẤM dùng Khung năng lực số tham chiếu bên ngoài để bịa thêm mục tiêu hay mã số. CHỈ dùng những gì PPCT ghi.
-        - Nếu cột năng lực số trong PPCT để trống, thì mục tiêu NLS ghi là: "Không có (theo PPCT)".
-
-        Đánh dấu mục tiêu này bằng dòng chữ: "(Nội dung trích xuất nguyên văn từ PPCT)".
-
-        NỘI DUNG PPCT:
-        ${info.distributionContent}
-        =========================================================
-        `;
-      }
-
-      let manualContext = "";
-      const allManualEntries: string[] = [];
-
-      if (enableNLS && info.manualNLS && info.manualNLS.length > 0) {
-        const nlsItems = info.manualNLS
-          .map((item) => `- Năng lực số [${item.code} - ${item.name}]:\n  Nội dung yêu cầu cần đạt: ${item.description}`)
-          .join("\n\n");
-        allManualEntries.push(`### CÁC MÃ NĂNG LỰC SỐ (NLS) ĐÃ CHỌN (Theo TT 02/2025/TT-BGDĐT):\n${nlsItems}`);
-      }
-
-      if (enableAI && info.manualAI && info.manualAI.length > 0) {
-        const aiItems = info.manualAI
-          .map((item) => `- Năng lực Trí tuệ Nhân tạo (AI) [${item.code} - ${item.name}]:\n  Nội dung yêu cầu cần đạt: ${item.description}`)
-          .join("\n\n");
-        allManualEntries.push(`### CÁC MÃ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) ĐÃ CHỌN (Theo QĐ 3439 & TT 02):\n${aiItems}`);
-      }
-
-      if (allManualEntries.length > 0) {
-        manualContext = `
-        =========================================================
-        🎯 YÊU CẦU TÍCH HỢP TỪ GIÁO VIÊN (MANUAL INPUT - ƯU TIÊN CAO NHẤT):
-        Người dùng đã chỉ định cụ thể các mã Năng lực cần tích hợp:
-        
-        ${allManualEntries.join("\n\n")}
-        
-        NHIỆM VỤ QUAN TRỌNG:
-        1. Đọc kỹ từng mã năng lực và "Nội dung yêu cầu cần đạt" ở trên.
-        2. Tự động PHÂN TÍCH và XÁC ĐỊNH xem nội dung yêu cầu này phù hợp nhất để đưa vào:
-           - Phần I. MỤC TIÊU -> 2. Về năng lực (nêu rõ các mã đã chọn).
-           - Phần II. TIẾN TRÌNH DẠY HỌC: Tích hợp khéo léo vào hoạt động dạy học phù hợp (Khởi động, Hình thành kiến thức, Luyện tập, Vận dụng).
-        3. Trình bày chi tiết nhiệm vụ học tập, công cụ số / công cụ AI sử dụng, phương thức tương tác và câu lệnh (prompt) hoặc hướng dẫn liêm chính học thuật nếu có sử dụng AI.
-        =========================================================
-        `;
-      }
-
-      // Determine Mode-specific instructions
+      let integrationStrategyDirective = "";
       let modeDirective = "";
       let structureGoalRequirement = "";
 
-      if (enableNLS && enableAI) {
-        modeDirective = `
-        🚨 CHẾ ĐỘ TÍCH HỢP: TÍCH HỢP ĐỒNG THỜI CẢ NĂNG LỰC SỐ (NLS) VÀ TRÍ TUỆ NHÂN TẠO (AI).
-        - Tích hợp cả 2 mục vào Phần I.2 (Mục tiêu năng lực) và Phần II (Tiến trình dạy học).
-        - ĐÁNH DẤU BÔI ĐỎ TOÀN BỘ NỘI DUNG TÍCH HỢP: Toàn bộ mục "c. Năng lực số" và các hoạt động NLS bổ sung trong tiến trình dạy học phải bọc trong thẻ <nls>...</nls>. Toàn bộ mục "d. Năng lực Trí tuệ Nhân tạo (AI)" và các hoạt động AI bổ sung trong tiến trình dạy học phải bọc trong thẻ <ai>...</ai>.
+      if (hasPPCT) {
+        integrationStrategyDirective = `
+        =============================================================================
+        🚨 TRƯỜNG HỢP 1: NGƯỜI DÙNG CUNG CẤP PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3) - NGUỒN CHUẨN MỰC PHÁP QUY TỐI THƯỢNG:
+        Trong Phân phối chương trình / Phụ lục 3 ĐÃ CÓ SẴN cột tích hợp Năng lực số / AI cho từng bài học/tiết học cụ thể.
+        
+        QUY TRÌNH SOI VÀ ĐỐI CHIẾU BẮT BUỘC:
+        1. Đọc tên bài học / tiết dạy trong "NỘI DUNG GIÁO ÁN GỐC".
+        2. Soi và tìm đúng dòng bài học / tiết dạy tương ứng trong nội dung "PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3)" bên dưới.
+        3. PHÂN LOẠI VÀ CHỈ TÍCH HỢP CHÍNH XÁC NỘI DUNG MÀ BÀI ĐÓ ĐƯỢC PHÂN CÔNG TRONG PPCT/PHỤ LỤC 3:
+           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT CHỈ CÓ NĂNG LỰC SỐ (NLS), KHÔNG CÓ AI (cột AI để trống hoặc không ghi):
+             + CHỈ TÍCH HỢP NĂNG LỰC SỐ (Mục I.2.c bọc trong thẻ <nls>...</nls> và bổ sung hoạt động số trong Tiến trình dạy học bọc trong <nls>...</nls>).
+             + ⛔ NGHIÊM CẤM TUYỆT ĐỐI: KHÔNG ĐƯỢC TỰ Ý THÊM MỤC NĂNG LỰC AI (Mục d), KHÔNG ĐƯỢC TỰ BỊA MÃ AI (như 6.2.TC2a, NLb.TC2, NLc.TC2...), KHÔNG THÊM BẤT KỲ HOẠT ĐỘNG AI NÀO VÀO TIẾN TRÌNH BÀI DẠY!
+           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT CHỈ CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI), KHÔNG CÓ NLS (cột NLS để trống hoặc không ghi):
+             + CHỈ TÍCH HỢP NĂNG LỰC AI (Mục I.2.c bọc trong thẻ <ai>...</ai> và bổ sung hoạt động AI trong Tiến trình dạy học bọc trong <ai>...</ai>).
+             + ⛔ NGHIÊM CẤM TUYỆT ĐỐI: KHÔNG ĐƯỢC TỰ Ý THÊM MỤC NĂNG LỰC SỐ (NLS), KHÔNG ĐƯỢC TỰ BỊA MÃ NLS (như 1.1.TC2a, 2.1.TC2b...), KHÔNG THÊM BẤT KỲ HOẠT ĐỘNG NLS NÀO VÀO TIẾN TRÌNH BÀI DẠY!
+           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT CÓ CẢ NLS VÀ AI:
+             + Tích hợp đầy đủ cả 2 mục: 'c. Năng lực số' (<nls>...</nls>) và 'd. Năng lực Trí tuệ Nhân tạo (AI)' (<ai>...</ai>).
+           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT KHÔNG CÓ CẢ NLS LẪN AI (để trống cả 2):
+             + ⛔ TUYỆT ĐỐI KHÔNG TÍCH HỢP CẢ NLS LẪN AI. Giữ nguyên mục tiêu và tiến trình bài dạy gốc.
+        4. Trích xuất NGUYÊN VĂN, CHÍNH XÁC VÀ ĐẦY ĐỦ TOÀN BỘ Mã số chi tiết (ví dụ: 2.1.TC2b, 6.2.TC2a, NLb.TC2...) kèm tên thành tố/miền và Yêu cầu cần đạt tương ứng của bài học đó.
+        5. ĐỒNG BỘ 100% vào Tiến trình dạy học (Mục II - cả 4 bước của các Hoạt động 1, 2, 3, 4).
+        6. ĐÁNH DẤU MÀU ĐỎ TOÀN BỘ PHẦN TÍCH HỢP:
+           - Toàn bộ mục tiêu NLS và các hoạt động số trong tiến trình dạy học PHẢI BAO BỌC BẰNG THẺ <nls>...</nls>.
+           - Toàn bộ mục tiêu AI và các hoạt động AI trong tiến trình dạy học PHẢI BAO BỌC BẰNG THẺ <ai>...</ai>.
+        
+        ⛔ NGUYÊN TẮC CẤM TỐI THƯỢNG (STRICTLY PROHIBITED):
+        - CẤM TUYỆT ĐỐI VIỆC TỰ Ý TÍCH HỢP THÊM NĂNG LỰC SỐ HOẶC AI KHI PHỤ LỤC / PPCT CỦA BÀI HỌC ĐÓ KHÔNG CÓ!
+        - TUYỆT ĐỐI KHÔNG tự ý thêm bất kỳ mã năng lực nào khác ngoài PPCT của bài học này.
+        - TUYỆT ĐỐI KHÔNG được bớt hoặc bỏ sót mã nào có trong PPCT của bài học này.
+        
+        NỘI DUNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3:
+        ${info.distributionContent}
+        =============================================================================
         `;
+
+        modeDirective = `
+        🚨 CHẾ ĐỘ: TỰ ĐỘNG TÍCH HỢP THEO PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3.
+        - Căn cứ 100% vào bảng PPCT/Phụ lục 3 ở trên của đúng bài học/tiết dạy này.
+        - Nếu bài chỉ có NLS -> Chỉ tích hợp NLS, CẤM thêm AI.
+        - Nếu bài chỉ có AI -> Chỉ tích hợp AI, CẤM thêm NLS.
+        - Nếu bài có cả 2 -> Tích hợp cả 2.
+        - Nếu bài không có cả 2 -> Không tích hợp.
+        `;
+
         structureGoalRequirement = `
+           1. Về kiến thức
+           2. Về năng lực:
+              a. Năng lực chung
+              b. Năng lực đặc thù môn học
+              (DỰA VÀO KẾT QUẢ SOI TỪ PPCT / PHỤ LỤC 3 CỦA BÀI HỌC/TIẾT NÀY):
+              * NẾU BÀI CHỈ CÓ NĂNG LỰC SỐ (NLS):
+                <nls>c. Năng lực số
+                - [Mã NLS chi tiết, ví dụ 2.1.TC2b] (Tên miền): [Yêu cầu cần đạt NLS đầy đủ theo đúng PPCT]
+                </nls>
+                (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI NÀO!)
+              * NẾU BÀI CHỈ CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI):
+                <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
+                - [Mã AI chi tiết, ví dụ NLb.TC2, 6.2.TC2a] (Tên miền): [Yêu cầu cần đạt AI đầy đủ theo đúng PPCT]
+                </ai>
+                (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ NÀO!)
+              * NẾU BÀI CÓ CẢ NLS VÀ AI TRONG PPCT:
+                <nls>c. Năng lực số
+                - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS đầy đủ theo đúng PPCT]
+                </nls>
+                <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
+                - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI đầy đủ theo đúng PPCT]
+                </ai>
+              * NẾU BÀI KHÔNG CÓ CẢ HAI TRONG PPCT:
+                (Giữ nguyên không thêm mục c/d về NLS/AI)
+           3. Về phẩm chất`;
+      } else if (hasManualNLS || hasManualAI) {
+        const manualItems: string[] = [];
+        if (hasManualNLS && info.manualNLS) {
+          const nlsList = info.manualNLS
+            .map(item => `- [${item.code}] (${item.name}): ${item.description}`)
+            .join("\n");
+          manualItems.push(`### CÁC MÃ NĂNG LỰC SỐ (NLS) ĐƯỢC CHỌN (BẮT BUỘC GHI ĐỦ MÃ ${info.manualNLS.map(i => i.code).join(", ")} VÀO GIÁO ÁN):\n${nlsList}`);
+        }
+        if (hasManualAI && info.manualAI) {
+          const aiList = info.manualAI
+            .map(item => `- [${item.code}] (${item.name}): ${item.description}`)
+            .join("\n");
+          manualItems.push(`### CÁC MÃ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) ĐƯỢC CHỌN (BẮT BUỘC GHI ĐỦ MÃ ${info.manualAI.map(i => i.code).join(", ")} VÀO GIÁO ÁN):\n${aiList}`);
+        }
+
+        integrationStrategyDirective = `
+        =============================================================================
+        🚨 TRƯỜNG HỢP 2: KHÔNG CÓ PPCT - TÍCH HỢP THEO ĐÚNG CÁC MÃ NGƯỜI DÙNG TÍCH CHỌN THỦ CÔNG:
+        Người dùng không tải PPCT lên, nhưng đã tích chọn cụ thể các mã năng lực sau:
+        
+        ${manualItems.join("\n\n")}
+        
+        NHIỆM VỤ BẮT BUỘC:
+        1. Tích hợp CHÍNH XÁC VÀ ĐẦY ĐỦ các mã năng lực người dùng đã chọn ở trên vào:
+           - Phần I.2 (Mục tiêu năng lực): GHI ĐẦY ĐỦ MÃ TIÊU CHÍ (Ví dụ: 1.1.TC2a, 2.1.TC2b, NLb.TC2, NLc.TC2...) cùng tên miền và mô tả yêu cầu cần đạt.
+           - Phần II (Tiến trình dạy học): Ở các bước có tích hợp, ghi rõ mã trong ngoặc vuông (Ví dụ: [2.1.TC2b], [NLb.TC2]...) gắn liền với hoạt động của GV và HS.
+        2. ĐÁNH DẤU MÀU ĐỎ TOÀN BỘ PHẦN TÍCH HỢP:
+           ${hasManualNLS ? "- Mục tiêu NLS và hoạt động NLS bổ sung PHẢI BAO BỌC BẰNG THẺ <nls>...</nls>." : ""}
+           ${hasManualAI ? "- Mục tiêu AI và hoạt động AI bổ sung PHẢI BAO BỌC BẰNG THẺ <ai>...</ai>." : ""}
+        
+        ⛔ NGUYÊN TẮC CẤM (STRICTLY PROHIBITED):
+        ${hasManualNLS && !hasManualAI ? "- Người dùng CHỈ CHỌN NĂNG LỰC SỐ (NLS). TUYỆT ĐỐI CẤM TỰ Ý THÊM MỤC NĂNG LỰC AI, KHÔNG THÊM HOẠT ĐỘNG AI, KHÔNG CÓ THẺ <ai>." : ""}
+        ${!hasManualNLS && hasManualAI ? "- Người dùng CHỈ CHỌN NĂNG LỰC AI. TUYỆT ĐỐI CẤM TỰ Ý THÊM MỤC NĂNG LỰC SỐ, KHÔNG THÊM HOẠT ĐỘNG NLS, KHÔNG CÓ THẺ <nls>." : ""}
+        - TUYỆT ĐỐI KHÔNG tự ý tích hợp thêm bất kỳ mã nào khác ngoài danh sách người dùng đã chọn ở trên.
+        =============================================================================
+        `;
+
+        if (hasManualNLS && hasManualAI) {
+          modeDirective = `🚨 CHẾ ĐỘ: TÍCH HỢP CẢ NLS VÀ AI THEO DANH SÁCH NGƯỜI DÙNG ĐÃ CHỌN.`;
+          structureGoalRequirement = `
            1. Về kiến thức
            2. Về năng lực:
               a. Năng lực chung
               b. Năng lực đặc thù môn học
               c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
                  <nls>c. Năng lực số
-                 - NLS [Mã miền] (Bậc [X]): [Yêu cầu cần đạt NLS cụ thể theo bài học]
-                 ...
+                 - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
                  </nls>
               d. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
                  <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-                 - AI.[Mã miền] (Bậc [X] - [Tên mức]): [Yêu cầu cần đạt AI cụ thể theo bài học]
-                 ...
+                 - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
                  </ai>
            3. Về phẩm chất`;
-      } else if (enableNLS && !enableAI) {
-        modeDirective = `
-        🚨 CHẾ ĐỘ TÍCH HỢP: CHỈ TÍCH HỢP NĂNG LỰC SỐ (NLS) - HOÀN TOÀN ĐỘC LẬP.
-        - TUYỆT ĐỐI KHÔNG TÍCH HỢP NĂNG LỰC AI.
-        - CẤM TỰ Ý THÊM MỤC "Năng lực Trí tuệ Nhân tạo (AI)" hoặc bất kỳ thẻ <ai>...</ai> nào vào giáo án.
-        - ĐÁNH DẤU BÔI ĐỎ TOÀN BỘ NỘI DUNG TÍCH HỢP: Toàn bộ mục "c. Năng lực số" và các hoạt động NLS bổ sung trong tiến trình dạy học phải bọc trong thẻ <nls>...</nls>.
-        `;
-        structureGoalRequirement = `
+        } else if (hasManualNLS) {
+          modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP NĂNG LỰC SỐ (NLS) - TUYỆT ĐỐI KHÔNG TÍCH HỢP AI.`;
+          structureGoalRequirement = `
            1. Về kiến thức
            2. Về năng lực:
               a. Năng lực chung
               b. Năng lực đặc thù môn học
               c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
                  <nls>c. Năng lực số
-                 - NLS [Mã miền] (Bậc [X]): [Yêu cầu cần đạt NLS cụ thể theo bài học]
-                 ...
+                 - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
                  </nls>
+                 (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI)
            3. Về phẩm chất`;
-      } else if (!enableNLS && enableAI) {
-        modeDirective = `
-        🚨 CHẾ ĐỘ TÍCH HỢP: CHỈ TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI) - HOÀN TOÀN ĐỘC LẬP.
-        - TUYỆT ĐỐI KHÔNG TÍCH HỢP NĂNG LỰC SỐ (NLS).
-        - CẤM TỰ Ý THÊM MỤC "Năng lực số" hoặc bất kỳ thẻ <nls>...</nls> nào vào giáo án.
-        - ĐÁNH DẤU BÔI ĐỎ TOÀN BỘ NỘI DUNG TÍCH HỢP: Toàn bộ mục "c. Năng lực Trí tuệ Nhân tạo (AI)" và các hoạt động AI bổ sung trong tiến trình dạy học phải bọc trong thẻ <ai>...</ai>.
-        `;
-        structureGoalRequirement = `
+        } else {
+          modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI) - TUYỆT ĐỐI KHÔNG TÍCH HỢP NLS.`;
+          structureGoalRequirement = `
            1. Về kiến thức
            2. Về năng lực:
               a. Năng lực chung
               b. Năng lực đặc thù môn học
               c. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
                  <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
-                 - AI.[Mã miền] (Bậc [X] - [Tên mức]): [Yêu cầu cần đạt AI cụ thể theo bài học]
-                 ...
+                 - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
                  </ai>
+                 (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ)
            3. Về phẩm chất`;
+        }
       } else {
-        modeDirective = `
-        🚨 CHẾ ĐỘ: KHÔNG TÍCH HỢP NLS VÀ KHÔNG TÍCH HỢP AI.
-        - Giữ nguyên cấu trúc mục tiêu và tiến trình bài dạy gốc.
-        - Chuẩn hóa bảng biểu và định dạng công thức toán/hóa, không thêm các mục NLS hay AI mới.
+        integrationStrategyDirective = `
+        =============================================================================
+        🚨 TRƯỜNG HỢP 3: KHÔNG CÓ PPCT VÀ NGƯỜI DÙNG KHÔNG CHỌN MÃ TÍCH HỢP NÀO:
+        - Chuẩn hóa cấu trúc giáo án gốc theo 4 bước rõ ràng, giữ nguyên 100% kiến thức và bài tập gốc.
+        - ⛔ TUYỆT ĐỐI KHÔNG tự ý thêm các mục NLS hay AI mới vào giáo án.
+        =============================================================================
         `;
+        modeDirective = `🚨 CHẾ ĐỘ: CHUẨN HÓA GIÁO ÁN GỐC (KHÔNG TÍCH HỢP NLS VÀ KHÔNG TÍCH HỢP AI).`;
         structureGoalRequirement = `
            1. Về kiến thức
            2. Về năng lực:
@@ -206,9 +242,7 @@ async function startServer() {
         
         ${modeDirective}
 
-        ${distributionContext}
-
-        ${manualContext}
+        ${integrationStrategyDirective}
 
         YÊU CẦU XỬ LÝ NỘI DUNG:
         ${options.analyzeOnly ? "- Chỉ phân tích, không chỉnh sửa chi tiết." : "- Chỉnh sửa giáo án và TÍCH HỢP NĂNG LỰC theo đúng chế độ đã chọn ở trên vào các hoạt động dạy học."}
@@ -247,12 +281,22 @@ async function startServer() {
              + BƯỚC 2 (Thực hiện nhiệm vụ - BẮT BUỘC PHẢI CÓ HOẠT ĐỘNG CỦA HS): Nêu rõ HS làm gì tương ứng (làm bài tập gốc, mở máy/điện thoại, thao tác công cụ số/AI, nhập prompt, tra cứu, đối chiếu kết quả với SGK để nhận diện tính chính xác/ảo giác AI, ghi nhận vào vở/phiếu học tập). (Bọc phần tích hợp trong thẻ màu đỏ)
              + BƯỚC 3 (Báo cáo, thảo luận): Nêu rõ HS trình bày kết quả bài học và kết quả số/AI, chia sẻ link/màn hình, phản biện và trao đổi. (Bọc phần tích hợp trong thẻ màu đỏ)
              + BƯỚC 4 (Đánh giá, kết luận): Nêu rõ GV nhận xét bài làm, đánh giá kết quả làm việc số/kỹ năng tương tác AI của HS, giáo dục liêm chính học thuật và chốt kiến thức chuẩn. (Bọc phần tích hợp trong thẻ màu đỏ)
-             + CỘT SẢN PHẨM (Nếu có bảng): Bổ sung sản phẩm số của học sinh (câu trả lời đã đối chiếu với SGK, bảng Padlet, sơ đồ tư duy số...). (Bọc phần tích hợp trong thẻ màu đỏ)
+             + 🚨 YÊU CẦU ĐẶC BIỆT CHI TIẾT HÓA MỤC SẢN PHẨM HỌC TẬP (Mục 'b. Sản phẩm' hoặc Cột Sản phẩm):
+               * TUYỆT ĐỐI KHÔNG dùng câu mô tả chung chung, hình thức như: "Học sinh nêu được các ý chính về...", "Học sinh trả lời được câu hỏi...", "Biết cách sử dụng AI...", "Hoàn thành các bài tập 1, 2, 3...".
+               * BẠN BẮT BUỘC PHẢI GHI CỤ THỂ VÀ ĐẦY ĐỦ TỪNG Ý CHÍNH ĐÓ LÀ GÌ:
+                 - Ghi rõ nội dung câu trả lời chuẩn, lời giải chi tiết, đáp án của từng bài tập/câu hỏi trong bài học gốc.
+                 - Liệt kê cụ thể từng ý chính, định nghĩa, khái niệm, công thức, số liệu, bảng biểu mà học sinh cần đạt được (Ví dụ: thay vì ghi "Nêu đặc điểm...", phải ghi rõ: 1. Đặc điểm A: ... 2. Đặc điểm B: ...).
+                 - Đối với sản phẩm tích hợp NLS/AI (bọc trong thẻ <nls> hoặc <ai>): Ghi rõ nội dung sản phẩm số cụ thể (ví dụ: Bản tóm tắt/so sánh cụ thể gồm những ý gì; Câu trả lời đã được đối chiếu/kiểm chứng từ ChatGPT với SGK; File trình chiếu hoặc sơ đồ tư duy trên Canva/Mindmeister với các nhánh nội dung cụ thể; Kết quả tra cứu cụ thể; Prompt cụ thể học sinh đã thực hiện và kết quả kiểm duyệt...).
            - ⛔ CẤM TUYỆT ĐỐI việc viết tắt hoặc bỏ sót bước ở Hoạt động 3 và 4 như "... (Các câu hỏi trắc nghiệm giữ nguyên) ..." hoặc chỉ ghi dấu gạch đầu dòng mà không chia đủ 4 bước!
 
-        8. ĐỊNH DẠNG VĂN BẢN ĐẦU RA:
-           - TUYỆT ĐỐI KHÔNG xuất các thẻ HTML như <strong>, <b>, <em>, <i>, <p>, <div> ra văn bản. Hãy dùng Markdown chuẩn (**in đậm**, *in nghiêng*).
-           - Loại bỏ toàn bộ các ký tự ô vuông rỗng (□, ■).
+        8. ĐỊNH DẠNG VÀ THỂ THỨC VĂN BẢN (NGHIÊM NGẶT 100%):
+           - BẢO TOÀN 100% THỂ THỨC VĂN BẢN CỦA GIÁO ÁN GỐC:
+             + Font chữ chuẩn: Times New Roman, cỡ 14 (14pt).
+             + Thể thức văn bản chuẩn: Căn đều 2 bên (Justified), lùi đầu dòng 1.27cm, giãn dòng 1.15 - 1.2, bảo toàn toàn bộ cấu trúc, đề mục và câu hỏi bài tập của giáo án cũ.
+           - LOẠI BỎ TRIỆT ĐỂ KÝ TỰ RÁC VÀ DẤU GẠCH CHÉO '/' THỪA:
+             + TUYỆT ĐỐI KHÔNG để xuất hiện các ký tự thừa như dấu gạch chéo '/', '\/', '//' vô nghĩa ở đầu dòng, cuối dòng hoặc xen kẽ đề mục, các dấu escape '\', hoặc ký tự lạ không thuộc nội dung bài dạy.
+             + TUYỆT ĐỐI KHÔNG xuất các thẻ HTML như <strong>, <b>, <em>, <i>, <p>, <div> ra văn bản. Hãy dùng Markdown chuẩn (**in đậm**, *in nghiêng*).
+             + Loại bỏ toàn bộ các ký tự ô vuông rỗng (□, ■).
 
         ĐỊNH DẠNG ĐẦU RA (NGHIÊM NGẶT):
         - Trả về toàn bộ nội dung giáo án dưới dạng Markdown.
@@ -314,6 +358,13 @@ ${structureGoalRequirement}
         // Clean weird Unicode glyphs and square bullet boxes
         text = text.replace(/[\uF000-\uF8FF]/g, "");
         text = text.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, "- ");
+
+        // Clean stray slashes and escaped markdown artifacts
+        text = text
+          .replace(/\\([*#_>\-\+\[\]])/g, "$1") // unescape markdown backslashes
+          .replace(/\\\//g, "/") // unescape \/
+          .replace(/(^|\n)\s*\/+\s*(?=[A-Za-z0-9#\*\-\+I])/g, "$1") // remove leading slash before text/headings
+          .replace(/([^\w\d\s\/])\s*\/+\s*([^\w\d\s\/])/g, "$1 $2"); // remove stray isolated slashes between symbols
 
         // Normalize escaped HTML tags
         text = text
