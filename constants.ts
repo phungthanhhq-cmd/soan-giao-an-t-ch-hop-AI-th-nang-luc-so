@@ -568,20 +568,20 @@ NGUYÊN TẮC ÁP DỤNG ĐỒNG BỘ CHO MỌI MÔN HỌC:
 
 QUY TẮC PHÂN LUỒNG TÍCH HỢP TỐI THƯỢNG (STRICT ENFORCEMENT):
 1. 🚨 TRƯỜNG HỢP 1: KHI CÓ PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3) - NGUỒN PHÁP QUY TỐI THƯỢNG:
-   - Bạn PHẢI tự động soi từ PPCT/Phụ lục 3, tìm đúng dòng bài học / tiết dạy tương ứng với giáo án gốc.
-   - PHÂN LOẠI VÀ CHỈ TÍCH HỢP CHÍNH XÁC NỘI DUNG MÀ BÀI ĐÓ CÓ TRONG PPCT/PHỤ LỤC 3:
-     + NẾU BÀI/TIẾT NÀY TRONG PPCT CHỈ CÓ NĂNG LỰC SỐ (NLS), KHÔNG CÓ AI (cột AI trống hoặc không ghi):
-       * CHỈ TÍCH HỢP NĂNG LỰC SỐ (mục c bọc trong <nls>...</nls>).
-       * ⛔ CẤM TUYỆT ĐỐI VIỆC TỰ Ý THÊM MỤC NĂNG LỰC AI (mục d), CẤM TỰ BỊA MÃ AI (như 6.2.TC2a, NLb.TC2...), CẤM THÊM BẤT KỲ HOẠT ĐỘNG AI NÀO VÀO TIẾN TRÌNH DẠY HỌC.
-     + NẾU BÀI/TIẾT NÀY TRONG PPCT CHỈ CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI), KHÔNG CÓ NLS (cột NLS trống hoặc không ghi):
-       * CHỈ TÍCH HỢP NĂNG LỰC AI (mục c/d bọc trong <ai>...</ai>).
-       * ⛔ CẤM TUYỆT ĐỐI VIỆC TỰ Ý THÊM MỤC NĂNG LỰC SỐ (NLS), CẤM TỰ BỊA MÃ NLS (như 1.1.TC2a, 2.1.TC2b...), CẤM THÊM BẤT KỲ HOẠT ĐỘNG NLS NÀO VÀO TIẾN TRÌNH DẠY HỌC.
-     + NẾU BÀI/TIẾT NÀY TRONG PPCT CÓ CẢ NLS VÀ AI:
-       * Tích hợp đầy đủ cả 2 mục: 'c. Năng lực số' (<nls>...</nls>) và 'd. Năng lực Trí tuệ Nhân tạo (AI)' (<ai>...</ai>).
-     + NẾU BÀI/TIẾT NÀY TRONG PPCT KHÔNG CÓ CẢ NLS LẪN AI (để trống cả 2):
-       * ⛔ TUYỆT ĐỐI KHÔNG TÍCH HỢP CẢ NLS LẪN AI. Giữ nguyên mục tiêu và tiến trình bài dạy gốc.
-   - ĐỒNG BỘ ĐỒNG NHẤT 100%: Mã số trích xuất trong Mục tiêu (I.2) phải được trích xuất NGUYÊN VĂN, ĐẦY ĐỦ MÃ (ví dụ: 2.1.TC2b, NLb.TC2...) và được hiện thực hóa gắn liền trong các hoạt động của GV và HS ở Tiến trình dạy học (Mục II - cả 4 bước).
-   - ⛔ CẤM TUYỆT ĐỐI: Không tự ý thêm bất kỳ mã nào ngoài PPCT nếu bài học đó trong PPCT không có hoặc cột năng lực để trống. Không tự ý bớt mã có trong PPCT.
+   - 🎯 QUY TRÌNH ĐỐI CHIẾU 100% CHÍNH XÁC:
+     + Bước 1: Đọc tên bài học và số tiết trong GIÁO ÁN GỐC (Ví dụ: "Tiết 9, 10, 11 - VIẾT BÀI VĂN KỂ LẠI MỘT CHUYẾN ĐI..." hoặc "Tiết 1, 2, 3 - Lá cờ thêu sáu chữ vàng"...).
+     + Bước 2: Soi tìm đúng hàng (row / <tr>) tương ứng trong Bảng Phân phối chương trình (PPCT / Phụ lục 3) dựa theo Cột "Bài học" hoặc Cột "Số tiết".
+     + Bước 3: Đọc ô ở cột "Ghi chú" hoặc cột "Năng lực số / AI" của ĐÚNG HÀNG ĐÓ:
+       * NẾU HÀNG ĐÓ TRONG PPCT CÓ GHI MÃ NLS (Ví dụ: "NLS (Tiết 3) – 1.3.TC2a: Tìm kiếm và sắp xếp hình ảnh..."):
+         -> BẮT BUỘC TRÍCH XUẤT NGUYÊN VĂN 100% mã số và nội dung YCCĐ được ghi trong ô đó của PPCT vào mục "c. Năng lực số" (bọc trong <nls>...</nls>).
+         -> ĐỒNG BỘ 100% mã số này vào đúng tiết/hoạt động trong Tiến trình dạy học (ghi rõ [1.3.TC2a] và bọc hoạt động số trong <nls>...</nls>).
+         -> ⛔ CẤM TUYỆT ĐỐI không được tự ý đổi thành mã khác (như 1.1.TC2b, 2.1.TC2a...), CẤM lấy mã từ bài học khác trong PPCT.
+       * NẾU HÀNG ĐÓ TRONG PPCT CÓ GHI MÃ AI:
+         -> BẮT BUỘC TRÍCH XUẤT NGUYÊN VĂN 100% mã số và nội dung YCCĐ AI từ ô đó của PPCT vào mục "d. Năng lực Trí tuệ Nhân tạo (AI)" (bọc trong <ai>...</ai>).
+       * NẾU HÀNG ĐÓ TRONG PPCT KHÔNG GHI MÃ NLS/AI NÀO (Ô cột Ghi chú/NLS để trống hoặc chỉ ghi nội dung khác như QP&AN, GD địa phương):
+         -> ⛔ TUYỆT ĐỐI CẤM TÍCH HỢP NLS HOẶC AI CHO BÀI NÀY!
+         -> ⛔ CẤM TUYỆT ĐỐI việc tự ý bịa mã (như 1.1.TC2b, 2.1.TC2a...) để nhét vào giáo án khi dòng PPCT của bài đó không có!
+   - ⛔ NGUYÊN TẮC BẤT DI BẤT DỊCH: "PHÂN PHỐI CHƯƠNG TRÌNH GHI MÃ NÀO THÌ GIÁO ÁN GHI ĐÚNG MÃ ĐÓ - PPCT KHÔNG CÓ MÃ THÌ GIÁO ÁN KHÔNG ĐƯỢC TỰ BỊA MÃ".
 
 2. 🚨 TRƯỜNG HỢP 2: KHI KHÔNG CÓ PPCT (CHỈ TẢI GIÁO ÁN LÊN, TÍCH HỢP THEO LỰA CHỌN CỦA NGƯỜI DÙNG):
    - Bạn PHẢI tích hợp THEO ĐÚNG CÁC MÃ MÀ NGƯỜI DÙNG ĐÃ TÍCH CHỌN THỦ CÔNG:

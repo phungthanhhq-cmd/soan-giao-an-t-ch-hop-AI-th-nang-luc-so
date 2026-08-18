@@ -45,9 +45,10 @@ async function startServer() {
 
       // Danh sách các mô hình chuẩn @google/genai theo thứ tự ưu tiên (loại bỏ hoàn toàn model cũ đã bị deprecate)
       const modelsToTry = [
+        "gemini-3.6-flash",
+        "gemini-2.5-flash",
         "gemini-3.7-flash",
         "gemini-flash-latest",
-        "gemini-2.5-flash",
         "gemini-3.1-flash-lite",
       ];
 
@@ -66,32 +67,26 @@ async function startServer() {
         integrationStrategyDirective = `
         =============================================================================
         🚨 TRƯỜNG HỢP 1: NGƯỜI DÙNG CUNG CẤP PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3) - NGUỒN CHUẨN MỰC PHÁP QUY TỐI THƯỢNG:
-        Trong Phân phối chương trình / Phụ lục 3 ĐÃ CÓ SẴN cột tích hợp Năng lực số / AI cho từng bài học/tiết học cụ thể.
+        Trong Phân phối chương trình / Phụ lục 3 ĐÃ CÓ SẴN bảng phân phối cho từng bài học/tiết học cụ thể (gồm các cột: TT, Bài học, Số tiết, Thời điểm, Thiết bị, Địa điểm, Ghi chú / Năng lực số / AI).
         
-        QUY TRÌNH SOI VÀ ĐỐI CHIẾU BẮT BUỘC:
-        1. Đọc tên bài học / tiết dạy trong "NỘI DUNG GIÁO ÁN GỐC".
-        2. Soi và tìm đúng dòng bài học / tiết dạy tương ứng trong nội dung "PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3)" bên dưới.
-        3. PHÂN LOẠI VÀ CHỈ TÍCH HỢP CHÍNH XÁC NỘI DUNG MÀ BÀI ĐÓ ĐƯỢC PHÂN CÔNG TRONG PPCT/PHỤ LỤC 3:
-           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT CHỈ CÓ NĂNG LỰC SỐ (NLS), KHÔNG CÓ AI (cột AI để trống hoặc không ghi):
-             + CHỈ TÍCH HỢP NĂNG LỰC SỐ (Mục I.2.c bọc trong thẻ <nls>...</nls> và bổ sung hoạt động số trong Tiến trình dạy học bọc trong <nls>...</nls>).
-             + ⛔ NGHIÊM CẤM TUYỆT ĐỐI: KHÔNG ĐƯỢC TỰ Ý THÊM MỤC NĂNG LỰC AI (Mục d), KHÔNG ĐƯỢC TỰ BỊA MÃ AI (như 6.2.TC2a, NLb.TC2, NLc.TC2...), KHÔNG THÊM BẤT KỲ HOẠT ĐỘNG AI NÀO VÀO TIẾN TRÌNH BÀI DẠY!
-           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT CHỈ CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI), KHÔNG CÓ NLS (cột NLS để trống hoặc không ghi):
-             + CHỈ TÍCH HỢP NĂNG LỰC AI (Mục I.2.c bọc trong thẻ <ai>...</ai> và bổ sung hoạt động AI trong Tiến trình dạy học bọc trong <ai>...</ai>).
-             + ⛔ NGHIÊM CẤM TUYỆT ĐỐI: KHÔNG ĐƯỢC TỰ Ý THÊM MỤC NĂNG LỰC SỐ (NLS), KHÔNG ĐƯỢC TỰ BỊA MÃ NLS (như 1.1.TC2a, 2.1.TC2b...), KHÔNG THÊM BẤT KỲ HOẠT ĐỘNG NLS NÀO VÀO TIẾN TRÌNH BÀI DẠY!
-           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT CÓ CẢ NLS VÀ AI:
-             + Tích hợp đầy đủ cả 2 mục: 'c. Năng lực số' (<nls>...</nls>) và 'd. Năng lực Trí tuệ Nhân tạo (AI)' (<ai>...</ai>).
-           - 📌 NẾU BÀI/TIẾT NÀY TRONG PPCT KHÔNG CÓ CẢ NLS LẪN AI (để trống cả 2):
-             + ⛔ TUYỆT ĐỐI KHÔNG TÍCH HỢP CẢ NLS LẪN AI. Giữ nguyên mục tiêu và tiến trình bài dạy gốc.
-        4. Trích xuất NGUYÊN VĂN, CHÍNH XÁC VÀ ĐẦY ĐỦ TOÀN BỘ Mã số chi tiết (ví dụ: 2.1.TC2b, 6.2.TC2a, NLb.TC2...) kèm tên thành tố/miền và Yêu cầu cần đạt tương ứng của bài học đó.
-        5. ĐỒNG BỘ 100% vào Tiến trình dạy học (Mục II - cả 4 bước của các Hoạt động 1, 2, 3, 4).
-        6. ĐÁNH DẤU MÀU ĐỎ TOÀN BỘ PHẦN TÍCH HỢP:
-           - Toàn bộ mục tiêu NLS và các hoạt động số trong tiến trình dạy học PHẢI BAO BỌC BẰNG THẺ <nls>...</nls>.
-           - Toàn bộ mục tiêu AI và các hoạt động AI trong tiến trình dạy học PHẢI BAO BỌC BẰNG THẺ <ai>...</ai>.
+        🎯 QUY TRÌNH ĐỐI CHIẾU VÀ TRÍCH XUẤT 100% CHÍNH XÁC:
+        1. ĐỌC GIÁO ÁN GỐC: Nhận diện Tên bài học và Số tiết dạy (Ví dụ: "Tiết 9, 10, 11 - VIẾT BÀI VĂN KỂ LẠI MỘT CHUYẾN ĐI..." hoặc "Tiết 1, 2, 3 - Lá cờ thêu sáu chữ vàng"...).
+        2. QUÉT BẢNG PPCT: Tìm đúng hàng (row / <tr>) trong Bảng Phân phối chương trình bên dưới có Cột "Bài học" hoặc Cột "Số tiết" tương ứng với bài/tiết của giáo án gốc.
+        3. ĐỌC KỸ CỘT "GHI CHÚ" / CỘT "NĂNG LỰC SỐ / AI" CỦA ĐÚNG HÀNG ĐÓ:
+           - 📌 NẾU HÀNG ĐÓ TRONG PPCT CÓ GHI MÃ NLS (Ví dụ: "NLS (Tiết 3) – 1.3.TC2a: Tìm kiếm và sắp xếp hình ảnh..." hoặc "1.3.TC2a: ..."):
+             + BẮT BUỘC TRÍCH XUẤT NGUYÊN VĂN 100% mã số và nội dung YCCĐ được ghi trong ô đó của PPCT vào mục "c. Năng lực số" (bọc trong <nls>...</nls>).
+             + ĐỒNG BỘ 100% mã số này vào đúng tiết/hoạt động trong Tiến trình dạy học (ghi rõ [1.3.TC2a] và bọc hoạt động số trong <nls>...</nls>).
+             + ⛔ CẤM TUYỆT ĐỐI không được tự ý đổi thành mã khác (như 1.1.TC2b, 2.1.TC2a...), CẤM lấy mã từ bài học khác trong PPCT.
+           - 📌 NẾU HÀNG ĐÓ TRONG PPCT CÓ GHI MÃ AI (Ví dụ: "NLb.TC2: ...", "6.2.TC2a: ..."):
+             + BẮT BUỘC TRÍCH XUẤT NGUYÊN VĂN 100% mã số và nội dung YCCĐ AI từ ô đó của PPCT vào mục "d. Năng lực Trí tuệ Nhân tạo (AI)" (bọc trong <ai>...</ai>).
+             + ĐỒNG BỘ 100% mã số này vào Tiến trình dạy học (ghi rõ [NLb.TC2] và bọc hoạt động AI trong <ai>...</ai>).
+           - 📌 NẾU HÀNG ĐÓ TRONG PPCT KHÔNG GHI MÃ NLS HAY AI NÀO (Ô cột Ghi chú / NLS để trống hoặc chỉ ghi nội dung khác như "Tích hợp GD QP-AN", "Tích hợp GD địa phương"):
+             + ⛔ TUYỆT ĐỐI CẤM TÍCH HỢP NLS HAY AI CHO BÀI NÀY!
+             + ⛔ CẤM TUYỆT ĐỐI việc tự ý bịa mã (như 1.1.TC2b, 2.1.TC2a...) để nhét vào giáo án khi dòng PPCT của bài đó không có!
         
-        ⛔ NGUYÊN TẮC CẤM TỐI THƯỢNG (STRICTLY PROHIBITED):
-        - CẤM TUYỆT ĐỐI VIỆC TỰ Ý TÍCH HỢP THÊM NĂNG LỰC SỐ HOẶC AI KHI PHỤ LỤC / PPCT CỦA BÀI HỌC ĐÓ KHÔNG CÓ!
-        - TUYỆT ĐỐI KHÔNG tự ý thêm bất kỳ mã năng lực nào khác ngoài PPCT của bài học này.
-        - TUYỆT ĐỐI KHÔNG được bớt hoặc bỏ sót mã nào có trong PPCT của bài học này.
+        ⛔ NGUYÊN TẮC BẤT DI BẤT DỊCH:
+        - "PHÂN PHỐI CHƯƠNG TRÌNH GHI MÃ NÀO THÌ GIÁO ÁN GHI ĐÚNG MÃ ĐÓ - PPCT KHÔNG CÓ MÃ THÌ GIÁO ÁN KHÔNG ĐƯỢC TỰ BỊA MÃ".
+        - TUYỆT ĐỐI KHÔNG ĐỂ XẢY RA TÌNH TRẠNG "PHÂN PHỐI CHƯƠNG TRÌNH MỘT MÃ, GIÁO ÁN MỘT MÃ"!
         
         NỘI DUNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3:
         ${info.distributionContent}
@@ -99,12 +94,10 @@ async function startServer() {
         `;
 
         modeDirective = `
-        🚨 CHẾ ĐỘ: TỰ ĐỘNG TÍCH HỢP THEO PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3.
+        🚨 CHẾ ĐỘ: TỰ ĐỘNG TÍCH HỢP THEO ĐÚNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3.
         - Căn cứ 100% vào bảng PPCT/Phụ lục 3 ở trên của đúng bài học/tiết dạy này.
-        - Nếu bài chỉ có NLS -> Chỉ tích hợp NLS, CẤM thêm AI.
-        - Nếu bài chỉ có AI -> Chỉ tích hợp AI, CẤM thêm NLS.
-        - Nếu bài có cả 2 -> Tích hợp cả 2.
-        - Nếu bài không có cả 2 -> Không tích hợp.
+        - Nếu hàng bài này trong PPCT có mã NLS nào -> Trích xuất nguyên văn đúng mã đó.
+        - Nếu hàng bài này trong PPCT không có mã NLS -> Tuyệt đối không tích hợp NLS, không tự bịa mã.
         `;
 
         structureGoalRequirement = `
@@ -112,26 +105,17 @@ async function startServer() {
            2. Về năng lực:
               a. Năng lực chung
               b. Năng lực đặc thù môn học
-              (DỰA VÀO KẾT QUẢ SOI TỪ PPCT / PHỤ LỤC 3 CỦA BÀI HỌC/TIẾT NÀY):
-              * NẾU BÀI CHỈ CÓ NĂNG LỰC SỐ (NLS):
+              (DỰA VÀO KẾT QUẢ ĐỐI CHIẾU TỪ PPCT / PHỤ LỤC 3 CỦA ĐÚNG BÀI HỌC/TIẾT NÀY):
+              * NẾU BÀI CÓ NĂNG LỰC SỐ (NLS) TRONG PPCT:
                 <nls>c. Năng lực số
-                - [Mã NLS chi tiết, ví dụ 2.1.TC2b] (Tên miền): [Yêu cầu cần đạt NLS đầy đủ theo đúng PPCT]
+                - [Mã NLS nguyên văn từ PPCT, ví dụ 1.3.TC2a] (Tên miền): [Yêu cầu cần đạt NLS theo đúng dòng PPCT của bài này]
                 </nls>
-                (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI NÀO!)
-              * NẾU BÀI CHỈ CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI):
-                <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
-                - [Mã AI chi tiết, ví dụ NLb.TC2, 6.2.TC2a] (Tên miền): [Yêu cầu cần đạt AI đầy đủ theo đúng PPCT]
-                </ai>
-                (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ NÀO!)
-              * NẾU BÀI CÓ CẢ NLS VÀ AI TRONG PPCT:
-                <nls>c. Năng lực số
-                - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS đầy đủ theo đúng PPCT]
-                </nls>
+              * NẾU BÀI CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) TRONG PPCT:
                 <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-                - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI đầy đủ theo đúng PPCT]
+                - [Mã AI nguyên văn từ PPCT, ví dụ NLb.TC2] (Tên miền): [Yêu cầu cần đạt AI theo đúng dòng PPCT của bài này]
                 </ai>
-              * NẾU BÀI KHÔNG CÓ CẢ HAI TRONG PPCT:
-                (Giữ nguyên không thêm mục c/d về NLS/AI)
+              * NẾU BÀI KHÔNG CÓ MÃ NLS HAY AI TRONG PPCT:
+                (Giữ nguyên mục tiêu gốc, tuyệt đối không thêm mục c/d về NLS/AI)
            3. Về phẩm chất`;
       } else if (hasManualNLS || hasManualAI) {
         const manualItems: string[] = [];
@@ -232,6 +216,7 @@ async function startServer() {
 
       const userPrompt = `
         DỮ LIỆU THAM CHIẾU KHUNG NĂNG LỰC SỐ & KHUNG NĂNG LỰC AI:
+        (LƯU Ý: Đây chỉ là dữ liệu từ điển tham chiếu tổng thể. Khi người dùng đã cung cấp Phân phối chương trình (PPCT) ở trên, bạn BẮT BUỘC dùng đúng mã trong PPCT của đúng bài đó. CẤM TUYỆT ĐỐI không được tự ý nhặt mã trong khung này để gán vào bài học nếu bài đó trong PPCT không có hoặc có mã khác).
         ${NLS_FRAMEWORK_DATA}
 
         THÔNG TIN GIÁO ÁN ĐẦU VÀO:
