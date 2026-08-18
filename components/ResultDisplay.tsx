@@ -42,20 +42,39 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
     // 2. Remove HTML Anchors (Bookmarks artifacts from Word conversion) e.g., <a id="_Hlk147258080"></a>
     clean = clean.replace(/<a\s+id="[^"]*"><\/a>/gi, "");
 
-    // 3. Decode any escaped HTML tags for nls / ai / formatting so they parse properly
+    // 3. Convert basic HTML formatting tags to markdown/clean format so they never leak as raw text
+    clean = clean
+      .replace(/<\/?strong>/gi, "**")
+      .replace(/<\/?b>/gi, "**")
+      .replace(/<\/?em>/gi, "*")
+      .replace(/<\/?i>/gi, "*")
+      .replace(/&lt;strong&gt;/gi, "**")
+      .replace(/&lt;\/strong&gt;/gi, "**")
+      .replace(/&lt;b&gt;/gi, "**")
+      .replace(/&lt;\/b&gt;/gi, "**")
+      .replace(/&lt;em&gt;/gi, "*")
+      .replace(/&lt;\/em&gt;/gi, "*")
+      .replace(/&lt;i&gt;/gi, "*")
+      .replace(/&lt;\/i&gt;/gi, "*");
+
+    // 4. Decode any escaped HTML tags for nls / ai / formatting so they parse properly
     clean = clean
       .replace(/&lt;nls&gt;/gi, "<nls>")
       .replace(/&lt;\/nls&gt;/gi, "</nls>")
       .replace(/&lt;ai&gt;/gi, "<ai>")
       .replace(/&lt;\/ai&gt;/gi, "</ai>")
       .replace(/&lt;u&gt;/gi, "<u>")
-      .replace(/&lt;\/u&gt;/gi, "</u>");
+      .replace(/&lt;\/u&gt;/gi, "</u>")
+      .replace(/&lt;sub&gt;/gi, "<sub>")
+      .replace(/&lt;\/sub&gt;/gi, "</sub>")
+      .replace(/&lt;sup&gt;/gi, "<sup>")
+      .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
-    // 4. Remove weird symbols, Wingdings / Private Use Area glyphs, square box bullets (□, ■, etc.)
+    // 5. Remove weird symbols, Wingdings / Private Use Area glyphs, square box bullets (□, ■, etc.)
     clean = clean.replace(/[\uF000-\uF8FF]/g, "");
-    clean = clean.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD]/g, "- ");
+    clean = clean.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, "- ");
     
-    // 5. Remove common AI intros
+    // 6. Remove common AI intros
     const lines = clean.split('\n');
     if (lines.length > 0) {
         const firstLine = lines[0].trim().toLowerCase();
@@ -106,19 +125,27 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
       .replace(/&lt;\/ai&gt;/gi, '</ai>')
       .replace(/&lt;u&gt;/gi, '<u>')
       .replace(/&lt;\/u&gt;/gi, '</u>')
+      .replace(/&lt;strong&gt;/gi, '<strong>')
+      .replace(/&lt;\/strong&gt;/gi, '</strong>')
+      .replace(/&lt;b&gt;/gi, '<b>')
+      .replace(/&lt;\/b&gt;/gi, '</b>')
+      .replace(/&lt;em&gt;/gi, '<em>')
+      .replace(/&lt;\/em&gt;/gi, '</em>')
+      .replace(/&lt;i&gt;/gi, '<i>')
+      .replace(/&lt;\/i&gt;/gi, '</i>')
       .replace(/[\uF000-\uF8FF]/g, '')
-      .replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD]/g, '- ');
+      .replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, '- ');
 
     // Regex matching all formatting tags, markdown symbols, math placeholders, and linebreaks
-    const tokenRegex = /(<nls\b[^>]*>|<\/nls>|<ai\b[^>]*>|<\/ai>|<u>|<\/u>|<span\b[^>]*>|<\/span>|<font\b[^>]*>|<\/font>|<sub>|<\/sub>|<sup>|<\/sup>|<br\s*\/?>|\*\*|\*|_|\[MATH_ID_\d+_\d+\])/gi;
+    const tokenRegex = /(<nls\b[^>]*>|<\/nls>|<ai\b[^>]*>|<\/ai>|<strong>|<\/strong>|<b>|<\/b>|<em>|<\/em>|<i>|<\/i>|<u>|<\/u>|<span\b[^>]*>|<\/span>|<font\b[^>]*>|<\/font>|<sub>|<\/sub>|<sup>|<\/sup>|<p\b[^>]*>|<\/p>|<div\b[^>]*>|<\/div>|<br\s*\/?>|\*\*|\*|_|\[MATH_ID_\d+_\d+\])/gi;
 
     const parts = normalizedText.split(tokenRegex);
 
     const pushText = (str: string) => {
       if (!str) return;
-      // Clean HTML entities if present and strip any leftover tags so they never appear as text
+      // Clean HTML entities if present and strip any unhandled HTML tags so they NEVER leak as text
       const cleanStr = str
-        .replace(/<\/?(nls|ai|u)>/gi, '')
+        .replace(/<[^>]+>/g, '')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')
@@ -165,6 +192,14 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
         state.isRed = true;
       } else if (lower === '</ai>') {
         state.isRed = false;
+      } else if (lower.startsWith('<strong>') || lower.startsWith('<b>')) {
+        state.isBold = true;
+      } else if (lower === '</strong>' || lower === '</b>') {
+        state.isBold = false;
+      } else if (lower.startsWith('<em>') || lower.startsWith('<i>')) {
+        state.isItalic = true;
+      } else if (lower === '</em>' || lower === '</i>') {
+        state.isItalic = false;
       } else if (lower === '<u>' || lower.includes('color="red"') || lower.includes('color:red') || lower.includes('color: red')) {
         state.isRed = true;
       } else if (lower === '</u>' || (state.isRed && (lower === '</span>' || lower === '</font>'))) {
@@ -181,7 +216,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
         state.isBold = !state.isBold;
       } else if (part === '*' || part === '_') {
         state.isItalic = !state.isItalic;
-      } else if (lower === '<br>' || lower === '<br/>' || lower === '<br />') {
+      } else if (lower === '<br>' || lower === '<br/>' || lower === '<br />' || lower === '<p>' || lower === '</p>' || lower === '<div>' || lower === '</div>') {
         runs.push(new TextRun({ text: "", break: 1 }));
       } else {
         pushText(part);

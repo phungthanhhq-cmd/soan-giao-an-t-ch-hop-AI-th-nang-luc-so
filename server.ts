@@ -58,19 +58,21 @@ async function startServer() {
       if (enableNLS && info.distributionContent && info.distributionContent.trim().length > 0) {
         distributionContext = `
         =========================================================
-        🚨 QUY TẮC TỐI THƯỢNG (KHI CÓ PPCT - STRICT MODE):
+        🚨 QUY TẮC TỐI THƯỢNG (KHI CÓ PPCT - STRICT MODE & ĐỒNG NHẤT 100% MÃ SỐ):
         Người dùng ĐÃ CUNG CẤP nội dung Phân phối chương trình (PPCT).
-        Đây là văn bản pháp quy, bạn phải tuân thủ TUYỆT ĐỐI các yêu cầu sau:
+        Đây là văn bản pháp quy của nhà trường/tổ chuyên môn, bạn phải tuân thủ TUYỆT ĐỐI các yêu cầu sau:
 
         1. Đọc tên bài học trong "NỘI DUNG GIÁO ÁN GỐC".
         2. Tìm bài học tương ứng trong nội dung PPCT.
-        3. Trích xuất NGUYÊN VĂN, CHÍNH XÁC nội dung cột "Năng lực số" (hoặc YCCĐ năng lực số) của bài học đó.
-        4. Đưa nội dung trích xuất đó vào phần Mục tiêu Năng lực số.
+        3. Trích xuất NGUYÊN VĂN, CHÍNH XÁC toàn bộ Mã số Năng lực số (ví dụ: NLS 1.1, NLS 2.2, NLS.TC1...) và nội dung cột "Năng lực số" (hoặc YCCĐ năng lực số) của bài học đó.
+        4. Đưa nội dung trích xuất đó vào phần Mục I.2.c (Mục tiêu Năng lực số).
+        5. ĐỒNG BỘ ĐỒNG NHẤT VỚI TIẾN TRÌNH DẠY HỌC: Trong Mục II (Tiến trình dạy học), các hoạt động tích hợp của GV và HS (Khởi động, Hình thành kiến thức, Luyện tập, Vận dụng) PHẢI PHỤC VỤ VÀ GẮN CHẶT VỚI CHÍNH CÁC MÃ SỐ TRONG PPCT ĐÃ TRÍCH XUẤT.
         
         ⛔ CÁC ĐIỀU CẤM (STRICTLY PROHIBITED):
-        - CẤM TUYỆT ĐỐI việc tự ý thêm bất kỳ năng lực số nào khác không có trong PPCT của bài học này (Trừ khi có YÊU CẦU THỦ CÔNG bên dưới).
+        - CẤM TUYỆT ĐỐI việc tự ý thêm bất kỳ mã năng lực số nào khác không có trong PPCT của bài học này (Trừ khi có YÊU CẦU THỦ CÔNG bên dưới).
+        - CẤM TUYỆT ĐỐI việc tự ý bớt hoặc bỏ sót bất kỳ mã nào có trong PPCT.
         - CẤM tự ý nâng cao hay thay đổi cấp độ nếu PPCT không yêu cầu.
-        - CẤM dùng Khung năng lực số tham chiếu để bịa thêm mục tiêu. CHỈ dùng những gì PPCT ghi.
+        - CẤM dùng Khung năng lực số tham chiếu bên ngoài để bịa thêm mục tiêu hay mã số. CHỈ dùng những gì PPCT ghi.
         - Nếu cột năng lực số trong PPCT để trống, thì mục tiêu NLS ghi là: "Không có (theo PPCT)".
 
         Đánh dấu mục tiêu này bằng dòng chữ: "(Nội dung trích xuất nguyên văn từ PPCT)".
@@ -234,11 +236,29 @@ async function startServer() {
            ${enableAI ? "- TẤT CẢ các nội dung tích hợp Năng lực AI (cả mục tiêu AI và các hoạt động AI bổ sung trong Tiến trình dạy học/Bảng biểu) BẮT BUỘC phải được bao bọc bằng thẻ <ai>...</ai>." : ""}
            (Hệ thống sẽ tự động bôi màu ĐỎ cho toàn bộ các phần nằm trong thẻ này trên bản xem trước và khi xuất file Word DOCX).
         
+        7. 🎯 QUY TẮC HOÀN THIỆN ĐỒNG BỘ ĐẦY ĐỦ 4 BƯỚC CHO TẤT CẢ CÁC HOẠT ĐỘNG (BẮT BUỘC):
+           - MỌI HOẠT ĐỘNG trong tiến trình dạy học:
+             + Hoạt động 1: Khởi động / Mở đầu
+             + Hoạt động 2: Hình thành kiến thức / Khám phá
+             + Hoạt động 3: Luyện tập (BẮT BUỘC PHẢI CHIA ĐỦ 4 BƯỚC VÀ GIỮ NGUYÊN 100% CÂU HỎI TRẮC NGHIỆM/BÀI TẬP)
+             + Hoạt động 4: Vận dụng (BẮT BUỘC PHẢI CHIA ĐỦ 4 BƯỚC)
+           - Trong mục **d. Tổ chức thực hiện** (hoặc bảng 2 cột Tổ chức thực hiện | Sản phẩm), BẮT BUỘC PHẢI CÓ ĐỦ 4 BƯỚC RÕ RÀNG:
+             + BƯỚC 1 (Chuyển giao nhiệm vụ): Nêu rõ GV giao nhiệm vụ bài học gốc + giao nhiệm vụ số/AI (công cụ số/AI, câu lệnh prompt cụ thể, tiêu chuẩn kiểm chứng). (Bọc phần tích hợp trong thẻ màu đỏ)
+             + BƯỚC 2 (Thực hiện nhiệm vụ - BẮT BUỘC PHẢI CÓ HOẠT ĐỘNG CỦA HS): Nêu rõ HS làm gì tương ứng (làm bài tập gốc, mở máy/điện thoại, thao tác công cụ số/AI, nhập prompt, tra cứu, đối chiếu kết quả với SGK để nhận diện tính chính xác/ảo giác AI, ghi nhận vào vở/phiếu học tập). (Bọc phần tích hợp trong thẻ màu đỏ)
+             + BƯỚC 3 (Báo cáo, thảo luận): Nêu rõ HS trình bày kết quả bài học và kết quả số/AI, chia sẻ link/màn hình, phản biện và trao đổi. (Bọc phần tích hợp trong thẻ màu đỏ)
+             + BƯỚC 4 (Đánh giá, kết luận): Nêu rõ GV nhận xét bài làm, đánh giá kết quả làm việc số/kỹ năng tương tác AI của HS, giáo dục liêm chính học thuật và chốt kiến thức chuẩn. (Bọc phần tích hợp trong thẻ màu đỏ)
+             + CỘT SẢN PHẨM (Nếu có bảng): Bổ sung sản phẩm số của học sinh (câu trả lời đã đối chiếu với SGK, bảng Padlet, sơ đồ tư duy số...). (Bọc phần tích hợp trong thẻ màu đỏ)
+           - ⛔ CẤM TUYỆT ĐỐI việc viết tắt hoặc bỏ sót bước ở Hoạt động 3 và 4 như "... (Các câu hỏi trắc nghiệm giữ nguyên) ..." hoặc chỉ ghi dấu gạch đầu dòng mà không chia đủ 4 bước!
+
+        8. ĐỊNH DẠNG VĂN BẢN ĐẦU RA:
+           - TUYỆT ĐỐI KHÔNG xuất các thẻ HTML như <strong>, <b>, <em>, <i>, <p>, <div> ra văn bản. Hãy dùng Markdown chuẩn (**in đậm**, *in nghiêng*).
+           - Loại bỏ toàn bộ các ký tự ô vuông rỗng (□, ■).
+
         ĐỊNH DẠNG ĐẦU RA (NGHIÊM NGẶT):
         - Trả về toàn bộ nội dung giáo án dưới dạng Markdown.
         - Cấu trúc mục TIÊU BÀI HỌC bắt buộc:
 ${structureGoalRequirement}
-        - Trong phần TIẾN TRÌNH DẠY HỌC: Giữ nguyên toàn bộ nội dung từng hoạt động gốc, chỉ chèn thêm các hoạt động tích hợp được bao bọc bằng thẻ <nls>...</nls> hoặc <ai>...</ai>.
+        - Trong phần TIẾN TRÌNH DẠY HỌC: Giữ nguyên toàn bộ nội dung từng hoạt động gốc, chỉ chèn thêm các hoạt động tích hợp đồng bộ cả hoạt động của GV và HS được bao bọc bằng thẻ <nls>...</nls> hoặc <ai>...</ai>.
         - KHÔNG ĐƯỢC CÓ LỜI DẪN NGOÀI LỀ.
         - Bắt đầu ngay bằng nội dung giáo án.
         
@@ -276,9 +296,24 @@ ${structureGoalRequirement}
         text = text.replace(/\^\{([^}]+)\}/g, "<sup>$1</sup>");
         text = text.replace(/([A-Za-z])\{([0-9]+)\}/g, "$1<sub>$2</sub>");
 
+        // Convert html styling tags to markdown so they never leak as raw html tags
+        text = text
+          .replace(/<\/?strong>/gi, "**")
+          .replace(/<\/?b>/gi, "**")
+          .replace(/<\/?em>/gi, "*")
+          .replace(/<\/?i>/gi, "*")
+          .replace(/&lt;strong&gt;/gi, "**")
+          .replace(/&lt;\/strong&gt;/gi, "**")
+          .replace(/&lt;b&gt;/gi, "**")
+          .replace(/&lt;\/b&gt;/gi, "**")
+          .replace(/&lt;em&gt;/gi, "*")
+          .replace(/&lt;\/em&gt;/gi, "*")
+          .replace(/&lt;i&gt;/gi, "*")
+          .replace(/&lt;\/i&gt;/gi, "*");
+
         // Clean weird Unicode glyphs and square bullet boxes
         text = text.replace(/[\uF000-\uF8FF]/g, "");
-        text = text.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD]/g, "- ");
+        text = text.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, "- ");
 
         // Normalize escaped HTML tags
         text = text
@@ -287,7 +322,11 @@ ${structureGoalRequirement}
           .replace(/&lt;ai&gt;/gi, "<ai>")
           .replace(/&lt;\/ai&gt;/gi, "</ai>")
           .replace(/&lt;u&gt;/gi, "<u>")
-          .replace(/&lt;\/u&gt;/gi, "</u>");
+          .replace(/&lt;\/u&gt;/gi, "</u>")
+          .replace(/&lt;sub&gt;/gi, "<sub>")
+          .replace(/&lt;\/sub&gt;/gi, "</sub>")
+          .replace(/&lt;sup&gt;/gi, "<sup>")
+          .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
         return text;
       };
