@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* NLS & AI Highlight styles - Đỏ nổi bật toàn bộ nội dung tích hợp */
+nls, ai, .nls-highlight, .ai-highlight {
+  color: #dc2626 !important; /* text-red-600 */
+  font-weight: 600;
+  text-decoration: none;
+  display: inline;
+}
+
+/* Also override <u> specifically for NLS/AI context */
+u {
+  color: #dc2626 !important;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Ensure react-markdown rendered nls and ai tags are styled prominently */
+.prose nls, .prose ai, .prose u {
+  color: #dc2626 !important;
+  text-decoration: none;
+}
+
+.prose nls *, .prose ai *, .prose u * {
+  color: #dc2626 !important;
+}
+
