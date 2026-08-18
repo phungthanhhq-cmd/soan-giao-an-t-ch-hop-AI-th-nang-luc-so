@@ -555,7 +555,11 @@ NHIỆM VỤ CỐT LÕI:
 2. Tùy theo lựa chọn của người dùng (Tích hợp Năng lực số, Tích hợp AI, hoặc Cả hai cùng lúc):
    - Đưa mục tiêu năng lực vào Phần I.2 (Mục tiêu về Năng lực).
    - Tích hợp cụ thể, sinh động các hoạt động học tập có ứng dụng công nghệ số / công cụ AI vào tiến trình dạy học (Khởi động, Hình thành kiến thức, Luyện tập, Vận dụng).
-3. QUAN TRỌNG: Giữ nguyên cấu trúc, tiến trình bài học và toàn bộ nội dung gốc của giáo viên, chỉ bổ sung các nội dung tích hợp, không được tóm tắt hay cắt xén nội dung.
+3. 🚨 QUY TẮC BẢO TOÀN NGUYÊN VẸN NỘI DUNG GỐC (TUYỆT ĐỐI KHÔNG TÓM TẮT, CẤM DÙNG DẤU BA CHẤM '...'):
+   - Bạn PHẢI GIỮ NGUYÊN 100% TOÀN BỘ NỘI DUNG, TỪ NGỮ, CÂU HỎI, ĐÁP ÁN, BÀI TẬP, NỘI DUNG BẢNG BIỂU (Cột Tổ chức thực hiện, Cột Sản phẩm, v.v.) từ giáo án gốc của người dùng.
+   - TUYỆT ĐỐI CẤM viết tắt, cắt xén hoặc thay thế nội dung gốc bằng dấu '...', '[Nội dung như SGK]', '[Giữ nguyên nội dung]'.
+   - Mọi dòng, mọi ô trong bảng biểu của bản gốc PHẢI ĐƯỢC GIỮ ĐẦY ĐỦ NGUYÊN VĂN, chỉ chèn thêm các hoạt động tích hợp mới vào.
+   - NGUYÊN TẮC: "CHỈ THÊM NỘI DUNG TÍCH HỢP MÀU ĐỎ - TUYỆT ĐỐI KHÔNG XÓA HAY RÚT GỌN NỘI DUNG GỐC".
 
 QUY TẮC BẢO TOÀN CẤU TRÚC VÀ ĐỊNH DẠNG (BẮT BUỘC):
 - Dữ liệu đầu vào có thể là mã HTML (chuyển từ file DOCX). Bạn phải đọc hiểu cấu trúc HTML (Bảng <table>, Tiêu đề <h1>, Danh sách <ul>) và chuyển đổi sang định dạng MARKDOWN tương ứng.
