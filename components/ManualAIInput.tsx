@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Bot, Info, Sparkles, ChevronDown, Search, Cpu, ShieldCheck } from 'lucide-react';
+import { Plus, Trash2, Bot, Info, Sparkles, ChevronDown, Search, Check, X, Edit3, ListFilter } from 'lucide-react';
 import { AI_COMPONENT_OPTIONS, AI_LEVEL_DETAILS, AI_ALL_GRADE_REQUIREMENTS } from '../constants';
 import { ManualNLSEntry, SchoolLevel } from '../types';
 
@@ -9,6 +9,41 @@ interface ManualAIInputProps {
   schoolLevel: SchoolLevel;
   grade: number;
 }
+
+// Helper lookup to find official AI code across all levels and grade requirements
+const findAICodeInfo = (codeStr: string) => {
+  const cleanCode = codeStr.trim().toLowerCase();
+  if (!cleanCode) return null;
+
+  // Check AI_LEVEL_DETAILS
+  for (const [domCode, levels] of Object.entries(AI_LEVEL_DETAILS)) {
+    const found = levels.find(l => l.code.toLowerCase() === cleanCode);
+    if (found) {
+      const compOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === domCode);
+      return {
+        code: found.code,
+        desc: found.desc,
+        domainCode: domCode,
+        domainLabel: compOption ? compOption.label : `Mạch ${domCode}`
+      };
+    }
+  }
+
+  // Check AI_ALL_GRADE_REQUIREMENTS
+  for (const reqs of Object.values(AI_ALL_GRADE_REQUIREMENTS)) {
+    const found = reqs.find(r => r.code.toLowerCase() === cleanCode);
+    if (found) {
+      return {
+        code: found.code,
+        desc: found.desc,
+        domainCode: found.domainCode,
+        domainLabel: found.domainLabel
+      };
+    }
+  }
+
+  return null;
+};
 
 const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, schoolLevel, grade }) => {
   // Helper to determine suggested default proficiency level from school level & grade
@@ -24,10 +59,17 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
 
   const [selectedDomain, setSelectedDomain] = useState<string>("ALL");
   const [targetProficiencyLevel, setTargetProficiencyLevel] = useState<number>(() => getSuggestedDefaultLevel(schoolLevel, grade));
-  const [description, setDescription] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'select' | 'manual'>('select');
+
+  // Custom manual input state inside dropdown
+  const [customCode, setCustomCode] = useState<string>('');
+  const [customDesc, setCustomDesc] = useState<string>('');
+  const [customDomain, setCustomDomain] = useState<string>('AI.TUYCHINH');
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -48,29 +90,47 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
     setTargetProficiencyLevel(defaultLevel);
   }, [schoolLevel, grade]);
 
-  // Reset description when domain or level changes
-  useEffect(() => {
-    setDescription("");
-  }, [selectedDomain, targetProficiencyLevel]);
+  // When customCode changes, try to auto-fill official description if matching code exists
+  const handleCustomCodeChange = (val: string) => {
+    setCustomCode(val);
+    const matched = findAICodeInfo(val);
+    if (matched) {
+      setCustomDesc(matched.desc);
+      setCustomDomain(matched.domainCode);
+    }
+  };
 
-  const handleAddCustom = () => {
-    if (!description.trim()) {
-      alert("Vui lòng nhập nội dung năng lực AI.");
+  // Add custom AI code directly
+  const handleAddCustomCode = (codeToAdd?: string, descToAdd?: string) => {
+    const finalCode = (codeToAdd || customCode).trim();
+    if (!finalCode) {
+      alert("Vui lòng nhập mã năng lực AI (ví dụ: NLb.TC2, 6.2.TC2a).");
       return;
     }
 
-    const domainCode = selectedDomain === "ALL" ? "AI.TUYCHINH" : selectedDomain;
-    const component = AI_COMPONENT_OPTIONS.find(opt => opt.code === domainCode);
+    // Lookup description if not provided
+    const lookup = findAICodeInfo(finalCode);
+    const finalDesc = (descToAdd || customDesc || lookup?.desc || `Năng lực Trí tuệ Nhân tạo (AI) theo yêu cầu cần đạt mã [${finalCode}]`).trim();
+    const finalDomainLabel = lookup ? lookup.domainLabel : (AI_COMPONENT_OPTIONS.find(o => o.code === customDomain)?.label || "Năng lực AI");
+
+    // Check if already in entries
+    if (entries.some(e => e.code.toLowerCase() === finalCode.toLowerCase())) {
+      alert(`Mã AI [${finalCode}] đã có trong danh sách được chọn.`);
+      return;
+    }
+
     const newEntry: ManualNLSEntry = {
       id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 6),
-      code: domainCode,
-      name: component ? component.label : "Năng lực AI tùy chỉnh",
-      description: description.trim(),
+      code: lookup?.code || finalCode,
+      name: finalDomainLabel,
+      description: finalDesc,
       category: 'AI'
     };
 
     setEntries([...entries, newEntry]);
-    setDescription(""); 
+    setCustomCode('');
+    setCustomDesc('');
+    setSearchTerm('');
   };
 
   const handleRemove = (id: string) => {
@@ -141,11 +201,11 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
            item.domainLabel.toLowerCase().includes(term);
   });
 
-  const isCodeChecked = (code: string) => entries.some(e => e.code === code);
+  const isCodeChecked = (code: string) => entries.some(e => e.code.toLowerCase() === code.toLowerCase());
 
   const toggleCode = (codeItem: { code: string; desc: string; domainCode: string; domainLabel: string }) => {
     if (isCodeChecked(codeItem.code)) {
-      setEntries(entries.filter(e => e.code !== codeItem.code));
+      setEntries(entries.filter(e => e.code.toLowerCase() !== codeItem.code.toLowerCase()));
     } else {
       const newEntry: ManualNLSEntry = {
         id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 6),
@@ -155,14 +215,13 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
         category: 'AI'
       };
       setEntries([...entries, newEntry]);
-      setDescription(codeItem.desc);
     }
   };
 
   const handleSelectAll = () => {
     const updatedEntries = [...entries];
     filteredCodesList.forEach(item => {
-      if (!updatedEntries.some(e => e.code === item.code)) {
+      if (!updatedEntries.some(e => e.code.toLowerCase() === item.code.toLowerCase())) {
         updatedEntries.push({
           id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 6),
           code: item.code,
@@ -176,11 +235,12 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
   };
 
   const handleDeselectAll = () => {
-    const codeSet = new Set(filteredCodesList.map(c => c.code));
-    setEntries(entries.filter(e => !codeSet.has(e.code)));
+    const codeSet = new Set(filteredCodesList.map(c => c.code.toLowerCase()));
+    setEntries(entries.filter(e => !codeSet.has(e.code.toLowerCase())));
   };
 
-  const checkedCountInCurrent = availableCodesList.filter(item => isCodeChecked(item.code)).length;
+  // Search term lookup check
+  const searchedLookup = searchTerm.trim() ? findAICodeInfo(searchTerm.trim()) : null;
 
   return (
     <div className="bg-white rounded-3xl shadow-xl shadow-purple-100/50 p-6 border border-purple-100/80 backdrop-blur-sm relative">
@@ -244,154 +304,301 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
            </select>
         </div>
 
-        {/* Multi-Select Dropdown 3: Mã tích hợp AI */}
-        <div className="relative" ref={dropdownRef}>
+        {/* Multi-Select & Input Dropdown 3: Mã tích hợp AI */}
+        <div className="sm:col-span-2 relative" ref={dropdownRef}>
            <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1 flex justify-between items-center">
-             <span>3. Mã Tích hợp AI</span>
-             {checkedCountInCurrent > 0 && (
-               <span className="text-[10px] font-semibold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">
-                 {checkedCountInCurrent}/{availableCodesList.length}
+             <span className="flex items-center gap-1.5">
+               <span>3. Mã Tích hợp AI</span>
+               <span className="text-purple-600 font-normal lowercase">(tích chọn danh sách hoặc gõ mã)</span>
+             </span>
+             {entries.length > 0 && (
+               <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                 Đã chọn {entries.length} mã AI
                </span>
              )}
            </label>
 
+           {/* Trigger Button with live selected codes preview */}
            <button
              type="button"
-             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+             onClick={() => {
+               setIsDropdownOpen(!isDropdownOpen);
+               if (!isDropdownOpen) {
+                 setTimeout(() => searchInputRef.current?.focus(), 50);
+               }
+             }}
              className={`w-full rounded-xl border-0 bg-slate-50 py-2.5 px-3 text-slate-700 ring-1 ring-inset ${
-               isDropdownOpen ? 'ring-2 ring-purple-600 bg-purple-50/40' : 'ring-slate-200 hover:bg-slate-100'
-             } text-xs font-medium transition-all flex items-center justify-between cursor-pointer`}
+               isDropdownOpen ? 'ring-2 ring-purple-600 bg-purple-50/40 shadow-sm' : 'ring-slate-200 hover:bg-slate-100'
+             } text-xs font-medium transition-all flex items-center justify-between cursor-pointer min-h-[42px]`}
            >
-             <span className="truncate text-left font-medium">
-               {availableCodesList.length === 0
-                 ? "Không có mã"
-                 : checkedCountInCurrent === 0
-                 ? `-- Chọn mã AI [${proficiencyLabels[targetProficiencyLevel]?.code}] (${availableCodesList.length} mã) --`
-                 : `Đã tích ${checkedCountInCurrent} mã [${proficiencyLabels[targetProficiencyLevel]?.code}]`}
-             </span>
-             <ChevronDown size={14} className={`text-slate-400 transition-transform flex-shrink-0 ml-1 ${isDropdownOpen ? 'rotate-180 text-purple-600' : ''}`} />
-           </button>
-
-           {/* Popup menu with checkboxes */}
-           {isDropdownOpen && (
-             <div className="absolute z-30 top-full left-0 mt-1.5 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-purple-200 p-3.5 text-xs space-y-2.5 max-h-80 overflow-y-auto">
-               <div className="flex items-center justify-between pb-2 border-b border-purple-50">
-                 <div>
-                   <span className="font-bold text-slate-800 text-[11px] uppercase tracking-wider block">
-                     Chuẩn Năng lực AI [{proficiencyLabels[targetProficiencyLevel]?.code}]
-                   </span>
-                   <span className="text-[10px] text-slate-500">
-                     {selectedDomain === "ALL" ? `Tất cả mã năng lực AI (${availableCodesList.length} mã)` : `${availableCodesList.length} mã trong mạch`}
-                   </span>
-                 </div>
-                 <div className="flex gap-1.5">
-                   <button
-                     type="button"
-                     onClick={handleSelectAll}
-                     className="text-[10px] font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded-lg transition-colors"
-                   >
-                     Chọn tất cả
-                   </button>
-                   <button
-                     type="button"
-                     onClick={handleDeselectAll}
-                     className="text-[10px] font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-lg transition-colors"
-                   >
-                     Bỏ chọn
-                   </button>
-                 </div>
-               </div>
-
-               {/* Quick Search */}
-               <div className="relative">
-                 <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                 <input
-                   type="text"
-                   value={searchTerm}
-                   onChange={(e) => setSearchTerm(e.target.value)}
-                   placeholder="Tìm mã hoặc từ khóa (ví dụ: AI.1, prompt, đạo đức...)"
-                   className="w-full bg-slate-50 rounded-xl py-1.5 pl-8 pr-2.5 text-[11px] border border-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 text-slate-700 placeholder:text-slate-400"
-                 />
-               </div>
-
-               {filteredCodesList.length === 0 ? (
-                 <p className="text-slate-400 italic py-4 text-center text-xs">
-                   {searchTerm ? "Không tìm thấy mã AI phù hợp với từ khóa" : "Không có mã nào ở mức độ này"}
-                 </p>
+             <div className="truncate text-left flex-1 flex items-center gap-1.5 flex-wrap">
+               {entries.length === 0 ? (
+                 <span className="text-slate-500 font-medium">
+                   -- Tích chọn mã AI [{proficiencyLabels[targetProficiencyLevel]?.code}] ({availableCodesList.length} mã) hoặc gõ mã --
+                 </span>
                ) : (
-                 <div className="space-y-2 pr-1">
-                   {filteredCodesList.map((item) => {
-                     const checked = isCodeChecked(item.code);
-                     return (
-                       <label
-                         key={item.code}
-                         className={`flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-all ${
-                           checked 
-                             ? 'bg-purple-50/80 border border-purple-200 shadow-sm' 
-                             : 'bg-white hover:bg-slate-50 border border-slate-100'
-                         }`}
-                       >
-                         <input
-                           type="checkbox"
-                           checked={checked}
-                           onChange={() => toggleCode(item)}
-                           className="mt-0.5 h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer accent-purple-600 flex-shrink-0"
-                         />
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-center gap-2 mb-1 flex-wrap">
-                             <span className={`font-bold px-2 py-0.5 rounded-md text-[11px] tracking-wide inline-block ${
-                               checked ? 'bg-purple-600 text-white shadow-xs' : 'bg-purple-100 text-purple-800'
-                             }`}>
-                               {item.code}
-                             </span>
-                             <span className="text-[11px] text-slate-500 font-normal truncate" title={item.domainLabel}>
-                               {item.domainLabel}
-                             </span>
-                           </div>
-                           <p className="text-xs text-slate-700 leading-snug font-normal">
-                             {item.desc}
-                           </p>
-                         </div>
-                       </label>
-                     );
-                   })}
+                 <div className="flex items-center gap-1.5 flex-wrap">
+                   <span className="font-bold text-purple-700">Đã tích {entries.length} mã AI:</span>
+                   {entries.slice(0, 4).map(e => (
+                     <span key={e.id} className="bg-purple-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-md">
+                       {e.code}
+                     </span>
+                   ))}
+                   {entries.length > 4 && (
+                     <span className="text-[10px] font-bold text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-md">
+                       +{entries.length - 4} mã khác
+                     </span>
+                   )}
                  </div>
                )}
              </div>
-           )}
-        </div>
+             <ChevronDown size={16} className={`text-slate-400 transition-transform shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180 text-purple-600' : ''}`} />
+           </button>
 
-        {/* Input Description & Add Button */}
-        <div>
-           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">4. Nội dung AI tùy chỉnh</label>
-           <div className="flex gap-2">
-             <textarea
-               value={description}
-               onChange={(e) => setDescription(e.target.value)}
-               placeholder="Mô tả cụ thể hoặc chọn Mã AI ở trên..."
-               rows={1}
-               className="block w-full rounded-xl border-0 bg-slate-50 py-2 px-3 text-slate-700 ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 text-xs transition-shadow resize-none h-[38px] flex items-center"
-             />
-             <button
-               onClick={handleAddCustom}
-               disabled={!description.trim()}
-               className="bg-purple-600 text-white w-[38px] h-[38px] rounded-xl hover:bg-purple-700 transition-colors shadow-md disabled:bg-slate-300 disabled:shadow-none flex items-center justify-center flex-shrink-0"
-               title="Thêm yêu cầu AI tùy chỉnh"
-             >
-               <Plus size={18} />
-             </button>
-           </div>
+           {/* Popup menu with Checkboxes & Custom Input */}
+           {isDropdownOpen && (
+             <div className="absolute z-40 top-full left-0 mt-2 w-full bg-white rounded-2xl shadow-2xl border border-purple-100 p-4 text-xs space-y-3 max-h-96 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+               
+               {/* Mode Switch Tabs */}
+               <div className="flex items-center justify-between border-b border-purple-50 pb-2.5">
+                 <div className="flex gap-2">
+                   <button
+                     type="button"
+                     onClick={() => setActiveTab('select')}
+                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                       activeTab === 'select' 
+                         ? 'bg-purple-600 text-white shadow-xs' 
+                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                     }`}
+                   >
+                     <ListFilter size={13} />
+                     Tích chọn từ danh mục [{proficiencyLabels[targetProficiencyLevel]?.code}]
+                   </button>
+                   <button
+                     type="button"
+                     onClick={() => setActiveTab('manual')}
+                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                       activeTab === 'manual' 
+                         ? 'bg-purple-600 text-white shadow-xs' 
+                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                     }`}
+                   >
+                     <Edit3 size={13} />
+                     Nhập mã AI trực tiếp
+                   </button>
+                 </div>
+
+                 <button
+                   type="button"
+                   onClick={() => setIsDropdownOpen(false)}
+                   className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
+                   title="Đóng bảng chọn"
+                 >
+                   <X size={16} />
+                 </button>
+               </div>
+
+               {activeTab === 'select' ? (
+                 <>
+                   {/* Search & Quick Add Header */}
+                   <div className="space-y-2">
+                     <div className="relative">
+                       <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                       <input
+                         ref={searchInputRef}
+                         type="text"
+                         value={searchTerm}
+                         onChange={(e) => setSearchTerm(e.target.value)}
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter' && searchTerm.trim()) {
+                             e.preventDefault();
+                             handleAddCustomCode(searchTerm.trim());
+                           }
+                         }}
+                         placeholder="🔍 Nhập mã AI (VD: NLb.TC2, 6.2.TC2a...) hoặc tìm kiếm..."
+                         className="w-full bg-slate-50 rounded-xl py-2 pl-9 pr-8 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-slate-800 placeholder:text-slate-400 font-medium"
+                       />
+                       {searchTerm && (
+                         <button
+                           type="button"
+                           onClick={() => setSearchTerm('')}
+                           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                         >
+                           <X size={13} />
+                         </button>
+                       )}
+                     </div>
+
+                     {/* Quick Action: Add typed AI code immediately */}
+                     {searchTerm.trim().length > 0 && (
+                       <div className="bg-purple-50/80 border border-purple-200 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                         <div className="min-w-0 flex-1">
+                           <span className="text-[10px] text-purple-700 font-bold uppercase block">Nhập nhanh mã AI:</span>
+                           <p className="text-xs font-bold text-purple-950 truncate">
+                             [{searchTerm.trim()}] {searchedLookup ? `- ${searchedLookup.desc}` : "(Mã AI tùy chỉnh)"}
+                           </p>
+                         </div>
+                         <button
+                           type="button"
+                           onClick={() => handleAddCustomCode(searchTerm.trim())}
+                           className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 flex items-center gap-1 shadow-xs transition-colors"
+                         >
+                           <Plus size={13} />
+                           Tích chọn ngay
+                         </button>
+                       </div>
+                     )}
+
+                     {/* Quick Selection Buttons */}
+                     <div className="flex items-center justify-between px-1 text-[11px]">
+                       <span className="text-slate-500 font-semibold">
+                         {filteredCodesList.length} mã AI khả dụng {selectedDomain !== "ALL" ? `(${selectedDomain})` : `(Tất cả mạch)`}
+                       </span>
+                       <div className="flex gap-2">
+                         <button
+                           type="button"
+                           onClick={handleSelectAll}
+                           className="font-bold text-purple-600 hover:text-purple-800 hover:underline"
+                         >
+                           Tích chọn tất cả ({filteredCodesList.length})
+                         </button>
+                         <span className="text-slate-300">|</span>
+                         <button
+                           type="button"
+                           onClick={handleDeselectAll}
+                           className="font-bold text-slate-500 hover:text-slate-700 hover:underline"
+                         >
+                           Bỏ tích
+                         </button>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Checkboxes List */}
+                   {filteredCodesList.length === 0 ? (
+                     <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                       <p className="text-slate-500 font-medium text-xs">Không tìm thấy mã AI trong danh mục hiện tại.</p>
+                       {searchTerm.trim() && (
+                         <button
+                           type="button"
+                           onClick={() => handleAddCustomCode(searchTerm.trim())}
+                           className="mt-2 text-xs font-bold text-purple-600 hover:text-purple-800 bg-white border border-purple-200 px-3 py-1.5 rounded-lg inline-flex items-center gap-1 shadow-xs"
+                         >
+                           <Plus size={13} /> Thêm & tích chọn mã <strong>[{searchTerm.trim()}]</strong>
+                         </button>
+                       )}
+                     </div>
+                   ) : (
+                     <div className="space-y-2 pr-1 max-h-56 overflow-y-auto">
+                       {filteredCodesList.map((item) => {
+                         const checked = isCodeChecked(item.code);
+                         return (
+                           <div
+                             key={item.code}
+                             onClick={() => toggleCode(item)}
+                             className={`flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-all border ${
+                               checked 
+                                 ? 'bg-purple-50/90 border-purple-300 shadow-xs' 
+                                 : 'bg-white hover:bg-slate-50 border-slate-100'
+                             }`}
+                           >
+                             <div className={`mt-0.5 w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all ${
+                               checked 
+                                 ? 'bg-purple-600 border-purple-600 text-white' 
+                                 : 'bg-white border-slate-300 text-transparent'
+                             }`}>
+                               <Check size={12} strokeWidth={3} />
+                             </div>
+                             <div className="flex-1 min-w-0">
+                               <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                 <span className={`font-bold px-2 py-0.5 rounded-md text-[11px] tracking-wide inline-block ${
+                                   checked ? 'bg-purple-600 text-white shadow-xs' : 'bg-purple-100 text-purple-700'
+                                 }`}>
+                                   {item.code}
+                                 </span>
+                                 <span className="text-[11px] text-slate-500 font-medium truncate" title={item.domainLabel}>
+                                   {item.domainLabel}
+                                 </span>
+                               </div>
+                               <p className="text-xs text-slate-700 leading-snug font-normal">
+                                 {item.desc}
+                               </p>
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   )}
+                 </>
+               ) : (
+                 /* Manual Direct Input Form */
+                 <div className="bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 space-y-3">
+                   <div className="flex items-center gap-2">
+                     <Edit3 size={15} className="text-purple-600" />
+                     <h3 className="font-bold text-slate-800 text-xs">Nhập mã năng lực AI theo nhu cầu</h3>
+                   </div>
+                   
+                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                     <div>
+                       <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Mã AI (Bắt buộc)</label>
+                       <input
+                         type="text"
+                         value={customCode}
+                         onChange={(e) => handleCustomCodeChange(e.target.value)}
+                         placeholder="VD: NLb.TC2, 6.2.TC2a"
+                         className="w-full bg-white rounded-xl py-2 px-3 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 font-bold text-purple-700 placeholder:text-slate-400"
+                       />
+                     </div>
+                     <div className="sm:col-span-2">
+                       <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Mạch Năng lực AI</label>
+                       <select
+                         value={customDomain}
+                         onChange={(e) => setCustomDomain(e.target.value)}
+                         className="w-full bg-white rounded-xl py-2 px-3 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 font-medium text-slate-700"
+                       >
+                         {AI_COMPONENT_OPTIONS.map((opt) => (
+                           <option key={opt.code} value={opt.code}>{opt.label}</option>
+                         ))}
+                         <option value="AI.TUYCHINH">Năng lực AI tùy chỉnh khác</option>
+                       </select>
+                     </div>
+                   </div>
+
+                   <div>
+                     <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Mô tả / Yêu cầu cần đạt AI</label>
+                     <textarea
+                       value={customDesc}
+                       onChange={(e) => setCustomDesc(e.target.value)}
+                       placeholder="Nhập yêu cầu cần đạt AI hoặc hệ thống tự động nhận diện theo mã..."
+                       rows={2}
+                       className="w-full bg-white rounded-xl py-2 px-3 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 font-normal text-slate-700 placeholder:text-slate-400 resize-none"
+                     />
+                   </div>
+
+                   <button
+                     type="button"
+                     onClick={() => handleAddCustomCode()}
+                     disabled={!customCode.trim()}
+                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2.5 rounded-xl transition-colors shadow-sm disabled:bg-slate-300 disabled:shadow-none flex items-center justify-center gap-1.5"
+                   >
+                     <Plus size={15} /> Thêm & Tích chọn mã AI này ngay
+                   </button>
+                 </div>
+               )}
+
+             </div>
+           )}
         </div>
 
       </div>
 
       {/* Selected Items List */}
-      <div className="mt-8 space-y-3">
+      <div className="mt-6 space-y-3">
         {entries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-purple-100 rounded-2xl bg-purple-50/30">
-             <Cpu className="text-purple-300 mb-2" size={24} />
-             <p className="text-slate-500 text-sm font-medium">Chưa chọn yêu cầu Tích hợp AI cụ thể.</p>
-             <p className="text-slate-400 text-xs mt-1">Bấm vào ô <strong>"3. Mã Tích hợp AI"</strong> ở trên để sổ danh sách các mã năng lực AI và tích chọn.</p>
+          <div className="flex flex-col items-center justify-center py-7 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
+             <Info className="text-slate-300 mb-2" size={24} />
+             <p className="text-slate-500 text-sm font-medium">Chưa có mã AI nào được tích chọn.</p>
+             <p className="text-slate-400 text-xs mt-1">Bấm vào ô <strong>"3. Mã Tích hợp AI"</strong> ở trên để tích chọn mã từ danh mục hoặc gõ nhập mã tùy ý.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -404,16 +611,16 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                 onClick={() => setEntries([])}
                 className="text-[11px] font-semibold text-rose-500 hover:text-rose-700 transition-colors"
               >
-                Xóa tất cả
+                Xóa tất cả ({entries.length})
               </button>
             </div>
             {entries.map((entry) => (
               <div 
                 key={entry.id} 
-                className="group flex items-start justify-between bg-purple-50/50 hover:bg-purple-50 border border-purple-200/80 p-3.5 rounded-2xl transition-all duration-200"
+                className="group flex items-start justify-between bg-purple-50/40 hover:bg-purple-50 border border-purple-100/80 p-3.5 rounded-2xl transition-all duration-200"
               >
                 <div className="flex items-start flex-1 min-w-0">
-                  <div className="mt-0.5 p-1 bg-purple-600 rounded-lg mr-3 shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
+                  <div className="mt-0.5 p-1 bg-purple-600 rounded-lg mr-3 shadow-sm group-hover:scale-105 transition-transform shrink-0">
                      <Sparkles className="text-white fill-current" size={13} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -430,7 +637,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                 </div>
                 <button 
                   onClick={() => handleRemove(entry.id)}
-                  className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-xl transition-all ml-3 flex-shrink-0"
+                  className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-xl transition-all ml-3 shrink-0"
                   title="Xóa mã này"
                 >
                   <Trash2 size={16} />

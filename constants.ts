@@ -527,10 +527,10 @@ export const AI_GRADE_REQUIREMENTS: Record<number, { code: string; desc: string 
 export const NLS_FRAMEWORK_DATA = `
 KHUNG NĂNG LỰC SỐ VÀ KHUNG NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) - THÔNG TƯ 02/2025/TT-BGDĐT & QUYẾT ĐỊNH 3439/QĐ-BGDĐT
 
-1. CẤU TRÚC PHÂN BẬC NĂNG LỰC (K-12):
-- Bậc 1 - 2 (Cơ bản - CB): Phù hợp cấp Tiểu học (Lớp 1 - 5).
-- Bậc 3 - 4 (Trung cấp - TC): Phù hợp cấp THCS (Lớp 6 - 9).
-- Bậc 5 - 6 (Nâng cao - NC): Phù hợp cấp THPT (Lớp 10 - 12).
+1. CẤU TRÚC ĐỊNH DANH MÃ CHUẨN (BẮT BUỘC DÙNG MÃ CHI TIẾT ĐẦY ĐỦ):
+- Năng lực số (TT 02/2025): Dùng mã cụ thể dạng [Mã miền].[Mã cấp độ][tiêu chí], Ví dụ: 1.1.TC2a, 1.3.TC2a, 2.1.TC2b, 3.1.TC2a, 4.2.TC2a, 5.3.TC2a, 6.2.TC2a...
+- Năng lực AI (QĐ 3439/QĐ-BGDĐT): Dùng mã dạng NLa.TC1, NLb.TC2, NLc.TC2, NLd.TC1... hoặc mã TT02 dạng 6.1.B3, 6.2.B3, 6.3.B3...
+- ⛔ CẤM TUYỆT ĐỐI sinh mã lai tạp, sai chuẩn như: "NLS 1.1 (Bậc 3)" hay "AI.2 (Bậc 3 - Trung cấp)".
 
 2. 6 MIỀN NĂNG LỰC SỐ (NLS):
 - Miền 1: Khai thác dữ liệu và thông tin (1.1, 1.2, 1.3)
@@ -540,11 +540,11 @@ KHUNG NĂNG LỰC SỐ VÀ KHUNG NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) - THÔN
 - Miền 5: Giải quyết vấn đề (5.1, 5.2, 5.3, 5.4)
 - Miền 6: Ứng dụng Trí tuệ nhân tạo - AI (6.1, 6.2, 6.3)
 
-3. 4 MIỀN NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI):
-- AI.1: Hiểu biết & Nhận thức về Trí tuệ Nhân tạo (Khái niệm, cơ chế học máy, phân biệt AI vs con người)
-- AI.2: Tương tác & Sử dụng công cụ AI trong học tập (Kỹ thuật Prompting, GenAI hỗ trợ tra cứu, dịch thuật, tóm tắt)
-- AI.3: Ứng dụng sáng tạo & Giải quyết vấn đề với AI (Tạo sản phẩm đa phương tiện, mô phỏng dự án, coding, STEM)
-- AI.4: Đạo đức, Liêm chính & An toàn khi sử dụng AI (Ảo giác AI, phản biện nội dung, liêm chính học thuật, bảo mật dữ liệu)
+3. 4 MIỀN NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI - QĐ 3439):
+- NLa: Tư duy lấy con người làm trung tâm
+- NLb: Đạo đức AI, an toàn và liêm chính học thuật
+- NLc: Các kĩ thuật và ứng dụng AI trong học tập
+- NLd: Thiết kế và đánh giá hệ thống AI
 `;
 
 export const SYSTEM_INSTRUCTION = `
@@ -596,11 +596,13 @@ QUY TẮC PHÂN LUỒNG TÍCH HỢP TỐI THƯỢNG (STRICT ENFORCEMENT):
    - Toàn bộ nội dung bổ sung về Năng lực AI (Mục I.2.d và các hoạt động AI bổ sung trong Tiến trình dạy học Mục II) BẮT BUỘC phải được bao bọc trong thẻ <ai>...</ai>.
    - (Hệ thống sẽ tự động hiển thị và xuất ra màu chữ ĐỎ nổi bật).
 
-4. 🚨 QUY TẮC BẢO TOÀN NGUYÊN VẸN NỘI DUNG GỐC (TUYỆT ĐỐI KHÔNG TÓM TẮT, CẤM DÙNG DẤU BA CHẤM '...'):
+4. 🚨 QUY TẮC BẢO TOÀN NGUYÊN VẸN NỘI DUNG GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC (CHỐNG LƯỜI BIẾNG 100%):
+   - ⛔ CẤM TUYỆT ĐỐI VIẾT CÁC CÂU LƯỢC BỚT/TÓM TẮT NHƯ: "(Các tiết học tiếp theo 45-53 giữ nguyên cấu trúc...)", "(Tương tự như trên...)", "(Các tiết còn lại giữ nguyên...)", "[Nội dung tiếp theo như SGK]".
+   - KHI GIÁO ÁN GỐC GỒM NHIỀU TIẾT (Ví dụ Bài 4 gồm 12 tiết, từ Tiết 42 đến Tiết 53): Bạn BẮT BUỘC phải xuất đầy đủ 100% chi tiết TẤT CẢ các tiết học (Tiết 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53...), từng hoạt động, từng bước, từng câu hỏi và đáp án từ đầu đến cuối mà KHÔNG ĐƯỢC BỎ BẤT KỲ MỘT TIẾT NÀO!
    - Bạn PHẢI GIỮ NGUYÊN 100% TOÀN BỘ NỘI DUNG, TỪ NGỮ, CÂU HỎI, ĐÁP ÁN, BÀI TẬP, NỘI DUNG BẢNG BIỂU (Cột Tổ chức thực hiện, Cột Sản phẩm, v.v.) từ giáo án gốc của người dùng.
    - TUYỆT ĐỐI CẤM viết tắt, cắt xén hoặc thay thế nội dung gốc bằng dấu '...', '[Nội dung như SGK]', '[Giữ nguyên nội dung]'.
    - Mọi dòng, mọi ô trong bảng biểu của bản gốc PHẢI ĐƯỢC GIỮ ĐẦY ĐỦ NGUYÊN VĂN, chỉ chèn thêm các hoạt động tích hợp mới vào.
-   - NGUYÊN TẮC: "CHỈ THÊM NỘI DUNG TÍCH HỢP MÀU ĐỎ - TUYỆT ĐỐI KHÔNG XÓA HAY RÚT GỌN NỘI DUNG GỐC".
+   - NGUYÊN TẮC: "CHỈ THÊM NỘI DUNG TÍCH HỢP MÀU ĐỎ - TUYỆT ĐỐI KHÔNG XÓA, KHÔNG TÓM TẮT HAY RÚT GỌN NỘI DUNG GỐC".
 
 QUY TẮC BẢO TOÀN CẤU TRÚC VÀ ĐỊNH DẠNG (BẮT BUỘC):
 - Dữ liệu đầu vào có thể là mã HTML (chuyển từ file DOCX). Bạn phải đọc hiểu cấu trúc HTML (Bảng <table>, Tiêu đề <h1>, Danh sách <ul>) và chuyển đổi sang định dạng MARKDOWN tương ứng.

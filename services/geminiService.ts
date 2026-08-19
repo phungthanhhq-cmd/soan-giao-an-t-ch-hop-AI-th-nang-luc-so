@@ -20,24 +20,14 @@ const buildUserPrompt = (info: LessonInfo, options: ProcessingOptions): string =
     🚨 TRƯỜNG HỢP 1: NGƯỜI DÙNG CUNG CẤP PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3) - NGUỒN CHUẨN MỰC PHÁP QUY TỐI THƯỢNG:
     Trong Phân phối chương trình / Phụ lục 3 ĐÃ CÓ SẴN bảng phân phối cho từng bài học/tiết học cụ thể (gồm các cột: TT, Bài học, Số tiết, Thời điểm, Thiết bị, Địa điểm, Ghi chú / Năng lực số / AI).
     
-    🎯 QUY TRÌNH ĐỐI CHIẾU VÀ TRÍCH XUẤT 100% CHÍNH XÁC:
-    1. ĐỌC GIÁO ÁN GỐC: Nhận diện Tên bài học và Số tiết dạy (Ví dụ: "Tiết 9, 10, 11 - VIẾT BÀI VĂN KỂ LẠI MỘT CHUYẾN ĐI..." hoặc "Tiết 1, 2, 3 - Lá cờ thêu sáu chữ vàng"...).
-    2. QUÉT BẢNG PPCT: Tìm đúng hàng (row / <tr>) trong Bảng Phân phối chương trình bên dưới có Cột "Bài học" hoặc Cột "Số tiết" tương ứng với bài/tiết của giáo án gốc.
-    3. ĐỌC KỸ CỘT "GHI CHÚ" / CỘT "NĂNG LỰC SỐ / AI" CỦA ĐÚNG HÀNG ĐÓ:
-       - 📌 NẾU HÀNG ĐÓ TRONG PPCT CÓ GHI MÃ NLS (Ví dụ: "NLS (Tiết 3) – 1.3.TC2a: Tìm kiếm và sắp xếp hình ảnh..." hoặc "1.3.TC2a: ..."):
-         + BẮT BUỘC TRÍCH XUẤT NGUYÊN VĂN 100% mã số và nội dung YCCĐ được ghi trong ô đó của PPCT vào mục "c. Năng lực số" (bọc trong <nls>...</nls>).
-         + ĐỒNG BỘ 100% mã số này vào đúng tiết/hoạt động trong Tiến trình dạy học (ghi rõ [1.3.TC2a] và bọc hoạt động số trong <nls>...</nls>).
-         + ⛔ CẤM TUYỆT ĐỐI không được tự ý đổi thành mã khác (như 1.1.TC2b, 2.1.TC2a...), CẤM lấy mã từ bài học khác trong PPCT.
-       - 📌 NẾU HÀNG ĐÓ TRONG PPCT CÓ GHI MÃ AI (Ví dụ: "NLb.TC2: ...", "6.2.TC2a: ..."):
-         + BẮT BUỘC TRÍCH XUẤT NGUYÊN VĂN 100% mã số và nội dung YCCĐ AI từ ô đó của PPCT vào mục "d. Năng lực Trí tuệ Nhân tạo (AI)" (bọc trong <ai>...</ai>).
-         + ĐỒNG BỘ 100% mã số này vào Tiến trình dạy học (ghi rõ [NLb.TC2] và bọc hoạt động AI trong <ai>...</ai>).
-       - 📌 NẾU HÀNG ĐÓ TRONG PPCT KHÔNG GHI MÃ NLS HAY AI NÀO (Ô cột Ghi chú / NLS để trống hoặc chỉ ghi nội dung khác như "Tích hợp GD QP-AN", "Tích hợp GD địa phương"):
-         + ⛔ TUYỆT ĐỐI CẤM TÍCH HỢP NLS HAY AI CHO BÀI NÀY!
-         + ⛔ CẤM TUYỆT ĐỐI việc tự ý bịa mã (như 1.1.TC2b, 2.1.TC2a...) để nhét vào giáo án khi dòng PPCT của bài đó không có!
-    
-    ⛔ NGUYÊN TẮC BẤT DI BẤT DỊCH:
-    - "PHÂN PHỐI CHƯƠNG TRÌNH GHI MÃ NÀO THÌ GIÁO ÁN GHI ĐÚNG MÃ ĐÓ - PPCT KHÔNG CÓ MÃ THÌ GIÁO ÁN KHÔNG ĐƯỢC TỰ BỊA MÃ".
-    - TUYỆT ĐỐI KHÔNG ĐỂ XẢY RA TÌNH TRẠNG "PHÂN PHỐI CHƯƠNG TRÌNH MỘT MÃ, GIÁO ÁN MỘT MÃ"!
+    🎯 5 NGUYÊN TẮC BẮT BUỘC KHI CÓ PHỤ LỤC:
+    1. 📌 TUÂN THỦ ĐỒNG BỘ THEO PHỤ LỤC: Đối chiếu chính xác từng tiết của giáo án với từng hàng trong bảng Phụ lục 3 (PPCT).
+    2. 📌 CHỈ TÍCH HỢP ĐÚNG TIẾT VÀ MÃ CÓ TRONG PHỤ LỤC: 
+       - Tiết nào trong Phụ lục CÓ ghi mã NLS/AI (ví dụ: Tiết 44 có mã 1.3.TC2a, Tiết 47 có mã NLb.TC2) -> CHỈ tích hợp đúng mã đó vào đúng tiết đó.
+       - Tiết nào trong Phụ lục KHÔNG ghi mã NLS/AI (ô để trống) -> TUYỆT ĐỐI KHÔNG tích hợp NLS/AI vào tiết đó!
+    3. ⛔ NGHIÊM CẤM TỰ Ý PHÁT SINH MÃ NĂNG LỰC: Tuyệt đối không tự bịa mã, không đổi mã, không thêm mã cho những tiết mà Phụ lục không yêu cầu.
+    4. ⛔ KHÔNG ĐƯỢC BỚT NỘI DUNG TRONG GIÁO ÁN: Giữ nguyên 100% toàn bộ nội dung giáo án gốc, không cắt xén, không dùng dấu '...', không tóm tắt các tiết tiếp theo.
+    5. 🔴 CHỈ BÔI ĐỎ NỘI DUNG ĐÃ BỔ SUNG DO TÍCH HỢP: Nội dung gốc giữ màu đen mặc định (không bọc trong thẻ <nls>/<ai>); CHỈ bọc các nhiệm vụ, câu lệnh, prompt bổ sung do tích hợp trong thẻ <nls>...</nls> hoặc <ai>...</ai>.
     
     NỘI DUNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3:
     ${info.distributionContent}
@@ -185,7 +175,9 @@ const buildUserPrompt = (info: LessonInfo, options: ProcessingOptions): string =
     ${options.detailedReport ? "- Kèm theo bảng giải thích chi tiết mã năng lực đã chọn ở cuối bài." : ""}
     
     YÊU CẦU VỀ ĐỊNH DẠNG & NGUYÊN TẮC BẢO TOÀN (BẮT BUỘC):
-    1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GIÁO ÁN GỐC:
+    1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GIÁO ÁN GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC:
+       - ⛔ CẤM TUYỆT ĐỐI VIẾT CÁC DÒNG RÚT GỌN NHƯ: "(Các tiết học tiếp theo 45-53 giữ nguyên cấu trúc...)", "(Tương tự như trên...)", "(Các tiết còn lại giữ nguyên...)".
+       - KHI GIÁO ÁN GỒM NHIỀU TIẾT (Ví dụ: Bài 4 gồm 12 tiết, Tiết 42-53): BẮT BUỘC phải xuất đầy đủ 100% chi tiết TẤT CẢ các tiết học (Tiết 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53...), từng hoạt động, từng bước, từng câu hỏi và đáp án từ đầu đến cuối mà KHÔNG ĐƯỢC BỎ BẤT KỲ MỘT TIẾT NÀO!
        - Bạn PHẢI GIỮ NGUYÊN 100% TẤT CẢ NỘI DUNG, TỪ NGỮ, CÂU HỎI, ĐÁP ÁN, SẢN PHẨM HỌC TẬP, CÁC BƯỚC THỰC HIỆN CỦA GIÁO VIÊN TRONG BẢN GỐC.
        - CẤM TUYỆT ĐỐI việc viết tắt hay thay thế nội dung gốc bằng dấu ba chấm ('...'), ('[Nội dung như SGK]'), ('[Giữ nguyên...]').
        - TRONG CÁC BẢNG BIỂU (ví dụ bảng: Tổ chức thực hiện | Sản phẩm): BẠN PHẢI GIỮ LẠI TOÀN BỘ CHỮ trong cột "Tổ chức thực hiện" và cột "Sản phẩm", chỉ chèn thêm các nhiệm vụ/câu hỏi NLS/AI tích hợp màu đỏ vào vị trí thích hợp.
