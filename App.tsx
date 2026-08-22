@@ -7,6 +7,7 @@ import ManualAIInput from './components/ManualAIInput';
 import ResultDisplay from './components/ResultDisplay';
 import { Subject, Textbook, ManualNLSEntry, SchoolLevel } from './types';
 import { generateNLSLessonPlan } from './services/geminiService';
+import { extractCodesFromPPCT } from './utils/ppctExtractor';
 import { 
   Sparkles, 
   Sliders, 
@@ -20,7 +21,8 @@ import {
   Settings,
   Share2,
   Check,
-  Bot
+  Bot,
+  RefreshCw
 } from 'lucide-react';
 import { 
   subscribeToAuth, 
@@ -51,7 +53,25 @@ const App: React.FC = () => {
   // Content States
   const [lessonContent, setLessonContent] = useState<string>('');
   const [distributionContent, setDistributionContent] = useState<string>('');
+  const [distFileName, setDistFileName] = useState<string | null>(null);
   const [mathMap, setMathMap] = useState<Record<string, string>>({});
+
+  // Session-wide PPCT Registry (Subject + Grade -> PPCT file & content)
+  const [ppctSessionStore, setPpctSessionStore] = useState<Record<string, {
+    content: string;
+    fileName: string;
+    subject: Subject;
+    grade: number;
+    updatedAt: number;
+  }>>(() => {
+    try {
+      const raw = sessionStorage.getItem('PPCT_SESSION_CACHE_V1');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {
+      console.warn("Could not load PPCT from sessionStorage", e);
+    }
+    return {};
+  });
   
   // Independent Integration Modes: NLS and AI
   const [enableNLS, setEnableNLS] = useState<boolean>(true);
@@ -60,6 +80,126 @@ const App: React.FC = () => {
   // New State for Manual NLS & AI Input
   const [manualNLSEntries, setManualNLSEntries] = useState<ManualNLSEntry[]>([]);
   const [manualAIEntries, setManualAIEntries] = useState<ManualNLSEntry[]>([]);
+  const [ppctSyncStatus, setPpctSyncStatus] = useState<{
+    nlsCount: number;
+    aiCount: number;
+    total: number;
+  } | null>(null);
+
+  // Auto-sync NLS & AI codes from PPCT when distributionContent is provided
+  const handleSyncFromPPCT = (ppctText: string, lessonText?: string, targetGrade?: number) => {
+    if (!ppctText || !ppctText.trim()) {
+      setPpctSyncStatus(null);
+      return;
+    }
+    const extracted = extractCodesFromPPCT(ppctText, lessonText || lessonContent, targetGrade ?? grade);
+    if (extracted.totalCodesFound > 0) {
+      if (extracted.nlsEntries.length > 0) {
+        setManualNLSEntries(extracted.nlsEntries);
+      }
+      if (extracted.aiEntries.length > 0) {
+        setManualAIEntries(extracted.aiEntries);
+      }
+      setPpctSyncStatus({
+        nlsCount: extracted.nlsEntries.length,
+        aiCount: extracted.aiEntries.length,
+        total: extracted.totalCodesFound
+      });
+    } else {
+      setPpctSyncStatus({
+        nlsCount: 0,
+        aiCount: 0,
+        total: 0
+      });
+    }
+  };
+
+  // Sync PPCT to session storage whenever distributionContent or distFileName changes
+  const handleSetDistributionContent = (content: string) => {
+    setDistributionContent(content);
+    const key = `${subject}_${grade}`;
+    if (content && content.trim().length > 0) {
+      const fileName = distFileName || `PPCT_${subject}_Lop${grade}.docx`;
+      const updatedStore = {
+        ...ppctSessionStore,
+        [key]: {
+          content,
+          fileName,
+          subject,
+          grade,
+          updatedAt: Date.now()
+        }
+      };
+      setPpctSessionStore(updatedStore);
+      try {
+        sessionStorage.setItem('PPCT_SESSION_CACHE_V1', JSON.stringify(updatedStore));
+      } catch (e) {
+        console.warn("sessionStorage save error", e);
+      }
+    } else {
+      // If cleared
+      const updatedStore = { ...ppctSessionStore };
+      delete updatedStore[key];
+      setPpctSessionStore(updatedStore);
+      try {
+        sessionStorage.setItem('PPCT_SESSION_CACHE_V1', JSON.stringify(updatedStore));
+      } catch (e) {
+        console.warn("sessionStorage save error", e);
+      }
+    }
+  };
+
+  const handleClearCurrentPPCT = () => {
+    const key = `${subject}_${grade}`;
+    const updatedStore = { ...ppctSessionStore };
+    delete updatedStore[key];
+    setPpctSessionStore(updatedStore);
+    try {
+      sessionStorage.setItem('PPCT_SESSION_CACHE_V1', JSON.stringify(updatedStore));
+    } catch (e) {
+      console.warn("sessionStorage error", e);
+    }
+    setDistributionContent('');
+    setDistFileName(null);
+    setPpctSyncStatus(null);
+  };
+
+  const handleSelectCachedPPCT = (key: string) => {
+    const cached = ppctSessionStore[key];
+    if (cached) {
+      setSubject(cached.subject);
+      setGrade(cached.grade);
+      setDistributionContent(cached.content);
+      setDistFileName(cached.fileName);
+      handleSyncFromPPCT(cached.content, lessonContent, cached.grade);
+    }
+  };
+
+  // When subject or grade changes, check if we have a cached PPCT for that subject & grade
+  useEffect(() => {
+    const key = `${subject}_${grade}`;
+    const cached = ppctSessionStore[key];
+    if (cached && cached.content) {
+      setDistributionContent(cached.content);
+      setDistFileName(cached.fileName);
+      handleSyncFromPPCT(cached.content, lessonContent, grade);
+    } else {
+      setDistributionContent('');
+      setDistFileName(null);
+      setPpctSyncStatus(null);
+    }
+  }, [subject, grade]);
+
+  // Initial load check if session has PPCT for default subject & grade
+  useEffect(() => {
+    const key = `${subject}_${grade}`;
+    const cached = ppctSessionStore[key];
+    if (cached && cached.content) {
+      setDistributionContent(cached.content);
+      setDistFileName(cached.fileName);
+      handleSyncFromPPCT(cached.content, lessonContent, grade);
+    }
+  }, []);
   
   // State for Options
   const [analyzeOnly, setAnalyzeOnly] = useState(false);
@@ -384,21 +524,39 @@ const App: React.FC = () => {
 
             {/* Smart PPCT & Integration Helper Banner */}
             {distributionContent && distributionContent.trim().length > 0 ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 text-xs flex items-start space-x-3 shadow-sm">
-                <Sparkles className="shrink-0 text-emerald-600 mt-0.5" size={18} />
-                <div className="flex-1">
-                  <p className="font-bold text-emerald-950 text-sm">🌟 Đã nhận diện Phân phối chương trình (PPCT):</p>
-                  <p className="mt-1 text-emerald-800 leading-relaxed">
-                    Hệ thống sẽ tự động quét, đối chiếu đúng bài học trong PPCT và trích xuất nguyên văn các mã NLS / AI có sẵn để tích hợp đồng bộ vào giáo án (tất cả phần tích hợp được <strong>đánh dấu bằng màu đỏ</strong>). Thầy/cô <strong>không cần phải lựa chọn mã thủ công</strong> bên dưới.
-                  </p>
+              <div className="bg-emerald-50/90 border border-emerald-300/80 rounded-2xl p-4 text-emerald-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                <div className="flex items-start space-x-3">
+                  <Sparkles className="shrink-0 text-emerald-600 mt-0.5" size={20} />
+                  <div>
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                      <span className="font-bold text-emerald-950 text-sm">🌟 Đã nhận diện Phân phối chương trình (PPCT):</span>
+                      {ppctSyncStatus && ppctSyncStatus.total > 0 && (
+                        <span className="bg-emerald-600 text-white font-bold px-2.5 py-0.5 rounded-full text-[11px] shadow-sm animate-pulse">
+                          ✨ Đã tự động đồng bộ {ppctSyncStatus.nlsCount} mã NLS & {ppctSyncStatus.aiCount} mã AI
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-emerald-800 leading-relaxed text-xs">
+                      Hệ thống đã tự động đối chiếu PPCT và trích xuất đúng các mã NLS/AI vào danh sách bên dưới để tích hợp đồng bộ (tất cả phần tích hợp được <strong>đánh dấu màu đỏ</strong>). Thầy/cô <strong>không cần phải nhập hay tích chọn thêm</strong>.
+                    </p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => handleSyncFromPPCT(distributionContent, lessonContent)}
+                  className="inline-flex items-center space-x-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold rounded-xl text-xs shadow-sm transition-all shrink-0 self-start sm:self-center"
+                  title="Quét và trích xuất lại các mã từ PPCT"
+                >
+                  <RefreshCw size={14} />
+                  <span>Đồng bộ lại từ PPCT</span>
+                </button>
               </div>
             ) : (
               (enableNLS || enableAI) && (
-                <div className="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3.5 text-indigo-900 text-xs flex items-center space-x-2.5">
-                  <Info className="shrink-0 text-indigo-600" size={16} />
-                  <span>
-                    💡 <strong>Lưu ý:</strong> Trường hợp chỉ tải giáo án lên (không có PPCT), hệ thống sẽ tích hợp theo đúng các mã thầy/cô tích chọn bên dưới và đánh dấu màu đỏ (tuyệt đối không tự ý thêm mã ngoài).
+                <div className="bg-indigo-50/80 border border-indigo-200/70 rounded-2xl p-3.5 text-indigo-950 text-xs flex items-center space-x-2.5 shadow-sm">
+                  <Info className="shrink-0 text-indigo-600" size={18} />
+                  <span className="leading-relaxed">
+                    🎯 <strong>Quy định tích hợp theo mã đã chọn:</strong> Khi thầy/cô nhập hoặc tích chọn mã vào các ô bên dưới, hệ thống sẽ <strong>căn cứ chính xác vào đó để tích hợp trong giáo án</strong>. App <strong>nghiêm cấm tuyệt đối</strong> tự ý chọn mã khác ngoài lựa chọn của thầy/cô. Nếu tải PPCT lên, app sẽ tự động đồng bộ đúng mã từ PPCT.
                   </span>
                 </div>
               )
@@ -443,8 +601,15 @@ const App: React.FC = () => {
                 lessonContent={lessonContent} 
                 setLessonContent={setLessonContent}
                 distributionContent={distributionContent}
-                setDistributionContent={setDistributionContent}
+                setDistributionContent={handleSetDistributionContent}
                 setMathMap={setMathMap}
+                currentSubject={subject}
+                currentGrade={grade}
+                distFileName={distFileName}
+                setDistFileName={setDistFileName}
+                onClearCurrentPPCT={handleClearCurrentPPCT}
+                cachedPPCTs={ppctSessionStore}
+                onSelectCachedPPCT={handleSelectCachedPPCT}
             />
             
             {/* Options Panel */}

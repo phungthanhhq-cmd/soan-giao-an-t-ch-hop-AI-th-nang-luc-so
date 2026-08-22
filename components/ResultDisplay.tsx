@@ -369,12 +369,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
           strippedPrefix.startsWith('c. năng lực trí tuệ nhân tạo') ||
           strippedPrefix.startsWith('c) năng lực trí tuệ nhân tạo') ||
           lowerTrimmed.includes('<nls>') ||
-          lowerTrimmed.includes('<ai>') ||
-          lowerTrimmed.startsWith('- nls') ||
-          lowerTrimmed.startsWith('* nls') ||
-          lowerTrimmed.startsWith('+ nls') ||
-          lowerTrimmed.startsWith('nls ') ||
-          (lowerTrimmed.includes('(bậc ') && (lowerTrimmed.includes('nls') || lowerTrimmed.includes('ai') || lowerTrimmed.includes('.tc')))
+          lowerTrimmed.includes('<ai>')
         ) {
           currentFormatState.isRed = true;
         } else if (
@@ -385,7 +380,25 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
           strippedPrefix.startsWith('ii. tiến trình') ||
           strippedPrefix.startsWith('ii. thiết bị') ||
           strippedPrefix.startsWith('b. năng lực đặc thù') ||
-          strippedPrefix.startsWith('a. năng lực chung')
+          strippedPrefix.startsWith('a. năng lực chung') ||
+          strippedPrefix.startsWith('1. hoạt động') ||
+          strippedPrefix.startsWith('2. hoạt động') ||
+          strippedPrefix.startsWith('3. hoạt động') ||
+          strippedPrefix.startsWith('4. hoạt động') ||
+          strippedPrefix.startsWith('hoạt động 1') ||
+          strippedPrefix.startsWith('hoạt động 2') ||
+          strippedPrefix.startsWith('hoạt động 3') ||
+          strippedPrefix.startsWith('hoạt động 4') ||
+          strippedPrefix.startsWith('a) mục tiêu') ||
+          strippedPrefix.startsWith('b) nội dung') ||
+          strippedPrefix.startsWith('c) sản phẩm') ||
+          strippedPrefix.startsWith('d) tổ chức') ||
+          strippedPrefix.startsWith('bước 1') ||
+          strippedPrefix.startsWith('bước 2') ||
+          strippedPrefix.startsWith('bước 3') ||
+          strippedPrefix.startsWith('bước 4') ||
+          strippedPrefix.startsWith('câu hỏi') ||
+          strippedPrefix.startsWith('bài tập')
         ) {
           currentFormatState.isRed = false;
         }

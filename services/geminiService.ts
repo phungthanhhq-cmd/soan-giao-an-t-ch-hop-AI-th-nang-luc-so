@@ -15,11 +15,26 @@ const buildUserPrompt = (info: LessonInfo, options: ProcessingOptions): string =
   let structureGoalRequirement = "";
 
   if (hasPPCT) {
+    const syncedItems: string[] = [];
+    if (hasManualNLS && info.manualNLS) {
+      const nlsList = info.manualNLS
+        .map(item => `- [${item.code}] (${item.name}): ${item.description}`)
+        .join("\n");
+      syncedItems.push(`### CÁC MÃ NĂNG LỰC SỐ (NLS) ĐÃ ĐỒNG BỘ TỪ PPCT (BẮT BUỘC TÍCH HỢP ĐÚNG MÃ ${info.manualNLS.map(i => i.code).join(", ")}):\n${nlsList}`);
+    }
+    if (hasManualAI && info.manualAI) {
+      const aiList = info.manualAI
+        .map(item => `- [${item.code}] (${item.name}): ${item.description}`)
+        .join("\n");
+      syncedItems.push(`### CÁC MÃ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) ĐÃ ĐỒNG BỘ TỪ PPCT (BẮT BUỘC TÍCH HỢP ĐÚNG MÃ ${info.manualAI.map(i => i.code).join(", ")}):\n${aiList}`);
+    }
+
     integrationStrategyDirective = `
     =============================================================================
     🚨 TRƯỜNG HỢP 1: NGƯỜI DÙNG CUNG CẤP PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3) - NGUỒN CHUẨN MỰC PHÁP QUY TỐI THƯỢNG:
     Trong Phân phối chương trình / Phụ lục 3 ĐÃ CÓ SẴN bảng phân phối cho từng bài học/tiết học cụ thể (gồm các cột: TT, Bài học, Số tiết, Thời điểm, Thiết bị, Địa điểm, Ghi chú / Năng lực số / AI).
     
+    ${syncedItems.length > 0 ? syncedItems.join("\n\n") + "\n\n" : ""}
     🎯 5 NGUYÊN TẮC BẮT BUỘC KHI CÓ PHỤ LỤC:
     1. 📌 TUÂN THỦ ĐỒNG BỘ THEO PHỤ LỤC: Đối chiếu chính xác từng tiết của giáo án với từng hàng trong bảng Phụ lục 3 (PPCT).
     2. 📌 CHỈ TÍCH HỢP ĐÚNG TIẾT VÀ MÃ CÓ TRONG PHỤ LỤC: 
@@ -35,10 +50,10 @@ const buildUserPrompt = (info: LessonInfo, options: ProcessingOptions): string =
     `;
 
     modeDirective = `
-    🚨 CHẾ ĐỘ: TỰ ĐỘNG TÍCH HỢP THEO ĐÚNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3.
+    🚨 CHẾ ĐỘ: TỰ ĐỘNG ĐỒNG BỘ VÀ TÍCH HỢP THEO ĐÚNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3.
     - Căn cứ 100% vào bảng PPCT/Phụ lục 3 ở trên của đúng bài học/tiết dạy này.
-    - Nếu hàng bài này trong PPCT có mã NLS nào -> Trích xuất nguyên văn đúng mã đó.
-    - Nếu hàng bài này trong PPCT không có mã NLS -> Tuyệt đối không tích hợp NLS, không tự bịa mã.
+    - Nếu hàng bài này trong PPCT có mã NLS/AI nào -> Trích xuất nguyên văn đúng mã đó để tích hợp.
+    - Nếu hàng bài này trong PPCT không có mã NLS/AI -> Tuyệt đối không tích hợp NLS/AI, không tự bịa mã.
     `;
 
     structureGoalRequirement = `
@@ -239,7 +254,7 @@ ${structureGoalRequirement}
   `;
 };
 
-const postProcessResult = (text: string): string => {
+const postProcessResult = (text: string, lessonInfo?: LessonInfo): string => {
   let fixed = text.replace(/\$\$?([^$]+)\$\$?/g, (match, content) => {
     if (content.includes("MATH_ID")) return match;
     let f = content;
@@ -294,6 +309,36 @@ const postProcessResult = (text: string): string => {
     .replace(/&lt;sup&gt;/gi, "<sup>")
     .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
+  // 1. AUTO-FIX BASTARDIZED / HALLUCINATED CODES TO MATCH OFFICIAL CODES
+  if (lessonInfo?.manualNLS && lessonInfo.manualNLS.length > 0) {
+    const primaryNLS = lessonInfo.manualNLS[0];
+    fixed = fixed.replace(/NLS\s*1\.[1-3]\s*\([^\)]*Bậc[^\)]*\)/gi, primaryNLS.code);
+    fixed = fixed.replace(/\[\s*NLS\s*1\.[1-3][^\]]*\]/gi, `[${primaryNLS.code}]`);
+  } else {
+    fixed = fixed.replace(/NLS\s*1\.1\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "1.1.TC1a");
+    fixed = fixed.replace(/NLS\s*1\.1\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "1.1.TC2a");
+    fixed = fixed.replace(/NLS\s*1\.3\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "1.3.TC1a");
+    fixed = fixed.replace(/NLS\s*1\.3\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "1.3.TC2a");
+  }
+
+  if (lessonInfo?.manualAI && lessonInfo.manualAI.length > 0) {
+    const primaryAI = lessonInfo.manualAI[0];
+    fixed = fixed.replace(/AI\.[1-4]\s*\([^\)]*Bậc[^\)]*\)/gi, primaryAI.code);
+    fixed = fixed.replace(/\[\s*AI\.[1-4][^\]]*\]/gi, `[${primaryAI.code}]`);
+  } else {
+    fixed = fixed.replace(/AI\.4\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "NLb.TC1");
+    fixed = fixed.replace(/AI\.4\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "NLb.TC2");
+    fixed = fixed.replace(/AI\.2\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "NLc.TC1");
+    fixed = fixed.replace(/AI\.2\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "NLc.TC2");
+  }
+
+  // 2. PREVENT RED COLOR LEAK:
+  fixed = fixed.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|II\.\s*TIẾN TRÌNH|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\bBước\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Nội dung|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Tổ chức))/gi, "</nls>\n$1");
+  fixed = fixed.replace(/<ai>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|II\.\s*TIẾN TRÌNH|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\bBước\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Nội dung|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Tổ chức))/gi, "</ai>\n$1");
+
+  fixed = fixed.replace(/<nls>\s*<\/nls>/gi, "");
+  fixed = fixed.replace(/<ai>\s*<\/ai>/gi, "");
+
   return fixed;
 };
 
@@ -335,7 +380,7 @@ async function generateLessonPlanClientSide(
     try {
       const resText = await callModel(modelId);
       if (resText && resText.trim().length > 0) {
-        return postProcessResult(resText);
+        return postProcessResult(resText, info);
       }
     } catch (err: any) {
       lastClientErr = String(err?.message || err);
