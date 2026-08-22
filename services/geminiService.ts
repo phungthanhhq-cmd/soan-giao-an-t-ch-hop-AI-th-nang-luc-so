@@ -289,12 +289,17 @@ const postProcessResult = (text: string, lessonInfo?: LessonInfo): string => {
   fixed = fixed.replace(/[\uF000-\uF8FF]/g, "");
   fixed = fixed.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, "- ");
 
-  // Clean stray slashes and escaped markdown artifacts
+  // Clean stray slashes, hashes, and escaped markdown artifacts
   fixed = fixed
     .replace(/\\([*#_>\-\+\[\]])/g, "$1") // unescape markdown backslashes
     .replace(/\\\//g, "/") // unescape \/
-    .replace(/(^|\n)\s*\/+\s*(?=[A-Za-z0-9#\*\-\+I])/g, "$1") // remove leading slash before text/headings
-    .replace(/([^\w\d\s\/])\s*\/+\s*([^\w\d\s\/])/g, "$1 $2"); // remove stray isolated slashes between symbols
+    .replace(/(^|\n)\s*\/+\s*(?=[^\n\r])/g, "$1") // remove leading slashes at the start of lines
+    .replace(/(\s)\/+\s*(?=[A-Za-z0-9\u00C0-\u1EF9#\*\-\+I])/g, "$1") // remove isolated slashes before words
+    .replace(/\|\s*\/+\s*/g, "| ") // remove stray slash at start of table cells
+    .replace(/\|\s*#{1,6}\s*/g, "| ") // remove stray markdown headings inside table cells
+    .replace(/(^|\n)(\s*[-*+]\s*)\/+\s*/g, "$1$2") // remove stray slashes after bullet points
+    .replace(/(^|\n)(\s*[-*+]\s*)#{1,6}\s*/g, "$1$2") // remove stray hashes after bullet points
+    .replace(/\s*\/+\s*$/gm, ""); // remove stray trailing slashes on lines
 
   // Normalize escaped HTML tags
   fixed = fixed

@@ -154,13 +154,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
     const pushText = (str: string) => {
       if (!str) return;
       // Clean HTML entities if present and strip any unhandled HTML tags so they NEVER leak as text
-      const cleanStr = str
+      let cleanStr = str
         .replace(/<[^>]+>/g, '')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+        .replace(/&#39;/g, "'")
+        .replace(/(^|\s)\/+(?=\s|$)/g, ' ') // remove isolated slashes
+        .replace(/#{2,}/g, ''); // remove any stray ##
 
       if (!cleanStr) return;
 
@@ -286,7 +288,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
         return new TableRow({
           children: normalizedCells.map((cellContent, cellIndex) => {
             let cellText = cellContent.trim();
-            cellText = cellText.replace(/^\\\*\s*/, "").replace(/^\\\s+/, "");
+            cellText = cellText
+              .replace(/^\\\*\s*/, "")
+              .replace(/^\\\s+/, "")
+              .replace(/^#{1,6}\s*/, "")
+              .replace(/^\/+\s*/, "");
 
             const cellW = getColumnWidth(cellIndex, hdrCount);
             const { runs } = parseTextWithFormatting(cellText);
@@ -434,9 +440,34 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
           continue;
         }
 
+        // Determine heading level and strip leading # and /
+        let isHeading1 = false;
+        let isHeading2 = false;
+        let isHeading3 = false;
+        let lineContent = trimmed;
+
+        if (/^#\s+/.test(trimmed) || /^##\s+/.test(trimmed)) {
+          isHeading1 = true;
+          lineContent = trimmed.replace(/^#{1,2}\s+/, '');
+        } else if (/^###\s+/.test(trimmed)) {
+          isHeading2 = true;
+          lineContent = trimmed.replace(/^###\s+/, '');
+        } else if (/^####\s+/.test(trimmed)) {
+          isHeading3 = true;
+          lineContent = trimmed.replace(/^####\s+/, '');
+        }
+
+        // Clean any stray leading slashes or stray hashes
+        lineContent = lineContent.replace(/^\/+\s*/, '').replace(/^#{1,6}\s*/, '');
+
+        const isAnyHeading = isHeading1 || isHeading2 || isHeading3;
+        const headingFormatState = isAnyHeading
+          ? { ...currentFormatState, isBold: true }
+          : currentFormatState;
+
         // Parse formatted runs with state inheritance
-        const { runs, endState } = parseTextWithFormatting(trimmed, currentFormatState);
-        currentFormatState = endState;
+        const { runs, endState } = parseTextWithFormatting(lineContent, headingFormatState);
+        currentFormatState = isAnyHeading ? currentFormatState : endState;
 
         // If line contains no displayable runs (e.g. only stripped tags)
         if (runs.length === 0) {
@@ -444,7 +475,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
         }
 
         // Headings
-        if (trimmed.startsWith('## ')) {
+        if (isHeading1) {
           children.push(new Paragraph({
             children: runs,
             heading: HeadingLevel.HEADING_1,
@@ -453,7 +484,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
             alignment: AlignmentType.JUSTIFIED
           }));
         } 
-        else if (trimmed.startsWith('### ')) {
+        else if (isHeading2) {
           children.push(new Paragraph({
             children: runs,
             heading: HeadingLevel.HEADING_2,
@@ -462,7 +493,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
             alignment: AlignmentType.JUSTIFIED
           }));
         }
-        else if (trimmed.startsWith('#### ')) {
+        else if (isHeading3) {
           children.push(new Paragraph({
             children: runs,
             heading: HeadingLevel.HEADING_3,
@@ -550,7 +581,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, mathMap 
   };
 
   const formatResultForPreview = (text: string): string => {
-    let formatted = text.replace(/\[MATH_ID_\d+_\d+\]/g, '[Công thức Toán học]');
+    let formatted = text
+      .replace(/\[MATH_ID_\d+_\d+\]/g, '[Công thức Toán học]')
+      .replace(/(^|\n)\s*\/+\s*(?=[^\n\r])/g, "$1")
+      .replace(/\|\s*\/+\s*/g, "| ")
+      .replace(/\|\s*#{1,6}\s*/g, "| ");
     
     // Ensure "c. Năng lực số" subsection is rendered in red if not already wrapped
     if (!formatted.includes('<nls>') && (formatted.includes('Năng lực số') || formatted.includes('năng lực số'))) {

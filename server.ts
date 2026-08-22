@@ -239,13 +239,18 @@ async function startServer() {
         ${options.detailedReport ? "- Kèm theo bảng giải thích chi tiết mã năng lực đã chọn ở cuối bài." : ""}
         
         YÊU CẦU VỀ ĐỊNH DẠNG & NGUYÊN TẮC BẢO TOÀN (BẮT BUỘC):
-        1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GIÁO ÁN GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC:
-           - ⛔ CẤM TUYỆT ĐỐI VIẾT CÁC DÒNG RÚT GỌN NHƯ: "(Các tiết học tiếp theo 45-53 giữ nguyên cấu trúc...)", "(Tương tự như trên...)", "(Các tiết còn lại giữ nguyên...)".
-           - KHI GIÁO ÁN GỒM NHIỀU TIẾT (Ví dụ: Bài 4 gồm 12 tiết, Tiết 42-53): BẮT BUỘC phải xuất đầy đủ 100% chi tiết TẤT CẢ các tiết học (Tiết 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53...), từng hoạt động, từng bước, từng câu hỏi và đáp án từ đầu đến cuối mà KHÔNG ĐƯỢC BỎ BẤT KỲ MỘT TIẾT NÀO!
-           - Bạn PHẢI GIỮ NGUYÊN 100% TẤT CẢ NỘI DUNG, TỪ NGỮ, CÂU HỎI, ĐÁP ÁN, SẢN PHẨM HỌC TẬP, CÁC BƯỚC THỰC HIỆN CỦA GIÁO VIÊN TRONG BẢN GỐC.
-           - CẤM TUYỆT ĐỐI việc viết tắt hay thay thế nội dung gốc bằng dấu ba chấm ('...'), ('[Nội dung như SGK]'), ('[Giữ nguyên...]').
-           - TRONG CÁC BẢNG BIỂU (ví dụ bảng: Tổ chức thực hiện | Sản phẩm): BẠN PHẢI GIỮ LẠI TOÀN BỘ CHỮ trong cột "Tổ chức thực hiện" và cột "Sản phẩm", chỉ chèn thêm các nhiệm vụ/câu hỏi NLS/AI tích hợp màu đỏ vào vị trí thích hợp.
-           - NGUYÊN TẮC VÀNG: CHỈ THÊM PHẦN TÍCH HỢP VÀO - TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU.
+        1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GIÁO ÁN GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC (CHỐNG LÀM BIẾNG 100%):
+           - ⛔ CẤM TUYỆT ĐỐI MỌI HÌNH THỨC CẮT XÉN, VIẾT TẮT, LƯỢC BỚT HOẶC TÓM TẮT NHƯ:
+             + "... (Giữ nguyên nội dung gốc) ..."
+             + "... (Các tiết học tiếp theo giữ nguyên cấu trúc...)"
+             + "... (Tương tự như trên...)"
+             + "... (Các câu hỏi trắc nghiệm giữ nguyên...)"
+             + "... (Nội dung bài tập như SGK)..."
+             + "[Nội dung tiếp theo như SGK]"
+           - KHI GIÁO ÁN GỒM NHIỀU TIẾT / NHIỀU HOẠT ĐỘNG: BẮT BUỘC phải xuất đầy đủ 100% chi tiết TẤT CẢ các tiết học, từng hoạt động, từng bước, từng câu hỏi trắc nghiệm, bài tập tình huống, đáp án và bảng biểu từ đầu đến cuối mà KHÔNG ĐƯỢC BỎ BẤT KỲ MỘT TIẾT HOẶC CÂU NÀO!
+           - BẠN PHẢI SAO CHÉP LẠI ĐẦY ĐỦ NGUYÊN VĂN 100% TOÀN BỘ NỘI DUNG, TỪ NGỮ, CÂU HỎI, ĐÁP ÁN, SẢN PHẨM HỌC TẬP TỪ BẢN GỐC.
+           - TRONG CÁC BẢNG BIỂU (Tổ chức thực hiện | Sản phẩm): BẮT BUỘC GIỮ LẠI TOÀN BỘ CHỮ trong cột "Tổ chức thực hiện" và cột "Sản phẩm", chỉ chèn thêm các câu lệnh/nhiệm vụ NLS/AI tích hợp màu đỏ vào.
+           - NGUYÊN TẮC BẤT BIẾN: "CHỈ BỔ SUNG NỘI DUNG TÍCH HỢP MÀU ĐỎ - TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA, CẮT XÉN, THAY ĐỔI HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU CHỮ".
         2. ĐỊNH DẠNG ĐẦU VÀO: Nội dung giáo án gốc bên dưới có thể là HTML (được chuyển từ DOCX). Các công thức toán học đã được thay thế bằng các mã giữ chỗ có dạng [MATH_ID_...].
         3. NHIỆM VỤ: Bạn phải chuyển đổi nội dung này sang MARKDOWN, đồng thời TÍCH HỢP nội dung theo đúng chế độ được chọn.
         4. BẢO TOÀN CẤU TRÚC BẢNG: 
@@ -341,12 +346,17 @@ ${structureGoalRequirement}
         text = text.replace(/[\uF000-\uF8FF]/g, "");
         text = text.replace(/[□■▢▣▤▥▦▧▨▩▪▫▬▭▮▯▲▼◆◇◈◉◊○●✦✧❖\uFFFD\u25A0\u25A1\u25AA\u25AB\u25FE\u25FD]/g, "- ");
 
-        // Clean stray slashes and escaped markdown artifacts
+        // Clean stray slashes, hashes, and escaped markdown artifacts
         text = text
           .replace(/\\([*#_>\-\+\[\]])/g, "$1") // unescape markdown backslashes
           .replace(/\\\//g, "/") // unescape \/
-          .replace(/(^|\n)\s*\/+\s*(?=[A-Za-z0-9#\*\-\+I])/g, "$1") // remove leading slash before text/headings
-          .replace(/([^\w\d\s\/])\s*\/+\s*([^\w\d\s\/])/g, "$1 $2"); // remove stray isolated slashes between symbols
+          .replace(/(^|\n)\s*\/+\s*(?=[^\n\r])/g, "$1") // remove leading slashes at the start of lines
+          .replace(/(\s)\/+\s*(?=[A-Za-z0-9\u00C0-\u1EF9#\*\-\+I])/g, "$1") // remove isolated slashes before words
+          .replace(/\|\s*\/+\s*/g, "| ") // remove stray slash at start of table cells
+          .replace(/\|\s*#{1,6}\s*/g, "| ") // remove stray markdown headings inside table cells
+          .replace(/(^|\n)(\s*[-*+]\s*)\/+\s*/g, "$1$2") // remove stray slashes after bullet points
+          .replace(/(^|\n)(\s*[-*+]\s*)#{1,6}\s*/g, "$1$2") // remove stray hashes after bullet points
+          .replace(/\s*\/+\s*$/gm, ""); // remove stray trailing slashes on lines
 
         // Normalize escaped HTML tags
         text = text

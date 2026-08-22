@@ -114,6 +114,14 @@ const App: React.FC = () => {
     }
   };
 
+  // Handle lesson content update with auto-sync from PPCT if available
+  const handleSetLessonContent = (content: string) => {
+    setLessonContent(content);
+    if (distributionContent && distributionContent.trim().length > 0) {
+      handleSyncFromPPCT(distributionContent, content, grade);
+    }
+  };
+
   // Sync PPCT to session storage whenever distributionContent or distFileName changes
   const handleSetDistributionContent = (content: string) => {
     setDistributionContent(content);
@@ -599,7 +607,7 @@ const App: React.FC = () => {
             {/* Content Input (Upload Lesson Plan & Syllabus) */}
             <ContentInput 
                 lessonContent={lessonContent} 
-                setLessonContent={setLessonContent}
+                setLessonContent={handleSetLessonContent}
                 distributionContent={distributionContent}
                 setDistributionContent={handleSetDistributionContent}
                 setMathMap={setMathMap}

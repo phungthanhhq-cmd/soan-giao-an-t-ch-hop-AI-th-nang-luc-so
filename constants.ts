@@ -612,15 +612,16 @@ QUY TẮC PHÂN LUỒNG TÍCH HỢP TỐI THƯỢNG (STRICT ENFORCEMENT):
        <ai>- Yêu cầu liêm chính: HS phải ghi rõ nguồn gốc và cam kết liêm chính học thuật...</ai>
      + ĐÓNG THẺ NGAY TRÊN TỪNG ĐOẠN ĐƯỢC THÊM MỚI, TUYỆT ĐỐI KHÔNG MỞ THẺ KÉO DÀI XUYÊN SUỐT TOÀN BỘ HOẠT ĐỘNG!
 
-4. 🚨 QUY TẮC BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC (CHỐNG LƯỜI BIẾNG 100%):
-   - ⛔ CẤM TUYỆT ĐỐI VIẾT CÁC CÂU LƯỢC BỚT/TÓM TẮT NHƯ:
+4. 🚨 QUY TẮC BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC (CHỐNG LÀM BIẾNG 100%):
+   - ⛔ CẤM TUYỆT ĐỐI MỌI HÌNH THỨC CẮT XÉN, VIẾT TẮT, LƯỢC BỚT HOẶC TÓM TẮT NHƯ:
      + "... (Giữ nguyên nội dung gốc) ..."
-     + "... (Các tiết học tiếp theo 45-53 giữ nguyên cấu trúc...)"
+     + "... (Các tiết học tiếp theo giữ nguyên cấu trúc...)"
      + "... (Tương tự như trên...)"
      + "... (Các câu hỏi trắc nghiệm giữ nguyên...)"
+     + "... (Nội dung bài tập như SGK)..."
      + "[Nội dung tiếp theo như SGK]"
    - KHI GIÁO ÁN GỐC GỒM NHIỀU HOẠT ĐỘNG/TIẾT HỌC: BẮT BUỘC phải chép lại đầy đủ 100% chi tiết TẤT CẢ các câu hỏi trắc nghiệm, bài tập, tình huống, bảng biểu, sản phẩm học tập từ giáo án gốc của người dùng.
-   - NGUYÊN TẮC: "CHỈ BỔ SUNG THÊM CÂU LỆNH/NHIỆM VỤ TÍCH HỢP MÀU ĐỎ - TUYỆT ĐỐI KHÔNG XÓA, KHÔNG TÓM TẮT HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU".
+   - NGUYÊN TẮC BẤT BIẾN: "CHỈ BỔ SUNG THÊM CÂU LỆNH/NHIỆM VỤ TÍCH HỢP MÀU ĐỎ - TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA, CẮT XÉN, THAY ĐỔI HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU CHỮ".
 
 QUY TẮC BẢO TOÀN CẤU TRÚC VÀ ĐỊNH DẠNG (BẮT BUỘC):
 - Dữ liệu đầu vào có thể là mã HTML (chuyển từ file DOCX). Bạn phải đọc hiểu cấu trúc HTML (Bảng <table>, Tiêu đề <h1>, Danh sách <ul>) và chuyển đổi sang định dạng MARKDOWN tương ứng.

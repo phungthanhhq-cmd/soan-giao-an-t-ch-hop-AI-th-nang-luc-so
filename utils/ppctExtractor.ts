@@ -70,32 +70,42 @@ export const findAICodeInfo = (codeStr: string) => {
 };
 
 /**
- * Extracts lesson title keywords from the lesson content (e.g., "Bài 4: Sắp xếp dữ liệu", "Tiết 45")
+ * Extracts lesson title keywords from the lesson content (e.g., "Bài 4: Sắp xếp dữ liệu", "Tiết 45", "Bài 1", "Chủ đề 2")
  */
-function extractLessonKeywords(lessonContent?: string): string[] {
-  if (!lessonContent) return [];
-  const keywords: string[] = [];
+function extractLessonKeywords(lessonContent?: string): { titles: string[], numbers: string[], periods: string[] } {
+  if (!lessonContent) return { titles: [], numbers: [], periods: [] };
+  const titles: string[] = [];
+  const numbers: string[] = [];
+  const periods: string[] = [];
 
-  // Match "Bài X", "Bài số X", "Chủ đề X", "Tiết X"
-  const patterns = [
-    /bài\s+(\d+[a-zA-Z]?|\w+)(?:\s*[:\.\-]\s*([^\n\r<]{3,40}))?/gi,
-    /chủ\s+đề\s+(\d+[a-zA-Z]?|\w+)(?:\s*[:\.\-]\s*([^\n\r<]{3,40}))?/gi,
-    /tiết\s+(\d+(?:\s*[-–,]\s*\d+)?)/gi
+  // Match "Bài X: Tên bài" or "BÀI X. TÊN BÀI"
+  const lessonPatterns = [
+    /(?:bài|chủ đề)\s+(\d+[a-zA-Z]?|\w+)(?:\s*[:\.\-–]\s*([^\n\r<]{3,60}))?/gi,
+    /tên\s+bài(?:\s+dạy)?\s*[:\.\-–]\s*([^\n\r<]{3,60})/gi
   ];
 
-  for (const pattern of patterns) {
+  for (const pattern of lessonPatterns) {
     let match;
     while ((match = pattern.exec(lessonContent)) !== null) {
-      if (match[0]) {
-        keywords.push(match[0].trim().toLowerCase());
+      if (match[1] && !isNaN(Number(match[1]))) {
+        numbers.push(match[1].trim());
       }
-      if (match[2]) {
-        keywords.push(match[2].trim().toLowerCase());
+      if (match[2] && match[2].trim().length > 3) {
+        titles.push(match[2].trim().toLowerCase());
       }
     }
   }
 
-  return keywords;
+  // Match "Tiết X", "Tiết: X", "Tiết X - Y", "Tiết X, Y"
+  const periodPattern = /(?:tiết|tiết\s*học|tiết\s*ppct)\s*[:\.\-]?\s*(\d+(?:\s*[-–,]\s*\d+)?)/gi;
+  let pMatch;
+  while ((pMatch = periodPattern.exec(lessonContent)) !== null) {
+    if (pMatch[1]) {
+      periods.push(pMatch[1].trim());
+    }
+  }
+
+  return { titles, numbers, periods };
 }
 
 /**
@@ -114,31 +124,47 @@ export function extractCodesFromPPCT(
   const aiMap = new Map<string, ManualNLSEntry>();
 
   // If lesson content is provided, try to find the section/table row corresponding to this lesson in PPCT
-  const keywords = extractLessonKeywords(lessonContent);
-  let relevantText = ppctContent;
+  const { titles, numbers, periods } = extractLessonKeywords(lessonContent);
+  let targetedRowsText = "";
 
-  if (keywords.length > 0) {
-    // Try to find lines or rows in PPCT matching the lesson title/number
-    const lines = ppctContent.split(/[\r\n]+|<tr[^>]*>|<\/tr>/i);
-    const matchedLines: string[] = [];
+  if (titles.length > 0 || numbers.length > 0 || periods.length > 0) {
+    // Split PPCT into table rows or lines
+    const rows = ppctContent.split(/<\/tr>|<tr[^>]*>|[\r\n]{2,}/i);
+    const matchedRows: string[] = [];
 
-    for (const line of lines) {
-      const lowerLine = line.toLowerCase();
-      const isMatch = keywords.some(kw => kw.length > 2 && lowerLine.includes(kw));
-      if (isMatch) {
-        matchedLines.push(line);
+    for (const row of rows) {
+      const lowerRow = row.toLowerCase();
+      
+      // Match by title
+      const titleMatch = titles.some(t => t.length > 3 && lowerRow.includes(t));
+      
+      // Match by lesson number (e.g. "bài 4" or "bài: 4")
+      const numMatch = numbers.some(n => {
+        const numRegex = new RegExp(`\\bbài\\s*(?:số)?\\s*[:\\.\\-]?\\s*${n}\\b`, 'i');
+        return numRegex.test(row);
+      });
+
+      // Match by period (e.g. "tiết 45")
+      const periodMatch = periods.some(p => {
+        return lowerRow.includes(`tiết ${p}`) || lowerRow.includes(`tiết: ${p}`) || lowerRow.includes(`tiết ${p.split(/[-–,]/)[0].trim()}`);
+      });
+
+      if (titleMatch || numMatch || periodMatch) {
+        matchedRows.push(row);
       }
     }
 
-    if (matchedLines.length > 0) {
-      // Prioritize matched rows, but also include all if matched lines have few codes
-      relevantText = matchedLines.join("\n") + "\n\n" + ppctContent;
+    if (matchedRows.length > 0) {
+      targetedRowsText = matchedRows.join("\n");
     }
   }
 
-  // Regex patterns to capture NLS codes:
-  // 1. e.g., 1.1.TC2a, 1.3.CB1a, 2.1.NC1b, 6.2.TC2a, 5.3.CB2
-  // 2. e.g., 6.1.B1, 6.2.B3, 6.3.B5
+  // Use targeted rows if found, otherwise fallback to entire PPCT
+  const textToScan = targetedRowsText.trim().length > 0 ? targetedRowsText : ppctContent;
+
+  // Regex patterns to capture NLS and AI codes:
+  // 1. e.g., 1.1.TC2a, 1.1.TC1a, 1.3.CB1a, 2.1.NC1b, 6.2.TC2a, 5.3.CB2
+  // 2. e.g., 6.1.B1, 6.2.B3, 6.3.B5, 1.1.B3
   // 3. e.g., NLa.TC1, NLb.TC2, NLc.CB1, NLd.NC2
   // 4. e.g., A1.L6.1, B2.L7.1, C5.L8.1, D2.L9.1
   const nlsRegex = /\b([1-6]\.[1-6]\.(?:CB|TC|NC)[1-2][a-c]?|[1-5]\.[1-6]\.B[1-8])\b/gi;
@@ -146,7 +172,7 @@ export function extractCodesFromPPCT(
 
   // 1. Scan AI codes
   let aiMatch;
-  while ((aiMatch = aiSpecificRegex.exec(relevantText)) !== null) {
+  while ((aiMatch = aiSpecificRegex.exec(textToScan)) !== null) {
     const rawCode = aiMatch[1];
     const upperCode = rawCode.toUpperCase();
     
@@ -168,7 +194,7 @@ export function extractCodesFromPPCT(
 
   // 2. Scan NLS codes
   let nlsMatch;
-  while ((nlsMatch = nlsRegex.exec(relevantText)) !== null) {
+  while ((nlsMatch = nlsRegex.exec(textToScan)) !== null) {
     const rawCode = nlsMatch[1];
     const upperCode = rawCode.toUpperCase();
     
