@@ -403,14 +403,18 @@ ${structureGoalRequirement}
         .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
       // 1. AUTO-FIX BASTARDIZED / HALLUCINATED CODES TO MATCH OFFICIAL CODES
-      // Strip any hallucinated level/tier descriptions like (Bậc 3), (Bậc 3 - Trung cấp), (Bậc 4 - Nâng cao), (Mức Trung cấp)
-      text = text.replace(/\s*\(\s*(?:Bậc|Mức|Cấp độ)[^\)]*\)/gi, "");
-      text = text.replace(/\s*\[\s*(?:Bậc|Mức|Cấp độ)[^\]]*\]/gi, "");
+      // Strip any hallucinated level/tier descriptions like (Bậc 3), (Bậc 3 - Trung cấp), (Bậc 4 - Nâng cao), (Mức Trung cấp), (Level 3), [Bậc 3 - Trung cấp], etc.
+      text = text.replace(/\s*\(\s*(?:Bậc|Mức|Cấp độ|Level|Cơ bản|Trung cấp|Nâng cao|Chuyên sâu)[^\)]*\)/gi, "");
+      text = text.replace(/\s*\[\s*(?:Bậc|Mức|Cấp độ|Level|Cơ bản|Trung cấp|Nâng cao|Chuyên sâu)[^\]]*\]/gi, "");
 
       // Normalize prefix "NLS " or "AI " when placed directly before codes
       text = text.replace(/\bNLS\s+(\d+\.\d+\.TC\w+)/gi, "$1");
+      text = text.replace(/\bNLS\s+(\d+\.\d+\.CB\w+)/gi, "$1");
+      text = text.replace(/\bNLS\s+(\d+\.\d+\.NC\w+)/gi, "$1");
       text = text.replace(/\bAI\s+(NL[a-d]\.TC\w+)/gi, "$1");
-      text = text.replace(/\bAI\s+(\d+\.A\d+\.\d+)/gi, "$1");
+      text = text.replace(/\bAI\s+(NL[a-d]\.CB\w+)/gi, "$1");
+      text = text.replace(/\bAI\s+(NL[a-d]\.NC\w+)/gi, "$1");
+      text = text.replace(/\bAI\s+(\d+\.[A-D]\d+\.\d+)/gi, "$1");
 
       const chosenNLS = (info?.manualNLS && info.manualNLS.length > 0)
         ? info.manualNLS
@@ -420,26 +424,52 @@ ${structureGoalRequirement}
         ? info.manualAI
         : (info?.syncedIntegrations?.filter(i => i.category === 'AI') || []);
 
+      // Replace any simplified domain codes (like "NLS 1.1", "- NLS 1.1:", "- 1.1:") with actual selected codes
       if (chosenNLS.length > 0) {
+        chosenNLS.forEach(item => {
+          const prefixMatch = item.code.match(/^(\d+\.\d+)/);
+          if (prefixMatch) {
+            const prefix = prefixMatch[1].replace(".", "\\.");
+            const reg1 = new RegExp(`\\bNLS\\s*${prefix}\\b`, 'gi');
+            text = text.replace(reg1, item.code);
+            const reg2 = new RegExp(`\\[\\s*NLS\\s*${prefix}[^\\]]*\\]`, 'gi');
+            text = text.replace(reg2, `[${item.code}]`);
+          }
+        });
+
         const primaryNLS = chosenNLS[0];
-        text = text.replace(/NLS\s*1\.[1-3]/gi, primaryNLS.code);
+        text = text.replace(/\bNLS\s*1\.[1-3]\b/gi, primaryNLS.code);
         text = text.replace(/\[\s*NLS\s*1\.[1-3][^\]]*\]/gi, `[${primaryNLS.code}]`);
       } else {
-        text = text.replace(/NLS\s*1\.1/gi, "1.1.TC1a");
-        text = text.replace(/NLS\s*1\.2/gi, "1.2.TC1a");
-        text = text.replace(/NLS\s*1\.3/gi, "1.3.TC1a");
+        text = text.replace(/\bNLS\s*1\.1\b/gi, "1.1.TC1a");
+        text = text.replace(/\bNLS\s*1\.2\b/gi, "1.2.TC1a");
+        text = text.replace(/\bNLS\s*1\.3\b/gi, "1.3.TC1a");
       }
 
+      // Replace any AI domain codes (like "NLa", "NLb", "AI.1", "AI 1") with actual selected codes
       if (chosenAI.length > 0) {
+        chosenAI.forEach(item => {
+          const codeBase = item.code.split('.')[0];
+          if (codeBase.startsWith("NL")) {
+            const reg = new RegExp(`\\bAI\\s*(${codeBase})\\b`, 'gi');
+            text = text.replace(reg, item.code);
+          }
+        });
+
         const primaryAI = chosenAI[0];
-        text = text.replace(/AI\.[1-4]/gi, primaryAI.code);
+        text = text.replace(/\bAI\.[1-4]\b/gi, primaryAI.code);
         text = text.replace(/\[\s*AI\.[1-4][^\]]*\]/gi, `[${primaryAI.code}]`);
+        text = text.replace(/\bAI\s+([A-D]|NL[a-d])\b/gi, primaryAI.code);
       } else {
-        text = text.replace(/AI\.4/gi, "NLb.TC1");
-        text = text.replace(/AI\.2/gi, "NLc.TC1");
-        text = text.replace(/AI\.1/gi, "NLa.TC1");
-        text = text.replace(/AI\.3/gi, "NLd.TC1");
+        text = text.replace(/\bAI\.4\b/gi, "NLb.TC1");
+        text = text.replace(/\bAI\.2\b/gi, "NLc.TC1");
+        text = text.replace(/\bAI\.1\b/gi, "NLa.TC1");
+        text = text.replace(/\bAI\.3\b/gi, "NLd.TC1");
       }
+
+      // Final cleanup of standalone "NLS" or "AI" prefixes before bullet dashes
+      text = text.replace(/-\s*NLS\s+(\d+\.\d+)/gi, "- $1");
+      text = text.replace(/-\s*AI\s+(NL[a-d]|\d+\.[A-D])/gi, "- $1");
 
       // 2. PREVENT RED COLOR LEAK:
       text = text.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</nls>\n$1");

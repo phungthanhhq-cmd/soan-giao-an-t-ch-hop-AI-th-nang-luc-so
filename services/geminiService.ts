@@ -355,14 +355,18 @@ const postProcessResult = (text: string, lessonInfo?: LessonInfo): string => {
     .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
   // 1. AUTO-FIX BASTARDIZED / HALLUCINATED CODES TO MATCH OFFICIAL CODES
-  // Strip any hallucinated level/tier descriptions like (Bậc 3), (Bậc 3 - Trung cấp), (Bậc 4 - Nâng cao), (Mức Trung cấp)
-  fixed = fixed.replace(/\s*\(\s*(?:Bậc|Mức|Cấp độ)[^\)]*\)/gi, "");
-  fixed = fixed.replace(/\s*\[\s*(?:Bậc|Mức|Cấp độ)[^\]]*\]/gi, "");
+  // Strip any hallucinated level/tier descriptions like (Bậc 3), (Bậc 3 - Trung cấp), (Bậc 4 - Nâng cao), (Mức Trung cấp), (Level 3), [Bậc 3 - Trung cấp], etc.
+  fixed = fixed.replace(/\s*\(\s*(?:Bậc|Mức|Cấp độ|Level|Cơ bản|Trung cấp|Nâng cao|Chuyên sâu)[^\)]*\)/gi, "");
+  fixed = fixed.replace(/\s*\[\s*(?:Bậc|Mức|Cấp độ|Level|Cơ bản|Trung cấp|Nâng cao|Chuyên sâu)[^\]]*\]/gi, "");
 
   // Normalize prefix "NLS " or "AI " when placed directly before codes
   fixed = fixed.replace(/\bNLS\s+(\d+\.\d+\.TC\w+)/gi, "$1");
+  fixed = fixed.replace(/\bNLS\s+(\d+\.\d+\.CB\w+)/gi, "$1");
+  fixed = fixed.replace(/\bNLS\s+(\d+\.\d+\.NC\w+)/gi, "$1");
   fixed = fixed.replace(/\bAI\s+(NL[a-d]\.TC\w+)/gi, "$1");
-  fixed = fixed.replace(/\bAI\s+(\d+\.A\d+\.\d+)/gi, "$1");
+  fixed = fixed.replace(/\bAI\s+(NL[a-d]\.CB\w+)/gi, "$1");
+  fixed = fixed.replace(/\bAI\s+(NL[a-d]\.NC\w+)/gi, "$1");
+  fixed = fixed.replace(/\bAI\s+(\d+\.[A-D]\d+\.\d+)/gi, "$1");
 
   const chosenNLS = (lessonInfo?.manualNLS && lessonInfo.manualNLS.length > 0)
     ? lessonInfo.manualNLS
@@ -372,26 +376,52 @@ const postProcessResult = (text: string, lessonInfo?: LessonInfo): string => {
     ? lessonInfo.manualAI
     : (lessonInfo?.syncedIntegrations?.filter(i => i.category === 'AI') || []);
 
+  // Replace any simplified domain codes (like "NLS 1.1", "- NLS 1.1:", "- 1.1:") with actual selected codes
   if (chosenNLS.length > 0) {
+    chosenNLS.forEach(item => {
+      const prefixMatch = item.code.match(/^(\d+\.\d+)/);
+      if (prefixMatch) {
+        const prefix = prefixMatch[1].replace(".", "\\.");
+        const reg1 = new RegExp(`\\bNLS\\s*${prefix}\\b`, 'gi');
+        fixed = fixed.replace(reg1, item.code);
+        const reg2 = new RegExp(`\\[\\s*NLS\\s*${prefix}[^\\]]*\\]`, 'gi');
+        fixed = fixed.replace(reg2, `[${item.code}]`);
+      }
+    });
+
     const primaryNLS = chosenNLS[0];
-    fixed = fixed.replace(/NLS\s*1\.[1-3]/gi, primaryNLS.code);
+    fixed = fixed.replace(/\bNLS\s*1\.[1-3]\b/gi, primaryNLS.code);
     fixed = fixed.replace(/\[\s*NLS\s*1\.[1-3][^\]]*\]/gi, `[${primaryNLS.code}]`);
   } else {
-    fixed = fixed.replace(/NLS\s*1\.1/gi, "1.1.TC1a");
-    fixed = fixed.replace(/NLS\s*1\.2/gi, "1.2.TC1a");
-    fixed = fixed.replace(/NLS\s*1\.3/gi, "1.3.TC1a");
+    fixed = fixed.replace(/\bNLS\s*1\.1\b/gi, "1.1.TC1a");
+    fixed = fixed.replace(/\bNLS\s*1\.2\b/gi, "1.2.TC1a");
+    fixed = fixed.replace(/\bNLS\s*1\.3\b/gi, "1.3.TC1a");
   }
 
+  // Replace any AI domain codes (like "NLa", "NLb", "AI.1", "AI 1") with actual selected codes
   if (chosenAI.length > 0) {
+    chosenAI.forEach(item => {
+      const codeBase = item.code.split('.')[0];
+      if (codeBase.startsWith("NL")) {
+        const reg = new RegExp(`\\bAI\\s*(${codeBase})\\b`, 'gi');
+        fixed = fixed.replace(reg, item.code);
+      }
+    });
+
     const primaryAI = chosenAI[0];
-    fixed = fixed.replace(/AI\.[1-4]/gi, primaryAI.code);
+    fixed = fixed.replace(/\bAI\.[1-4]\b/gi, primaryAI.code);
     fixed = fixed.replace(/\[\s*AI\.[1-4][^\]]*\]/gi, `[${primaryAI.code}]`);
+    fixed = fixed.replace(/\bAI\s+([A-D]|NL[a-d])\b/gi, primaryAI.code);
   } else {
-    fixed = fixed.replace(/AI\.4/gi, "NLb.TC1");
-    fixed = fixed.replace(/AI\.2/gi, "NLc.TC1");
-    fixed = fixed.replace(/AI\.1/gi, "NLa.TC1");
-    fixed = fixed.replace(/AI\.3/gi, "NLd.TC1");
+    fixed = fixed.replace(/\bAI\.4\b/gi, "NLb.TC1");
+    fixed = fixed.replace(/\bAI\.2\b/gi, "NLc.TC1");
+    fixed = fixed.replace(/\bAI\.1\b/gi, "NLa.TC1");
+    fixed = fixed.replace(/\bAI\.3\b/gi, "NLd.TC1");
   }
+
+  // Final cleanup of standalone "NLS" or "AI" prefixes before bullet dashes
+  fixed = fixed.replace(/-\s*NLS\s+(\d+\.\d+)/gi, "- $1");
+  fixed = fixed.replace(/-\s*AI\s+(NL[a-d]|\d+\.[A-D])/gi, "- $1");
 
   // 2. PREVENT RED COLOR LEAK:
   fixed = fixed.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</nls>\n$1");
@@ -519,7 +549,7 @@ export const generateNLSLessonPlan = async (
       throw new Error("Server AI trả về kết quả rỗng.");
     }
 
-    return data.text;
+    return postProcessResult(data.text, info);
   } catch (err: any) {
     console.error("Lỗi khi kết nối API:", err);
     
