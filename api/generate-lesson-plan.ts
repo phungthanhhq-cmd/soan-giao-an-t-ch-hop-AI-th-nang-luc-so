@@ -97,19 +97,28 @@ export default async function handler(req: any, res: any) {
       - Nếu hàng bài này trong PPCT không có mã NLS -> Tuyệt đối không tích hợp NLS, không tự bịa mã.
       `;
 
+      const syncedNLS = info.syncedIntegrations?.filter(i => i.category === 'NLS') || [];
+      const syncedAI = info.syncedIntegrations?.filter(i => i.category === 'AI') || [];
+      const syncedNLSFormatted = syncedNLS.length > 0
+        ? syncedNLS.map(i => `                  - ${i.code} (${i.name}): ${i.description}`).join("\n")
+        : `                  - [Mã NLS nguyên văn từ PPCT, ví dụ 1.1.TC1a, 1.3.TC2a]: [YCCĐ theo PPCT]`;
+      const syncedAIFormatted = syncedAI.length > 0
+        ? syncedAI.map(i => `                  - ${i.code} (${i.name}): ${i.description}`).join("\n")
+        : `                  - [Mã AI nguyên văn từ PPCT, ví dụ NLb.TC1, 6.A1.2]: [YCCĐ theo PPCT]`;
+
       structureGoalRequirement = `
            1. Về kiến thức
            2. Về năng lực:
               a. Năng lực chung
               b. Năng lực đặc thù môn học
-              (DỰA VÀO KẾT QUẢ ĐỐI CHIẾU TỪ PPCT / PHỤ LỤC 3 CỦA ĐÚNG BÀI HỌC/TIẾT NÀY):
+              (DỰA VÀO KẾT QUẢ ĐỐI CHIẾU TỪ PPCT / PHỤ LỤC CỦA ĐÚNG BÀI HỌC/TIẾT NÀY):
               * NẾU BÀI CÓ NĂNG LỰC SỐ (NLS) TRONG PPCT:
                 <nls>c. Năng lực số
-                - [Mã NLS nguyên văn từ PPCT, ví dụ 1.3.TC2a] (Tên miền): [Yêu cầu cần đạt NLS theo đúng dòng PPCT của bài này]
+${syncedNLSFormatted}
                 </nls>
               * NẾU BÀI CÓ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) TRONG PPCT:
                 <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-                - [Mã AI nguyên văn từ PPCT, ví dụ NLb.TC2] (Tên miền): [Yêu cầu cần đạt AI theo đúng dòng PPCT của bài này]
+${syncedAIFormatted}
                 </ai>
               * NẾU BÀI KHÔNG CÓ MÃ NLS HAY AI TRONG PPCT:
                 (Giữ nguyên mục tiêu gốc, tuyệt đối không thêm mục c/d về NLS/AI)
@@ -118,15 +127,15 @@ export default async function handler(req: any, res: any) {
       const manualItems: string[] = [];
       if (hasManualNLS && info.manualNLS) {
         const nlsList = info.manualNLS
-          .map(item => `- [${item.code}] (${item.name}): ${item.description}`)
+          .map(item => `- ${item.code} (${item.name}): ${item.description}`)
           .join("\n");
-        manualItems.push(`### CÁC MÃ NĂNG LỰC SỐ (NLS) ĐƯỢC CHỌN (BẮT BUỘC GHI ĐỦ MÃ ${info.manualNLS.map(i => i.code).join(", ")} VÀO GIÁO ÁN):\n${nlsList}`);
+        manualItems.push(`### CÁC MÃ NĂNG LỰC SỐ (NLS) ĐƯỢC CHỌN (BẮT BUỘC DÙNG ĐÚNG CHÍNH XÁC MÃ NGUYÊN BẢN 100%, KHÔNG BIẾN ĐỔI MÃ):\n${nlsList}`);
       }
       if (hasManualAI && info.manualAI) {
         const aiList = info.manualAI
-          .map(item => `- [${item.code}] (${item.name}): ${item.description}`)
+          .map(item => `- ${item.code} (${item.name}): ${item.description}`)
           .join("\n");
-        manualItems.push(`### CÁC MÃ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) ĐƯỢC CHỌN (BẮT BUỘC GHI ĐỦ MÃ ${info.manualAI.map(i => i.code).join(", ")} VÀO GIÁO ÁN):\n${aiList}`);
+        manualItems.push(`### CÁC MÃ NĂNG LỰC TRÍ TUỆ NHÂN TẠO (AI) ĐƯỢC CHỌN (BẮT BUỘC DÙNG ĐÚNG CHÍNH XÁC MÃ NGUYÊN BẢN 100%, KHÔNG BIẾN ĐỔI MÃ):\n${aiList}`);
       }
 
       integrationStrategyDirective = `
@@ -138,18 +147,27 @@ export default async function handler(req: any, res: any) {
       
       NHIỆM VỤ BẮT BUỘC:
       1. Tích hợp CHÍNH XÁC VÀ ĐẦY ĐỦ các mã năng lực người dùng đã chọn ở trên vào:
-         - Phần I.2 (Mục tiêu năng lực): GHI ĐẦY ĐỦ MÃ TIÊU CHÍ (Ví dụ: 1.1.TC2a, 2.1.TC2b, NLb.TC2, NLc.TC2...) cùng tên miền và mô tả yêu cầu cần đạt.
-         - Phần II (Tiến trình dạy học): Ở các bước có tích hợp, ghi rõ mã trong ngoặc vuông (Ví dụ: [2.1.TC2b], [NLb.TC2]...) gắn liền với hoạt động của GV và HS.
+         - Phần I.2 (Mục tiêu năng lực): BẮT BUỘC DÙNG ĐÚNG MÃ GỐC (Ví dụ: 1.1.TC1a, 1.1.TC2a, 1.3.TC2a, NLb.TC1, NLb.TC2, 6.A1.1, 6.A1.2...) cùng tên miền và mô tả yêu cầu cần đạt.
+         - Phần II (Tiến trình dạy học): Ở các bước có tích hợp, ghi rõ mã trong ngoặc vuông (Ví dụ: [1.1.TC1a], [NLb.TC1], [6.A1.2]...) gắn liền với hoạt động của GV và HS.
       2. ĐÁNH DẤU MÀU ĐỎ TOÀN BỘ PHẦN TÍCH HỢP:
          ${hasManualNLS ? "- Mục tiêu NLS và hoạt động NLS bổ sung PHẢI BAO BỌC BẰNG THẺ <nls>...</nls>." : ""}
          ${hasManualAI ? "- Mục tiêu AI và hoạt động AI bổ sung PHẢI BAO BỌC BẰNG THẺ <ai>...</ai>." : ""}
       
-      ⛔ NGUYÊN TẮC CẤM (STRICTLY PROHIBITED):
+      ⛔ NGUYÊN TẮC CẤM TUYỆT ĐỐI (STRICTLY PROHIBITED):
+      - ❌ CẤM BIẾN ĐỔI MÃ: Tuyệt đối không được viết tắt hoặc tự bịa dạng mã như "NLS 1.1 (Bậc 3)", "AI.4 (Bậc 3 - Trung cấp)", "NLS 1.2", "AI.1"...
+      -  BẮT BUỘC DÙNG ĐÚNG MÃ GỐC ĐẦY ĐỦ 100%: 1.1.TC1a, 1.1.TC2a, NLb.TC1, NLb.TC2, 6.A1.1, 6.A1.2...
       ${hasManualNLS && !hasManualAI ? "- Người dùng CHỈ CHỌN NĂNG LỰC SỐ (NLS). TUYỆT ĐỐI CẤM TỰ Ý THÊM MỤC NĂNG LỰC AI, KHÔNG THÊM HOẠT ĐỘNG AI, KHÔNG CÓ THẺ <ai>." : ""}
       ${!hasManualNLS && hasManualAI ? "- Người dùng CHỈ CHỌN NĂNG LỰC AI. TUYỆT ĐỐI CẤM TỰ Ý THÊM MỤC NĂNG LỰC SỐ, KHÔNG THÊM HOẠT ĐỘNG NLS, KHÔNG CÓ THẺ <nls>." : ""}
       - TUYỆT ĐỐI KHÔNG tự ý tích hợp thêm bất kỳ mã nào khác ngoài danh sách người dùng đã chọn ở trên.
       =============================================================================
       `;
+
+      const nlsFormattedLines = (hasManualNLS && info.manualNLS)
+        ? info.manualNLS.map(item => `                  - ${item.code} (${item.name}): ${item.description}`).join("\n")
+        : "";
+      const aiFormattedLines = (hasManualAI && info.manualAI)
+        ? info.manualAI.map(item => `                  - ${item.code} (${item.name}): ${item.description}`).join("\n")
+        : "";
 
       if (hasManualNLS && hasManualAI) {
         modeDirective = `🚨 CHẾ ĐỘ: TÍCH HỢP CẢ NLS VÀ AI THEO DANH SÁCH NGƯỜI DÙNG ĐÃ CHỌN.`;
@@ -160,11 +178,11 @@ export default async function handler(req: any, res: any) {
               b. Năng lực đặc thù môn học
               c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
                  <nls>c. Năng lực số
-                 - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
+                 ${nlsFormattedLines}
                  </nls>
               d. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
                  <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-                 - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
+                 ${aiFormattedLines}
                  </ai>
            3. Về phẩm chất`;
       } else if (hasManualNLS) {
@@ -176,7 +194,7 @@ export default async function handler(req: any, res: any) {
               b. Năng lực đặc thù môn học
               c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
                  <nls>c. Năng lực số
-                 - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
+                 ${nlsFormattedLines}
                  </nls>
                  (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI)
            3. Về phẩm chất`;
@@ -189,7 +207,7 @@ export default async function handler(req: any, res: any) {
               b. Năng lực đặc thù môn học
               c. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
                  <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
-                 - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
+                 ${aiFormattedLines}
                  </ai>
                  (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ)
            3. Về phẩm chất`;

@@ -63,6 +63,7 @@ export interface LessonInfo {
   manualNLS?: ManualNLSEntry[]; // List of manual NLS entries
   manualAI?: ManualNLSEntry[]; // List of manual AI entries
   integrationModes?: IntegrationModes; // Selected integration modes (NLS, AI, or both)
+  syncedIntegrations?: ManualNLSEntry[]; // Extracted / synced codes from PPCT
 }
 
 export interface ProcessingOptions {
