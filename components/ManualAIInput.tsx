@@ -128,15 +128,18 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
   // Build full available concrete codes list based on selectedGradeFilter and selectedDomain
   const availableCodesList: { code: string; desc: string; domainCode: string; domainLabel: string }[] = [];
 
-  if (selectedGradeFilter === "LEVEL") {
-    // Show high-level Bậc (A.CB1, B.TC1...) if explicitly chosen
-    const domainsToScan = selectedDomain === "ALL" 
-      ? AI_COMPONENT_OPTIONS.map(opt => opt.code)
-      : [selectedDomain];
+  // If selectedDomain is specifically from QĐ 3439 (NLa, NLb, NLc, NLd) or TT 02 (6.1, 6.2, 6.3)
+  const isSpecificLevelDomain = selectedDomain.startsWith("NL") || selectedDomain.startsWith("6.");
 
-    domainsToScan.forEach(domCode => {
+  if (selectedGradeFilter === "QD3439" || (selectedGradeFilter === "LEVEL" && isSpecificLevelDomain)) {
+    // Show QĐ 3439 codes (NLa, NLb, NLc, NLd)
+    const qd3439Domains = selectedDomain === "ALL" 
+      ? ["NLa", "NLb", "NLc", "NLd"]
+      : (selectedDomain.startsWith("NL") ? [selectedDomain] : ["NLa", "NLb", "NLc", "NLd"]);
+
+    qd3439Domains.forEach(domCode => {
       const domOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === domCode);
-      const domLabel = domOption ? domOption.label : domCode;
+      const domLabel = domOption ? domOption.label : `Khung QĐ 3439 - ${domCode}`;
       const levels = AI_LEVEL_DETAILS[domCode] || [];
 
       levels.forEach(lvl => {
@@ -149,6 +152,66 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
           });
         }
       });
+    });
+  } else if (selectedGradeFilter === "QD2422_LEVEL" || (selectedGradeFilter === "LEVEL" && !isSpecificLevelDomain)) {
+    // Show QĐ 2422 6 Bậc tổng quát (A, B, C, D)
+    const qd2422Domains = selectedDomain === "ALL" 
+      ? ["A", "B", "C", "D"]
+      : (["A", "B", "C", "D"].includes(selectedDomain) ? [selectedDomain] : ["A", "B", "C", "D"]);
+
+    qd2422Domains.forEach(domCode => {
+      const domOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === domCode);
+      const domLabel = domOption ? domOption.label : `Mạch ${domCode} (QĐ 2422)`;
+      const levels = AI_LEVEL_DETAILS[domCode] || [];
+
+      levels.forEach(lvl => {
+        if (!availableCodesList.some(item => item.code === lvl.code)) {
+          availableCodesList.push({
+            code: lvl.code,
+            desc: lvl.desc,
+            domainCode: domCode,
+            domainLabel: domLabel
+          });
+        }
+      });
+    });
+  } else if (selectedGradeFilter === "TT02" || selectedDomain.startsWith("6.")) {
+    // Show TT 02 codes (6.1, 6.2, 6.3)
+    const tt02Domains = selectedDomain === "ALL" 
+      ? ["6.1", "6.2", "6.3"]
+      : (selectedDomain.startsWith("6.") ? [selectedDomain] : ["6.1", "6.2", "6.3"]);
+
+    tt02Domains.forEach(domCode => {
+      const domOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === domCode);
+      const domLabel = domOption ? domOption.label : `Miền ${domCode} (TT 02)`;
+      const levels = AI_LEVEL_DETAILS[domCode] || [];
+
+      levels.forEach(lvl => {
+        if (!availableCodesList.some(item => item.code === lvl.code)) {
+          availableCodesList.push({
+            code: lvl.code,
+            desc: lvl.desc,
+            domainCode: domCode,
+            domainLabel: domLabel
+          });
+        }
+      });
+    });
+  } else if (isSpecificLevelDomain) {
+    // Domain is specifically chosen like NLb or 6.1, show its level details directly
+    const domOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === selectedDomain);
+    const domLabel = domOption ? domOption.label : selectedDomain;
+    const levels = AI_LEVEL_DETAILS[selectedDomain] || [];
+
+    levels.forEach(lvl => {
+      if (!availableCodesList.some(item => item.code === lvl.code)) {
+        availableCodesList.push({
+          code: lvl.code,
+          desc: lvl.desc,
+          domainCode: selectedDomain,
+          domainLabel: domLabel
+        });
+      }
     });
   } else {
     // Concrete Grade Requirements according to QĐ 2422 (e.g. 6.A1.1, 6.A1.2, 6.A1.3...)
@@ -256,33 +319,61 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
         
         {/* Dropdown 1: Mạch năng lực AI */}
         <div>
-           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">1. Mạch Năng lực AI (QĐ 2422)</label>
+           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">1. Mạch Năng lực AI (QĐ 2422 / QĐ 3439)</label>
            <select
              value={selectedDomain}
              onChange={(e) => setSelectedDomain(e.target.value)}
              className="block w-full rounded-xl border-0 bg-slate-50 py-2.5 px-3 text-slate-700 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-purple-600 text-xs font-medium transition-shadow cursor-pointer hover:bg-slate-100"
            >
-             <option value="ALL">-- Tất cả các mạch năng lực AI (A, B, C, D) --</option>
-             {AI_COMPONENT_OPTIONS.map((opt) => (
-               <option key={opt.code} value={opt.code}>{opt.label}</option>
-             ))}
+             <option value="ALL">-- Tất cả các mạch năng lực AI (QĐ 2422 / QĐ 3439) --</option>
+             
+             <optgroup label="🌟 Quyết định 2422/QĐ-BGDĐT (Mới nhất)">
+               {AI_COMPONENT_OPTIONS.filter(opt => opt.group === "QĐ 2422").map((opt) => (
+                 <option key={opt.code} value={opt.code}>{opt.label}</option>
+               ))}
+             </optgroup>
+
+             <optgroup label="🏛️ Quyết định 3439/QĐ-BGDĐT (Khung 6 Bậc)">
+               {AI_COMPONENT_OPTIONS.filter(opt => opt.group === "QĐ 3439").map((opt) => (
+                 <option key={opt.code} value={opt.code}>{opt.label}</option>
+               ))}
+             </optgroup>
+
+             <optgroup label="📑 Thông tư 02/2025/TT-BGDĐT">
+               {AI_COMPONENT_OPTIONS.filter(opt => opt.group === "TT 02").map((opt) => (
+                 <option key={opt.code} value={opt.code}>{opt.label}</option>
+               ))}
+             </optgroup>
            </select>
         </div>
 
-        {/* Dropdown 2: Khối Lớp (QĐ 2422) */}
+        {/* Dropdown 2: Khung Quyết định & Khối Lớp */}
         <div>
-           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">2. Khối Lớp Cụ thể (QĐ 2422)</label>
+           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">2. Khung Quyết định & Khối Lớp</label>
            <select
              value={selectedGradeFilter}
              onChange={(e) => setSelectedGradeFilter(e.target.value)}
              className="block w-full rounded-xl border-0 bg-slate-50 py-2.5 px-3 text-slate-700 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-purple-600 text-xs font-semibold transition-shadow cursor-pointer hover:bg-slate-100"
            >
-             <option value={grade.toString()}>⭐ Lớp {grade} (Theo bài dạy hiện tại)</option>
-             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(g => (
-               <option key={g} value={g.toString()}>Khối Lớp {g} (Chuẩn QĐ 2422: {g}.A1.1, {g}.A1.2...)</option>
-             ))}
-             <option value="ALL">🌐 Tất cả các khối lớp (Lớp 1 - 12)</option>
-             <option value="LEVEL">📋 Khung 6 Bậc tổng quát (CB1 - NC2)</option>
+             <optgroup label="⭐ QĐ 2422/QĐ-BGDĐT (Theo từng khối lớp)">
+               <option value={grade.toString()}>⭐ Lớp {grade} (Theo bài dạy hiện tại: {grade}.A1.1, {grade}.A1.2...)</option>
+               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(g => (
+                 <option key={g} value={g.toString()}>Khối Lớp {g} (QĐ 2422: {g}.A1.1, {g}.A1.2...)</option>
+               ))}
+               <option value="ALL">🌐 Tất cả các khối lớp (Lớp 1 - 12)</option>
+             </optgroup>
+
+             <optgroup label="🏛️ QĐ 3439/QĐ-BGDĐT (Khung 6 Bậc UNESCO)">
+               <option value="QD3439">📋 QĐ 3439: NLa, NLb, NLc, NLd (CB1, CB2, TC1, TC2, NC1, NC2)</option>
+             </optgroup>
+
+             <optgroup label="📋 QĐ 2422/QĐ-BGDĐT (Khung 6 Bậc Mạch A, B, C, D)">
+               <option value="QD2422_LEVEL">📋 QĐ 2422: Mạch A, B, C, D (CB1, CB2, TC1, TC2, NC1, NC2)</option>
+             </optgroup>
+
+             <optgroup label="📑 Thông tư 02/2025/TT-BGDĐT">
+               <option value="TT02">📋 Thông tư 02: Miền 6.1, 6.2, 6.3 (Bậc 1 - 8)</option>
+             </optgroup>
            </select>
         </div>
 

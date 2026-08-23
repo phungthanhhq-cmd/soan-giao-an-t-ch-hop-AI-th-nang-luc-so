@@ -26,19 +26,24 @@ export const NLS_COMPONENT_OPTIONS = [
   { code: "6.3", label: "6.3. Đánh giá trí tuệ nhân tạo" },
 ];
 
-// Khung năng lực Trí tuệ Nhân tạo (AI) theo Quyết định 2422/QĐ-BGDĐT & Thông tư 02/2025/TT-BGDĐT
+// Khung năng lực Trí tuệ Nhân tạo (AI) theo Quyết định 2422/QĐ-BGDĐT, Quyết định 3439/QĐ-BGDĐT & Thông tư 02/2025/TT-BGDĐT
 export const AI_COMPONENT_OPTIONS = [
-  { code: "A", label: "A: Tư duy lấy con người làm trung tâm (QĐ 2422)" },
-  { code: "B", label: "B: Đạo đức AI (QĐ 2422)" },
-  { code: "C", label: "C: Các kĩ thuật và ứng dụng AI (QĐ 2422)" },
-  { code: "D", label: "D: Thiết kế hệ thống AI (QĐ 2422)" },
-  { code: "NLa", label: "NLa: Tư duy lấy con người làm trung tâm" },
-  { code: "NLb", label: "NLb: Đạo đức AI" },
-  { code: "NLc", label: "NLc: Các kĩ thuật và ứng dụng AI" },
-  { code: "NLd", label: "NLd: Thiết kế hệ thống AI" },
-  { code: "6.1", label: "6.1. Hiểu biết về trí tuệ nhân tạo (TT 02)" },
-  { code: "6.2", label: "6.2. Sử dụng trí tuệ nhân tạo có đạo đức và trách nhiệm (TT 02)" },
-  { code: "6.3", label: "6.3. Đánh giá các công cụ AI (TT 02)" },
+  // --- QUYẾT ĐỊNH 2422/QĐ-BGDĐT (Mới nhất - Mạch A, B, C, D) ---
+  { code: "A", label: "Mạch A: Tư duy lấy con người làm trung tâm (QĐ 2422)", group: "QĐ 2422" },
+  { code: "B", label: "Mạch B: Đạo đức Trí tuệ Nhân tạo (QĐ 2422)", group: "QĐ 2422" },
+  { code: "C", label: "Mạch C: Các kĩ thuật và ứng dụng AI (QĐ 2422)", group: "QĐ 2422" },
+  { code: "D", label: "Mạch D: Thiết kế hệ thống AI (QĐ 2422)", group: "QĐ 2422" },
+  
+  // --- QUYẾT ĐỊNH 3439/QĐ-BGDĐT (Khung UNESCO / 6 Bậc) ---
+  { code: "NLa", label: "NLa: Tư duy lấy con người làm trung tâm (QĐ 3439)", group: "QĐ 3439" },
+  { code: "NLb", label: "NLb: Đạo đức AI (QĐ 3439)", group: "QĐ 3439" },
+  { code: "NLc", label: "NLc: Các kĩ thuật và ứng dụng AI (QĐ 3439)", group: "QĐ 3439" },
+  { code: "NLd", label: "NLd: Thiết kế hệ thống AI (QĐ 3439)", group: "QĐ 3439" },
+
+  // --- THÔNG TƯ 02/2025/TT-BGDĐT (Miền 6.1, 6.2, 6.3) ---
+  { code: "6.1", label: "Miền 6.1: Hiểu biết về trí tuệ nhân tạo (TT 02)", group: "TT 02" },
+  { code: "6.2", label: "Miền 6.2: Sử dụng AI có đạo đức và trách nhiệm (TT 02)", group: "TT 02" },
+  { code: "6.3", label: "Miền 6.3: Đánh giá các công cụ AI (TT 02)", group: "TT 02" },
 ];
 
 export const AI_LEVEL_DETAILS: Record<string, { code: string; desc: string; level: number }[]> = {
