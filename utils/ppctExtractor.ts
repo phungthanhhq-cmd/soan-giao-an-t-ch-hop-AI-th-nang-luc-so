@@ -39,7 +39,20 @@ export const findAICodeInfo = (codeStr: string) => {
   const cleanCode = codeStr.trim().toLowerCase();
   if (!cleanCode) return null;
 
-  // Check AI_LEVEL_DETAILS
+  // 1. Check AI_ALL_GRADE_REQUIREMENTS first (e.g. 6.A1.1, 6.A1.2, 6.A1.3...)
+  for (const reqs of Object.values(AI_ALL_GRADE_REQUIREMENTS)) {
+    const found = reqs.find(r => r.code.toLowerCase() === cleanCode);
+    if (found) {
+      return {
+        code: found.code,
+        desc: found.desc,
+        domainCode: found.domainCode,
+        domainLabel: found.domainLabel
+      };
+    }
+  }
+
+  // 2. Check AI_LEVEL_DETAILS (e.g. A.TC1, B.CB2, NLb.TC1...)
   for (const [domCode, levels] of Object.entries(AI_LEVEL_DETAILS)) {
     const found = levels.find(l => l.code.toLowerCase() === cleanCode);
     if (found) {
@@ -49,19 +62,6 @@ export const findAICodeInfo = (codeStr: string) => {
         desc: found.desc,
         domainCode: domCode,
         domainLabel: compOption ? compOption.label : `Mạch ${domCode}`
-      };
-    }
-  }
-
-  // Check AI_ALL_GRADE_REQUIREMENTS
-  for (const reqs of Object.values(AI_ALL_GRADE_REQUIREMENTS)) {
-    const found = reqs.find(r => r.code.toLowerCase() === cleanCode);
-    if (found) {
-      return {
-        code: found.code,
-        desc: found.desc,
-        domainCode: found.domainCode,
-        domainLabel: found.domainLabel
       };
     }
   }
@@ -163,12 +163,15 @@ export function extractCodesFromPPCT(
   const textToScan = targetedRowsText.trim().length > 0 ? targetedRowsText : ppctContent;
 
   // Regex patterns to capture NLS and AI codes:
-  // 1. e.g., 1.1.TC2a, 1.1.TC1a, 1.3.CB1a, 2.1.NC1b, 6.2.TC2a, 5.3.CB2
-  // 2. e.g., 6.1.B1, 6.2.B3, 6.3.B5, 1.1.B3
-  // 3. e.g., NLa.TC1, NLb.TC2, NLc.CB1, NLd.NC2
-  // 4. e.g., A1.L6.1, B2.L7.1, C5.L8.1, D2.L9.1
-  const nlsRegex = /\b([1-6]\.[1-6]\.(?:CB|TC|NC)[1-2][a-c]?|[1-5]\.[1-6]\.B[1-8])\b/gi;
-  const aiSpecificRegex = /\b(NL[a-d]\.(?:CB|TC|NC)[1-2]|[A-D][1-5]\.L(?:[1-9]|1[0-2])\.[1-9]|6\.[1-3]\.B[1-8]|6\.[1-3]\.(?:CB|TC|NC)[1-2][a-c]?)\b/gi;
+  // 1. NLS: e.g., 1.1.TC2a, 1.1.TC1a, 1.3.CB1a, 2.1.NC1b, 5.3.CB2, 1.1.B3
+  // 2. AI (QĐ 2422 / QĐ 3439 / UNESCO):
+  //    - e.g., 1.A1.1, 6.A1.1, 6.A1.MR1, 9.C2.1, 12.C3.2 (QĐ 2422)
+  //    - e.g., A.CB1, B.TC2, C.NC1, D.TC1 (QĐ 2422 Bậc)
+  //    - e.g., NLa.TC1, NLb.TC2, NLc.CB1, NLd.NC2
+  //    - e.g., A1.L6.1, B2.L7.1, C5.L8.1, D2.L9.1
+  //    - e.g., 6.1.B1, 6.2.B3, 6.3.B5, 6.2.TC2a
+  const nlsRegex = /\b([1-5]\.[1-6]\.(?:CB|TC|NC)[1-2][a-c]?|[1-5]\.[1-6]\.B[1-8])\b/gi;
+  const aiSpecificRegex = /\b((?:1[0-2]|[1-9])\.[A-D][1-5]\.(?:MR)?\d+|[A-D]\.(?:CB|TC|NC)[1-2]|[A-D]\.B[1-6]|NL[a-d]\.(?:CB|TC|NC)[1-2]|[A-D][1-5]\.L(?:[1-9]|1[0-2])\.[1-9]|6\.[1-3]\.B[1-8]|6\.[1-3]\.(?:CB|TC|NC)[1-2][a-c]?)\b/gi;
 
   // 1. Scan AI codes
   let aiMatch;

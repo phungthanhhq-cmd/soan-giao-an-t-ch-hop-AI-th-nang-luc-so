@@ -15,7 +15,20 @@ const findAICodeInfo = (codeStr: string) => {
   const cleanCode = codeStr.trim().toLowerCase();
   if (!cleanCode) return null;
 
-  // Check AI_LEVEL_DETAILS
+  // 1. Check AI_ALL_GRADE_REQUIREMENTS first (e.g. 6.A1.1, 6.A1.2, 6.A1.3...)
+  for (const reqs of Object.values(AI_ALL_GRADE_REQUIREMENTS)) {
+    const found = reqs.find(r => r.code.toLowerCase() === cleanCode);
+    if (found) {
+      return {
+        code: found.code,
+        desc: found.desc,
+        domainCode: found.domainCode,
+        domainLabel: found.domainLabel
+      };
+    }
+  }
+
+  // 2. Check AI_LEVEL_DETAILS (e.g. A.TC1, B.TC2...)
   for (const [domCode, levels] of Object.entries(AI_LEVEL_DETAILS)) {
     const found = levels.find(l => l.code.toLowerCase() === cleanCode);
     if (found) {
@@ -29,36 +42,12 @@ const findAICodeInfo = (codeStr: string) => {
     }
   }
 
-  // Check AI_ALL_GRADE_REQUIREMENTS
-  for (const reqs of Object.values(AI_ALL_GRADE_REQUIREMENTS)) {
-    const found = reqs.find(r => r.code.toLowerCase() === cleanCode);
-    if (found) {
-      return {
-        code: found.code,
-        desc: found.desc,
-        domainCode: found.domainCode,
-        domainLabel: found.domainLabel
-      };
-    }
-  }
-
   return null;
 };
 
 const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, schoolLevel, grade }) => {
-  // Helper to determine suggested default proficiency level from school level & grade
-  const getSuggestedDefaultLevel = (sLevel: SchoolLevel, gr: number): number => {
-    if (sLevel === SchoolLevel.TH || (gr >= 1 && gr <= 5)) {
-      return gr >= 4 ? 2 : 1;
-    }
-    if (sLevel === SchoolLevel.THCS || (gr >= 6 && gr <= 9)) {
-      return gr >= 8 ? 4 : 3;
-    }
-    return gr >= 12 ? 6 : 5;
-  };
-
   const [selectedDomain, setSelectedDomain] = useState<string>("ALL");
-  const [targetProficiencyLevel, setTargetProficiencyLevel] = useState<number>(() => getSuggestedDefaultLevel(schoolLevel, grade));
+  const [selectedGradeFilter, setSelectedGradeFilter] = useState<string>(() => grade.toString());
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'select' | 'manual'>('select');
@@ -84,11 +73,10 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
     };
   }, []);
 
-  // Update level selection when schoolLevel or grade changes
+  // Update grade selection when grade prop changes
   useEffect(() => {
-    const defaultLevel = getSuggestedDefaultLevel(schoolLevel, grade);
-    setTargetProficiencyLevel(defaultLevel);
-  }, [schoolLevel, grade]);
+    setSelectedGradeFilter(grade.toString());
+  }, [grade]);
 
   // When customCode changes, try to auto-fill official description if matching code exists
   const handleCustomCodeChange = (val: string) => {
@@ -104,13 +92,13 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
   const handleAddCustomCode = (codeToAdd?: string, descToAdd?: string) => {
     const finalCode = (codeToAdd || customCode).trim();
     if (!finalCode) {
-      alert("Vui lòng nhập mã năng lực AI (ví dụ: NLb.TC2, 6.2.TC2a).");
+      alert("Vui lòng nhập mã năng lực AI (ví dụ: 6.A1.1, 6.A1.2, 6.A1.3).");
       return;
     }
 
     // Lookup description if not provided
     const lookup = findAICodeInfo(finalCode);
-    const finalDesc = (descToAdd || customDesc || lookup?.desc || `Năng lực Trí tuệ Nhân tạo (AI) theo yêu cầu cần đạt mã [${finalCode}]`).trim();
+    const finalDesc = (descToAdd || customDesc || lookup?.desc || `Yêu cầu cần đạt Năng lực Trí tuệ Nhân tạo (AI) theo mã [${finalCode}]`).trim();
     const finalDomainLabel = lookup ? lookup.domainLabel : (AI_COMPONENT_OPTIONS.find(o => o.code === customDomain)?.label || "Năng lực AI");
 
     // Check if already in entries
@@ -137,60 +125,53 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
     setEntries(entries.filter(e => e.id !== id));
   };
 
-  // Map numbers to desired display codes
-  const proficiencyLabels: Record<number, { code: string; name: string }> = {
-    1: { code: "CB1", name: "Cơ bản 1 (Lớp 1-3)" },
-    2: { code: "CB2", name: "Cơ bản 2 (Lớp 4-5)" },
-    3: { code: "TC1", name: "Trung cấp 1 (Lớp 6-7)" },
-    4: { code: "TC2", name: "Trung cấp 2 (Lớp 8-9)" },
-    5: { code: "NC1", name: "Nâng cao 1 (Lớp 10-11)" },
-    6: { code: "NC2", name: "Nâng cao 2 (Lớp 12)" }
-  };
-
-  // Suggested levels display logic based on school level
-  const suggestedLevels = schoolLevel === SchoolLevel.TH ? [1, 2] : 
-                         schoolLevel === SchoolLevel.THCS ? [3, 4] : [5, 6];
-
-  // Build full available codes list based on selectedDomain and targetProficiencyLevel
+  // Build full available concrete codes list based on selectedGradeFilter and selectedDomain
   const availableCodesList: { code: string; desc: string; domainCode: string; domainLabel: string }[] = [];
 
-  const domainsToScan = selectedDomain === "ALL" 
-    ? AI_COMPONENT_OPTIONS.map(opt => opt.code)
-    : [selectedDomain];
+  if (selectedGradeFilter === "LEVEL") {
+    // Show high-level Bậc (A.CB1, B.TC1...) if explicitly chosen
+    const domainsToScan = selectedDomain === "ALL" 
+      ? AI_COMPONENT_OPTIONS.map(opt => opt.code)
+      : [selectedDomain];
 
-  domainsToScan.forEach(domCode => {
-    const domOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === domCode);
-    const domLabel = domOption ? domOption.label : domCode;
-    const levels = AI_LEVEL_DETAILS[domCode] || [];
+    domainsToScan.forEach(domCode => {
+      const domOption = AI_COMPONENT_OPTIONS.find(opt => opt.code === domCode);
+      const domLabel = domOption ? domOption.label : domCode;
+      const levels = AI_LEVEL_DETAILS[domCode] || [];
 
-    // Filter by target proficiency level
-    const matched = levels.filter(lvl => lvl.level === targetProficiencyLevel);
-    matched.forEach(lvl => {
-      if (!availableCodesList.some(item => item.code === lvl.code)) {
-        availableCodesList.push({
-          code: lvl.code,
-          desc: lvl.desc,
-          domainCode: domCode,
-          domainLabel: domLabel
-        });
-      }
+      levels.forEach(lvl => {
+        if (!availableCodesList.some(item => item.code === lvl.code)) {
+          availableCodesList.push({
+            code: lvl.code,
+            desc: lvl.desc,
+            domainCode: domCode,
+            domainLabel: domLabel
+          });
+        }
+      });
     });
-  });
+  } else {
+    // Concrete Grade Requirements according to QĐ 2422 (e.g. 6.A1.1, 6.A1.2, 6.A1.3...)
+    const gradesToScan: number[] = selectedGradeFilter === "ALL" 
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      : [parseInt(selectedGradeFilter) || grade];
 
-  // Also include grade-specific requirements according to TT 02 & QĐ 3439 for current grade
-  const gradeReqs = AI_ALL_GRADE_REQUIREMENTS[grade] || [];
-  gradeReqs.forEach(req => {
-    if (selectedDomain === "ALL" || selectedDomain === req.domainCode) {
-      if (!availableCodesList.some(item => item.code === req.code)) {
-        availableCodesList.push({
-          code: req.code,
-          desc: req.desc,
-          domainCode: req.domainCode,
-          domainLabel: req.domainLabel
-        });
-      }
-    }
-  });
+    gradesToScan.forEach(gr => {
+      const reqs = AI_ALL_GRADE_REQUIREMENTS[gr] || [];
+      reqs.forEach(req => {
+        if (selectedDomain === "ALL" || selectedDomain === req.domainCode || (selectedDomain.length === 1 && req.domainCode.startsWith(selectedDomain))) {
+          if (!availableCodesList.some(item => item.code === req.code)) {
+            availableCodesList.push({
+              code: req.code,
+              desc: req.desc,
+              domainCode: req.domainCode,
+              domainLabel: req.domainLabel
+            });
+          }
+        }
+      });
+    });
+  }
 
   // Filter list by search term
   const filteredCodesList = availableCodesList.filter(item => {
@@ -253,11 +234,11 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
              <div className="flex items-center gap-2">
                <h2 className="text-lg font-bold text-slate-800">Yêu cầu Năng lực Trí tuệ Nhân tạo (AI)</h2>
                <span className="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
-                 QĐ 3439 / UNESCO
+                 QĐ 2422 / QĐ 3439
                </span>
              </div>
              <p className="text-[11px] text-slate-500 mt-0.5">
-               Khung AI: <span className="font-semibold text-purple-700">{schoolLevel} - Lớp {grade}</span> (Gợi ý: <span className="font-bold text-purple-700">{proficiencyLabels[targetProficiencyLevel]?.code}</span>)
+               Mã cụ thể theo QĐ 2422: <span className="font-semibold text-purple-700">{schoolLevel} - Lớp {grade}</span> (Ví dụ: <span className="font-bold text-purple-700">{grade}.A1.1, {grade}.A1.2, {grade}.A1.3</span>)
              </p>
           </div>
         </div>
@@ -275,32 +256,33 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
         
         {/* Dropdown 1: Mạch năng lực AI */}
         <div>
-           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">1. Mạch Năng lực AI</label>
+           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">1. Mạch Năng lực AI (QĐ 2422)</label>
            <select
              value={selectedDomain}
              onChange={(e) => setSelectedDomain(e.target.value)}
              className="block w-full rounded-xl border-0 bg-slate-50 py-2.5 px-3 text-slate-700 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-purple-600 text-xs font-medium transition-shadow cursor-pointer hover:bg-slate-100"
            >
-             <option value="ALL">-- Tất cả các mạch năng lực AI --</option>
+             <option value="ALL">-- Tất cả các mạch năng lực AI (A, B, C, D) --</option>
              {AI_COMPONENT_OPTIONS.map((opt) => (
                <option key={opt.code} value={opt.code}>{opt.label}</option>
              ))}
            </select>
         </div>
 
-        {/* Dropdown 2: Mức độ (Bậc AI) */}
+        {/* Dropdown 2: Khối Lớp (QĐ 2422) */}
         <div>
-           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">2. Mức độ (Bậc AI)</label>
+           <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1">2. Khối Lớp Cụ thể (QĐ 2422)</label>
            <select
-             value={targetProficiencyLevel}
-             onChange={(e) => setTargetProficiencyLevel(parseInt(e.target.value))}
-             className="block w-full rounded-xl border-0 bg-slate-50 py-2.5 px-3 text-slate-700 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-purple-600 text-xs font-medium transition-shadow cursor-pointer hover:bg-slate-100 font-semibold"
+             value={selectedGradeFilter}
+             onChange={(e) => setSelectedGradeFilter(e.target.value)}
+             className="block w-full rounded-xl border-0 bg-slate-50 py-2.5 px-3 text-slate-700 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-purple-600 text-xs font-semibold transition-shadow cursor-pointer hover:bg-slate-100"
            >
-             {[1, 2, 3, 4, 5, 6].map(b => (
-               <option key={b} value={b}>
-                 {proficiencyLabels[b].code} - {proficiencyLabels[b].name} { suggestedLevels.includes(b) ? " ⭐" : "" }
-               </option>
+             <option value={grade.toString()}>⭐ Lớp {grade} (Theo bài dạy hiện tại)</option>
+             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(g => (
+               <option key={g} value={g.toString()}>Khối Lớp {g} (Chuẩn QĐ 2422: {g}.A1.1, {g}.A1.2...)</option>
              ))}
+             <option value="ALL">🌐 Tất cả các khối lớp (Lớp 1 - 12)</option>
+             <option value="LEVEL">📋 Khung 6 Bậc tổng quát (CB1 - NC2)</option>
            </select>
         </div>
 
@@ -308,7 +290,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
         <div className="sm:col-span-2 relative" ref={dropdownRef}>
            <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase ml-1 flex justify-between items-center">
              <span className="flex items-center gap-1.5">
-               <span>3. Mã Tích hợp AI</span>
+               <span>3. Mã Tích hợp AI Cụ thể (Chuẩn {selectedGradeFilter === "ALL" ? "Lớp 1-12" : selectedGradeFilter === "LEVEL" ? "Bậc" : `Lớp ${selectedGradeFilter}`})</span>
                <span className="text-purple-600 font-normal lowercase">(tích chọn danh sách hoặc gõ mã)</span>
              </span>
              {entries.length > 0 && (
@@ -334,19 +316,19 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
              <div className="truncate text-left flex-1 flex items-center gap-1.5 flex-wrap">
                {entries.length === 0 ? (
                  <span className="text-slate-500 font-medium">
-                   -- Tích chọn mã AI [{proficiencyLabels[targetProficiencyLevel]?.code}] ({availableCodesList.length} mã) hoặc gõ mã --
+                   -- Tích chọn mã AI cụ thể ({availableCodesList.length} mã khả dụng: {selectedGradeFilter !== "LEVEL" ? `${selectedGradeFilter === "ALL" ? "1-12" : selectedGradeFilter}.A1.1, ...` : "A.TC1, ..."}) hoặc gõ mã --
                  </span>
                ) : (
                  <div className="flex items-center gap-1.5 flex-wrap">
                    <span className="font-bold text-purple-700">Đã tích {entries.length} mã AI:</span>
-                   {entries.slice(0, 4).map(e => (
+                   {entries.slice(0, 5).map(e => (
                      <span key={e.id} className="bg-purple-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-md">
                        {e.code}
                      </span>
                    ))}
-                   {entries.length > 4 && (
+                   {entries.length > 5 && (
                      <span className="text-[10px] font-bold text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-md">
-                       +{entries.length - 4} mã khác
+                       +{entries.length - 5} mã khác
                      </span>
                    )}
                  </div>
@@ -372,7 +354,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                      }`}
                    >
                      <ListFilter size={13} />
-                     Tích chọn từ danh mục [{proficiencyLabels[targetProficiencyLevel]?.code}]
+                     Danh mục mã AI cụ thể ({availableCodesList.length})
                    </button>
                    <button
                      type="button"
@@ -384,7 +366,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                      }`}
                    >
                      <Edit3 size={13} />
-                     Nhập mã AI trực tiếp
+                     Gõ mã AI trực tiếp
                    </button>
                  </div>
 
@@ -415,7 +397,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                              handleAddCustomCode(searchTerm.trim());
                            }
                          }}
-                         placeholder="🔍 Nhập mã AI (VD: NLb.TC2, 6.2.TC2a...) hoặc tìm kiếm..."
+                         placeholder="🔍 Tìm kiếm hoặc gõ mã AI (VD: 6.A1.1, 6.A1.2, 6.A1.3...)"
                          className="w-full bg-slate-50 rounded-xl py-2 pl-9 pr-8 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-slate-800 placeholder:text-slate-400 font-medium"
                        />
                        {searchTerm && (
@@ -433,9 +415,9 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                      {searchTerm.trim().length > 0 && (
                        <div className="bg-purple-50/80 border border-purple-200 rounded-xl p-2.5 flex items-center justify-between gap-2">
                          <div className="min-w-0 flex-1">
-                           <span className="text-[10px] text-purple-700 font-bold uppercase block">Nhập nhanh mã AI:</span>
+                           <span className="text-[10px] text-purple-700 font-bold uppercase block">Nhận diện mã AI:</span>
                            <p className="text-xs font-bold text-purple-950 truncate">
-                             [{searchTerm.trim()}] {searchedLookup ? `- ${searchedLookup.desc}` : "(Mã AI tùy chỉnh)"}
+                             [{searchTerm.trim()}] {searchedLookup ? `- ${searchedLookup.desc}` : "(Mã AI theo nhu cầu)"}
                            </p>
                          </div>
                          <button
@@ -545,7 +527,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
                          type="text"
                          value={customCode}
                          onChange={(e) => handleCustomCodeChange(e.target.value)}
-                         placeholder="VD: NLb.TC2, 6.2.TC2a"
+                         placeholder="VD: 6.A1.1, 6.A1.2, 6.A1.3"
                          className="w-full bg-white rounded-xl py-2 px-3 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 font-bold text-purple-700 placeholder:text-slate-400"
                        />
                      </div>
@@ -598,7 +580,7 @@ const ManualAIInput: React.FC<ManualAIInputProps> = ({ entries, setEntries, scho
           <div className="flex flex-col items-center justify-center py-7 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
              <Info className="text-slate-300 mb-2" size={24} />
              <p className="text-slate-500 text-sm font-medium">Chưa có mã AI nào được tích chọn.</p>
-             <p className="text-slate-400 text-xs mt-1">Bấm vào ô <strong>"3. Mã Tích hợp AI"</strong> ở trên để tích chọn mã từ danh mục hoặc gõ nhập mã tùy ý.</p>
+             <p className="text-slate-400 text-xs mt-1">Bấm vào ô <strong>"3. Mã Tích hợp AI Cụ thể"</strong> ở trên để tích chọn mã (như 6.A1.1, 6.A1.2, 6.A1.3...) hoặc gõ nhập mã tùy ý.</p>
           </div>
         ) : (
           <div className="space-y-2">

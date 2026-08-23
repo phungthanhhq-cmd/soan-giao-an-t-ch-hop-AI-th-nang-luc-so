@@ -80,18 +80,19 @@ async function startServer() {
 
         integrationStrategyDirective = `
         =============================================================================
-        🚨 TRƯỜNG HỢP 1: NGƯỜI DÙNG CUNG CẤP PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / PHỤ LỤC 3) - NGUỒN CHUẨN MỰC PHÁP QUY TỐI THƯỢNG:
-        Trong Phân phối chương trình / Phụ lục 3 ĐÃ CÓ SẴN bảng phân phối cho từng bài học/tiết học cụ thể (gồm các cột: TT, Bài học, Số tiết, Thời điểm, Thiết bị, Địa điểm, Ghi chú / Năng lực số / AI).
+        🚨 TRƯỜNG HỢP 1: NGƯỜI DÙNG CUNG CẤP PHÂN PHỐI CHƯƠNG TRÌNH (PPCT / BẢN PHỤ LỤC) - NGUỒN CHUẨN MỰC PHÁP QUY TỐI THƯỢNG:
+        Trong Phân phối chương trình / Bản Phụ lục ĐÃ CÓ SẴN bảng phân phối cho từng bài học/tiết học cụ thể (gồm các cột: TT, Bài học, Số tiết, Thời điểm, Thiết bị, Địa điểm, Ghi chú / Năng lực số / AI).
         
         ${syncedItems.length > 0 ? syncedItems.join("\n\n") + "\n\n" : ""}
         🎯 5 NGUYÊN TẮC BẮT BUỘC KHI CÓ PHỤ LỤC:
-        1. 📌 TUÂN THỦ ĐỒNG BỘ THEO PHỤ LỤC: Đối chiếu chính xác từng tiết của giáo án với từng hàng trong bảng Phụ lục 3 (PPCT).
-        2. 📌 CHỈ TÍCH HỢP ĐÚNG TIẾT VÀ MÃ CÓ TRONG PHỤ LỤC: 
-           - Tiết nào trong Phụ lục CÓ ghi mã NLS/AI (ví dụ: Tiết 44 có mã 1.3.TC2a, Tiết 47 có mã NLb.TC2) -> CHỈ tích hợp đúng mã đó vào đúng tiết đó.
+        1. 📌 ĐỒNG BỘ ĐÚNG SỐ TIẾT VÀ ĐÚNG CHUẨN MÃ 100%: 
+           - Đối chiếu chính xác từng tiết của giáo án với từng hàng trong bảng Phụ lục (PPCT).
+           - Tiết nào trong Phụ lục CÓ ghi mã NLS/AI (ví dụ: Tiết 44 có mã 1.3.TC2a, Tiết 47 có mã 6.A1.2 hoặc NLb.TC2) -> BẮT BUỘC tích hợp ĐÚNG MÃ ĐÓ vào ĐÚNG TIẾT ĐÓ.
            - Tiết nào trong Phụ lục KHÔNG ghi mã NLS/AI (ô để trống) -> TUYỆT ĐỐI KHÔNG tích hợp NLS/AI vào tiết đó!
-        3. ⛔ NGHIÊM CẤM TỰ Ý PHÁT SINH MÃ NĂNG LỰC: Tuyệt đối không tự bịa mã, không đổi mã, không thêm mã cho những tiết mà Phụ lục không yêu cầu.
-        4. ⛔ KHÔNG ĐƯỢC BỚT NỘI DUNG TRONG GIÁO ÁN: Giữ nguyên 100% toàn bộ nội dung giáo án gốc, không cắt xén, không dùng dấu '...', không tóm tắt các tiết tiếp theo.
-        5. 🔴 CHỈ BÔI ĐỎ NỘI DUNG ĐÃ BỔ SUNG DO TÍCH HỢP: Nội dung gốc giữ màu đen mặc định (không bọc trong thẻ <nls>/<ai>); CHỈ bọc các nhiệm vụ, câu lệnh, prompt bổ sung do tích hợp trong thẻ <nls>...</nls> hoặc <ai>...</ai>.
+        2. ⛔ NGHIÊM CẤM TỰ Ý PHÁT SINH, THAY ĐỔI, THÊM BỚT MÃ: Tuyệt đối không tự bịa mã, không đổi mã, không thêm mã cho những tiết mà Phụ lục không yêu cầu. Chuẩn mã 100%.
+        3. ⛔ BẢO TOÀN CẤU TRÚC VÀ NỘI DUNG GIÁO ÁN GỐC 100%: Giữ nguyên toàn bộ cấu trúc giáo án đã code, không cắt xén, không dùng dấu '...', không tóm tắt các tiết tiếp theo, bảo toàn 100% nội dung gốc của giáo viên.
+        4. 🔴 CHỈ BÔI ĐỎ NỘI DUNG BỔ SUNG DO TÍCH HỢP: Nội dung gốc giữ màu đen mặc định (không bọc trong thẻ <nls>/<ai>); CHỈ bọc các nhiệm vụ, câu lệnh, prompt bổ sung do tích hợp trong thẻ <nls>...</nls> hoặc <ai>...</ai>.
+        5. ✨ GIÁO ÁN TRẢ VỀ SẠCH ĐẸP: Trình bày chuẩn thể thức Times New Roman 14pt, sạch sẽ, không ký tự rác, không dấu gạch chéo thừa, không lời dẫn ngoài lề.
         
         NỘI DUNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3:
         ${info.distributionContent}
@@ -99,10 +100,10 @@ async function startServer() {
         `;
 
         modeDirective = `
-        🚨 CHẾ ĐỘ: TỰ ĐỘNG ĐỒNG BỘ VÀ TÍCH HỢP THEO ĐÚNG PHÂN PHỐI CHƯƠNG TRÌNH / PHỤ LỤC 3.
-        - Căn cứ 100% vào bảng PPCT/Phụ lục 3 ở trên của đúng bài học/tiết dạy này.
-        - Nếu hàng bài này trong PPCT có mã NLS/AI nào -> Trích xuất nguyên văn đúng mã đó để tích hợp.
-        - Nếu hàng bài này trong PPCT không có mã NLS/AI -> Tuyệt đối không tích hợp NLS/AI, không tự bịa mã.
+        🚨 CHẾ ĐỘ: TỰ ĐỘNG ĐỒNG BỘ VÀ TÍCH HỢP THEO ĐÚNG PHÂN PHỐI CHƯƠNG TRÌNH / BẢN PHỤ LỤC.
+        - Căn cứ 100% vào bảng PPCT/Bản Phụ lục ở trên của đúng bài học và từng tiết dạy cụ thể.
+        - Đồng bộ đúng số tiết có tích hợp: Tiết nào trong phụ lục có mã thì tích hợp đúng tiết đó và đúng mã 100%.
+        - Nếu tiết nào trong PPCT không có mã NLS/AI -> Tuyệt đối không tích hợp NLS/AI, không tự bịa mã.
         `;
 
         structureGoalRequirement = `
