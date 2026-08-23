@@ -373,28 +373,42 @@ ${structureGoalRequirement}
           .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
         // 1. AUTO-FIX BASTARDIZED / HALLUCINATED CODES TO MATCH OFFICIAL CODES
-        // If the AI generated "NLS 1.1 (Bậc 3)" or "AI.4 (Bậc 3...)", replace with exact chosen or standard codes
-        if (lessonInfo.manualNLS && lessonInfo.manualNLS.length > 0) {
-          const primaryNLS = lessonInfo.manualNLS[0];
-          text = text.replace(/NLS\s*1\.[1-3]\s*\([^\)]*Bậc[^\)]*\)/gi, primaryNLS.code);
+        // Strip any hallucinated level/tier descriptions like (Bậc 3), (Bậc 3 - Trung cấp), (Bậc 4 - Nâng cao), (Mức Trung cấp)
+        text = text.replace(/\s*\(\s*(?:Bậc|Mức|Cấp độ)[^\)]*\)/gi, "");
+        text = text.replace(/\s*\[\s*(?:Bậc|Mức|Cấp độ)[^\]]*\]/gi, "");
+
+        // Normalize prefix "NLS " or "AI " when placed directly before codes
+        text = text.replace(/\bNLS\s+(\d+\.\d+\.TC\w+)/gi, "$1");
+        text = text.replace(/\bAI\s+(NL[a-d]\.TC\w+)/gi, "$1");
+        text = text.replace(/\bAI\s+(\d+\.A\d+\.\d+)/gi, "$1");
+
+        const chosenNLS = (lessonInfo?.manualNLS && lessonInfo.manualNLS.length > 0)
+          ? lessonInfo.manualNLS
+          : (lessonInfo?.syncedIntegrations?.filter(i => i.category === 'NLS') || []);
+
+        const chosenAI = (lessonInfo?.manualAI && lessonInfo.manualAI.length > 0)
+          ? lessonInfo.manualAI
+          : (lessonInfo?.syncedIntegrations?.filter(i => i.category === 'AI') || []);
+
+        if (chosenNLS.length > 0) {
+          const primaryNLS = chosenNLS[0];
+          text = text.replace(/NLS\s*1\.[1-3]/gi, primaryNLS.code);
           text = text.replace(/\[\s*NLS\s*1\.[1-3][^\]]*\]/gi, `[${primaryNLS.code}]`);
         } else {
-          // Standard normalization
-          text = text.replace(/NLS\s*1\.1\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "1.1.TC1a");
-          text = text.replace(/NLS\s*1\.1\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "1.1.TC2a");
-          text = text.replace(/NLS\s*1\.3\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "1.3.TC1a");
-          text = text.replace(/NLS\s*1\.3\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "1.3.TC2a");
+          text = text.replace(/NLS\s*1\.1/gi, "1.1.TC1a");
+          text = text.replace(/NLS\s*1\.2/gi, "1.2.TC1a");
+          text = text.replace(/NLS\s*1\.3/gi, "1.3.TC1a");
         }
 
-        if (lessonInfo.manualAI && lessonInfo.manualAI.length > 0) {
-          const primaryAI = lessonInfo.manualAI[0];
-          text = text.replace(/AI\.[1-4]\s*\([^\)]*Bậc[^\)]*\)/gi, primaryAI.code);
+        if (chosenAI.length > 0) {
+          const primaryAI = chosenAI[0];
+          text = text.replace(/AI\.[1-4]/gi, primaryAI.code);
           text = text.replace(/\[\s*AI\.[1-4][^\]]*\]/gi, `[${primaryAI.code}]`);
         } else {
-          text = text.replace(/AI\.4\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "NLb.TC1");
-          text = text.replace(/AI\.4\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "NLb.TC2");
-          text = text.replace(/AI\.2\s*\([^\)]*Bậc\s*3[^\)]*\)/gi, "NLc.TC1");
-          text = text.replace(/AI\.2\s*\([^\)]*Bậc\s*4[^\)]*\)/gi, "NLc.TC2");
+          text = text.replace(/AI\.4/gi, "NLb.TC1");
+          text = text.replace(/AI\.2/gi, "NLc.TC1");
+          text = text.replace(/AI\.1/gi, "NLa.TC1");
+          text = text.replace(/AI\.3/gi, "NLd.TC1");
         }
 
         // 2. PREVENT RED COLOR LEAK:

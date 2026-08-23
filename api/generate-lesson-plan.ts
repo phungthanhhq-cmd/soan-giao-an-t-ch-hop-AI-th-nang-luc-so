@@ -381,6 +381,52 @@ ${structureGoalRequirement}
         .replace(/&lt;sup&gt;/gi, "<sup>")
         .replace(/&lt;\/sup&gt;/gi, "</sup>");
 
+      // 1. AUTO-FIX BASTARDIZED / HALLUCINATED CODES TO MATCH OFFICIAL CODES
+      // Strip any hallucinated level/tier descriptions like (Bậc 3), (Bậc 3 - Trung cấp), (Bậc 4 - Nâng cao), (Mức Trung cấp)
+      text = text.replace(/\s*\(\s*(?:Bậc|Mức|Cấp độ)[^\)]*\)/gi, "");
+      text = text.replace(/\s*\[\s*(?:Bậc|Mức|Cấp độ)[^\]]*\]/gi, "");
+
+      // Normalize prefix "NLS " or "AI " when placed directly before codes
+      text = text.replace(/\bNLS\s+(\d+\.\d+\.TC\w+)/gi, "$1");
+      text = text.replace(/\bAI\s+(NL[a-d]\.TC\w+)/gi, "$1");
+      text = text.replace(/\bAI\s+(\d+\.A\d+\.\d+)/gi, "$1");
+
+      const chosenNLS = (info?.manualNLS && info.manualNLS.length > 0)
+        ? info.manualNLS
+        : (info?.syncedIntegrations?.filter(i => i.category === 'NLS') || []);
+
+      const chosenAI = (info?.manualAI && info.manualAI.length > 0)
+        ? info.manualAI
+        : (info?.syncedIntegrations?.filter(i => i.category === 'AI') || []);
+
+      if (chosenNLS.length > 0) {
+        const primaryNLS = chosenNLS[0];
+        text = text.replace(/NLS\s*1\.[1-3]/gi, primaryNLS.code);
+        text = text.replace(/\[\s*NLS\s*1\.[1-3][^\]]*\]/gi, `[${primaryNLS.code}]`);
+      } else {
+        text = text.replace(/NLS\s*1\.1/gi, "1.1.TC1a");
+        text = text.replace(/NLS\s*1\.2/gi, "1.2.TC1a");
+        text = text.replace(/NLS\s*1\.3/gi, "1.3.TC1a");
+      }
+
+      if (chosenAI.length > 0) {
+        const primaryAI = chosenAI[0];
+        text = text.replace(/AI\.[1-4]/gi, primaryAI.code);
+        text = text.replace(/\[\s*AI\.[1-4][^\]]*\]/gi, `[${primaryAI.code}]`);
+      } else {
+        text = text.replace(/AI\.4/gi, "NLb.TC1");
+        text = text.replace(/AI\.2/gi, "NLc.TC1");
+        text = text.replace(/AI\.1/gi, "NLa.TC1");
+        text = text.replace(/AI\.3/gi, "NLd.TC1");
+      }
+
+      // 2. PREVENT RED COLOR LEAK:
+      text = text.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|II\.\s*TIẾN TRÌNH|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\bBước\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Nội dung|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Tổ chức))/gi, "</nls>\n$1");
+      text = text.replace(/<ai>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|II\.\s*TIẾN TRÌNH|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\bBước\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Nội dung|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Tổ chức))/gi, "</ai>\n$1");
+
+      text = text.replace(/<nls>\s*<\/nls>/gi, "");
+      text = text.replace(/<ai>\s*<\/ai>/gi, "");
+
       return text;
     };
 
