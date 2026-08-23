@@ -771,6 +771,15 @@ NGUYÊN TẮC ÁP DỤNG ĐỒNG BỘ CHO MỌI MÔN HỌC:
 3. 🌍 MÔN NGOẠI NGỮ (Tiếng Anh, Tiếng Pháp, Tiếng Trung, Tiếng Nhật, Tiếng Hàn...):
    - Giữ nguyên 100% ngữ liệu bài đọc (Reading passage), đoạn hội thoại (Dialogue), bài tập ngữ pháp/từ vựng (Grammar/Vocabulary exercises), câu hỏi trắc nghiệm và bài tập viết.
    - Tích hợp công cụ số & AI phù hợp: Công cụ luyện phát âm AI (ELSA, Cambridge Dictionary audio), ứng dụng thẻ từ số (Quizlet, Anki), tương tác giao tiếp trực tuyến (Kahoot, Quizizz), AI hỗ trợ gợi ý ý tưởng viết và kiểm tra ngữ pháp (có đối chiếu và phản biện).
+   - 🚨 ĐẶC QUY TẮC RIÊNG CHO MÔN TIẾNG ANH (ENGLISH SUBJECT):
+     + Khi soạn giáo án môn Tiếng Anh: MÃ VÀ TOÀN BỘ NỘI DUNG TÍCH HỢP NĂNG LỰC SỐ (NLS) VÀ NĂNG LỰC AI BẮT BUỘC ĐƯỢC CHUYỂN SANG TIẾNG ANH (ENGLISH):
+       * Về mã: Giữ nguyên mã số chuẩn (1.1.TC1a, 1.3.TC2a, NLb.TC1, NLb.TC2, 6.A1.1, 6.A1.2...).
+       * Trong Mục tiêu năng lực: 
+         - Thẻ NLS: '<nls>c. Digital Competence:\n - [Mã, ví dụ 1.1.TC1a] (Browsing, searching and filtering data, information and digital content): [Mô tả YCCĐ bằng Tiếng Anh]\n</nls>'
+         - Thẻ AI: '<ai>d. Artificial Intelligence (AI) Competence:\n - [Mã, ví dụ NLb.TC1 / 6.A1.2] (AI Ethics / AI Literacy): [Mô tả YCCĐ bằng Tiếng Anh]\n</ai>'
+       * Trong Tiến trình dạy học (Procedures / Learning Activities):
+         - Mọi câu lệnh, nhiệm vụ số, nhiệm vụ AI, prompt mẫu, câu hỏi hướng dẫn bọc trong '<nls>...</nls>' và '<ai>...</ai>' BẮT BUỘC VIẾT HOÀN TOÀN BẰNG TIẾNG ANH (Ví dụ: '<nls>- Digital task [1.1.TC1a]: Students use digital search tools (Google, Cambridge Dictionary) to search for new vocabulary and sample sentences...</nls>', '<ai>- AI task [NLb.TC1]: Students use ChatGPT/Copilot with prompt: "..." and verify the output with the textbook.</ai>').
+     + Quy tắc này CHỈ áp dụng riêng cho môn Tiếng Anh. Các môn học khác giữ nguyên tiếng Việt như đã quy định.
 
 4. 💻 MÔN CÔNG NGHỆ, TIN HỌC, HĐTN-HN, NGHỆ THUẬT (ÂM NHẠC, MỸ THUẬT), GDTC, GDQP-AN:
    - Tích hợp sâu các công cụ số thực hành, phần mềm đồ họa/thiết kế kỹ thuật số, công cụ tạo âm thanh số, video phân tích động tác/kỹ thuật thể thao, cổng thông tin hướng nghiệp và nhật ký hoạt động số.

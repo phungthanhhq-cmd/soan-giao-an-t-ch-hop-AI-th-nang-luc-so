@@ -58,6 +58,25 @@ async function startServer() {
       const hasPPCT = Boolean(info.distributionContent && info.distributionContent.trim().length > 0);
       const hasManualNLS = Boolean(enableNLS && info.manualNLS && info.manualNLS.length > 0);
       const hasManualAI = Boolean(enableAI && info.manualAI && info.manualAI.length > 0);
+      const isEnglishSubject = info.subject === "Tiếng Anh" || info.subject?.toLowerCase().includes("tiếng anh") || info.subject?.toLowerCase().includes("english");
+
+      const englishDirective = isEnglishSubject ? `
+      =============================================================================
+      🚨 ĐẶC QUY TẮC BẮT BUỘC RIÊNG CHO MÔN TIẾNG ANH (ENGLISH SUBJECT DIRECTIVE):
+      Vì đây là môn TIẾNG ANH (ENGLISH):
+      1. MÃ NĂNG LỰC: Bắt buộc dùng đúng chuẩn mã gốc (Ví dụ: [1.1.TC1a], [1.3.TC2a], [NLb.TC1], [6.A1.2]...).
+      2. MỤC TIÊU NĂNG LỰC TÍCH HỢP (TRONG MỤC 2. VỀ NĂNG LỰC): BẮT BUỘC VIẾT BẰNG TIẾNG ANH:
+         - Thẻ NLS: <nls>c. Digital Competence:
+           - [Mã chuẩn, ví dụ 1.1.TC1a] (Browsing, searching and filtering data, information and digital content): [Mô tả YCCĐ bằng Tiếng Anh]
+         </nls>
+         - Thẻ AI: <ai>d. Artificial Intelligence (AI) Competence:
+           - [Mã chuẩn, ví dụ NLb.TC1 / 6.A1.2] (AI Ethics / AI Literacy): [Mô tả YCCĐ bằng Tiếng Anh]
+         </ai>
+      3. TIẾN TRÌNH DẠY HỌC (PROCEDURES / ACTIVITIES):
+         - Mọi câu lệnh, nhiệm vụ số, nhiệm vụ AI, prompt mẫu, câu hỏi hướng dẫn bọc trong <nls>...</nls> và <ai>...</ai> BẮT BUỘC PHẢI VIẾT BẰNG TIẾNG ANH 100% (Ví dụ: "<nls>- Digital task [1.1.TC1a]: Students use digital search tools (Google, Cambridge Dictionary) to search for new vocabulary and sample sentences...</nls>", "<ai>- AI task [NLb.TC1]: Students use ChatGPT/Copilot with prompt: '...' and verify the output with the textbook.</ai>").
+      4. CÁC MÔN HỌC KHÁC: Giữ nguyên tiếng Việt như bình thường.
+      =============================================================================
+      ` : "";
 
       let integrationStrategyDirective = "";
       let modeDirective = "";
@@ -234,6 +253,8 @@ async function startServer() {
         ${modeDirective}
 
         ${integrationStrategyDirective}
+
+        ${englishDirective}
 
         YÊU CẦU XỬ LÝ NỘI DUNG:
         ${options.analyzeOnly ? "- Chỉ phân tích, không chỉnh sửa chi tiết." : "- Chỉnh sửa giáo án và TÍCH HỢP NĂNG LỰC theo đúng chế độ đã chọn ở trên vào các hoạt động dạy học."}
@@ -413,8 +434,8 @@ ${structureGoalRequirement}
 
         // 2. PREVENT RED COLOR LEAK:
         // Ensure that section headings and original steps are NEVER wrapped in <nls> or <ai>
-        text = text.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|II\.\s*TIẾN TRÌNH|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\bBước\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Nội dung|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Tổ chức))/gi, "</nls>\n$1");
-        text = text.replace(/<ai>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|II\.\s*TIẾN TRÌNH|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\bBước\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Nội dung|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Tổ chức))/gi, "</ai>\n$1");
+        text = text.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</nls>\n$1");
+        text = text.replace(/<ai>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</ai>\n$1");
 
         // Remove redundant empty <nls></nls> or <ai></ai>
         text = text.replace(/<nls>\s*<\/nls>/gi, "");
