@@ -21,21 +21,22 @@ async function startServer() {
         return res.status(400).json({ error: "Thiếu dữ liệu đầu vào để tạo giáo án." });
       }
 
-      const apiKey = (req.headers["x-api-key"] as string) ||
+      const rawKey = (req.headers["x-api-key"] as string) ||
                      process.env.GEMINI_API_KEY || 
                      process.env.API_KEY || 
                      process.env.KAY_API_GEMINI || 
                      process.env.KEY_API_GEMINI || 
                      process.env.GEMINI_KEY || 
                      process.env.GEMINI_API;
-      if (!apiKey || !apiKey.trim()) {
+      const apiKey = rawKey ? rawKey.trim().replace(/^["']|["']$/g, '') : '';
+      if (!apiKey) {
         return res.status(400).json({
           error: "Chưa thiết lập Gemini API Key. Vui lòng nhấn nút 'CẤU HÌNH API KEY' ở thanh trên cùng để dán API Key của bạn.",
         });
       }
 
       const ai = new GoogleGenAI({
-        apiKey: apiKey.trim(),
+        apiKey: apiKey,
         httpOptions: {
           headers: {
             "User-Agent": "aistudio-build",
@@ -47,6 +48,9 @@ async function startServer() {
       const modelsToTry = [
         "gemini-3.6-flash",
         "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-2.0-flash-lite",
         "gemini-3.7-flash",
         "gemini-flash-latest",
         "gemini-3.1-flash-lite",

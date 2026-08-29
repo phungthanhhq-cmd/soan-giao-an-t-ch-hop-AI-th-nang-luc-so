@@ -18,10 +18,17 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setInputKey(apiKey || localStorage.getItem("USER_GEMINI_API_KEY") || "");
+    }
+  }, [isOpen, apiKey]);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
-    onSaveApiKey(inputKey.trim());
+    const cleanKey = inputKey.trim().replace(/^["']|["']$/g, '');
+    onSaveApiKey(cleanKey);
     onClose();
   };
 

@@ -438,16 +438,20 @@ async function generateLessonPlanClientSide(
   options: ProcessingOptions,
   apiKey: string
 ): Promise<string> {
-  if (!apiKey || !apiKey.trim()) {
+  const cleanApiKey = apiKey ? apiKey.trim().replace(/^["']|["']$/g, '') : '';
+  if (!cleanApiKey) {
     throw new Error("Trang web đang chạy trên Netlify/Web tĩnh. Vui lòng bấm nút 'CẤU HÌNH API KEY' ở góc trên để dán API Key Gemini của bạn để ứng dụng hoạt động!");
   }
 
-  const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+  const ai = new GoogleGenAI({ apiKey: cleanApiKey });
   const userPrompt = buildUserPrompt(info, options);
 
   const modelsToTry = [
     "gemini-3.6-flash",
     "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-2.0-flash-lite",
     "gemini-3.7-flash",
     "gemini-flash-latest",
     "gemini-3.1-flash-lite",

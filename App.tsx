@@ -217,7 +217,6 @@ const App: React.FC = () => {
   const [apiKeyInput, setApiKeyInput] = useState<string>(() => {
     return localStorage.getItem("USER_GEMINI_API_KEY") || "";
   });
-  const [showKeyInput, setShowKeyInput] = useState<boolean>(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [autoKeyNotice, setAutoKeyNotice] = useState<string | null>(null);
 
@@ -252,7 +251,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleSaveApiKey = (val: string) => {
-    const trimmed = val.trim();
+    const trimmed = val.trim().replace(/^["']|["']$/g, '');
     setApiKeyInput(trimmed);
     localStorage.setItem("USER_GEMINI_API_KEY", trimmed);
   };
@@ -310,9 +309,6 @@ const App: React.FC = () => {
       console.error("Process Error:", err);
       const msg = err.message || "Đã xảy ra lỗi không xác định khi kết nối với AI.";
       setError(msg);
-      if (msg.includes("API Key") || msg.includes("API") || msg.includes("AI") || msg.includes("chưa được cấu hình")) {
-        setShowKeyInput(true);
-      }
     } finally {
       setLoading(false);
     }
@@ -670,8 +666,8 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowKeyInput(true)}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center shrink-0 self-end sm:self-center"
+                  onClick={() => setIsApiKeyModalOpen(true)}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center shrink-0 self-end sm:self-center cursor-pointer"
                 >
                   <KeyRound size={14} className="mr-1.5" />
                   DÁN / ĐỔI API KEY NGAY
