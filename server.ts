@@ -66,19 +66,37 @@ async function startServer() {
 
       const englishDirective = isEnglishSubject ? `
       =============================================================================
-      🚨 ĐẶC QUY TẮC BẮT BUỘC RIÊNG CHO MÔN TIẾNG ANH (ENGLISH SUBJECT DIRECTIVE):
-      Vì đây là môn TIẾNG ANH (ENGLISH):
-      1. MÃ NĂNG LỰC: Bắt buộc dùng đúng chuẩn mã gốc (Ví dụ: [1.1.TC1a], [1.3.TC2a], [NLb.TC1], [6.A1.2]...).
-      2. MỤC TIÊU NĂNG LỰC TÍCH HỢP (TRONG MỤC 2. VỀ NĂNG LỰC): BẮT BUỘC VIẾT BẰNG TIẾNG ANH:
-         - Thẻ NLS: <nls>c. Digital Competence:
-           - [Mã chuẩn, ví dụ 1.1.TC1a] (Browsing, searching and filtering data, information and digital content): [Mô tả YCCĐ bằng Tiếng Anh]
-         </nls>
-         - Thẻ AI: <ai>d. Artificial Intelligence (AI) Competence:
-           - [Mã chuẩn, ví dụ NLb.TC1 / 6.A1.2] (AI Ethics / AI Literacy): [Mô tả YCCĐ bằng Tiếng Anh]
-         </ai>
-      3. TIẾN TRÌNH DẠY HỌC (PROCEDURES / ACTIVITIES):
-         - Mọi câu lệnh, nhiệm vụ số, nhiệm vụ AI, prompt mẫu, câu hỏi hướng dẫn bọc trong <nls>...</nls> và <ai>...</ai> BẮT BUỘC PHẢI VIẾT BẰNG TIẾNG ANH 100% (Ví dụ: "<nls>- Digital task [1.1.TC1a]: Students use digital search tools (Google, Cambridge Dictionary) to search for new vocabulary and sample sentences...</nls>", "<ai>- AI task [NLb.TC1]: Students use ChatGPT/Copilot with prompt: '...' and verify the output with the textbook.</ai>").
-      4. CÁC MÔN HỌC KHÁC: Giữ nguyên tiếng Việt như bình thường.
+      🚨 ĐẶC QUY TẮC BẮT BUỘC RIÊNG CHO MÔN TIẾNG ANH (ENGLISH LESSON PLAN INTEGRATION MANDATE):
+      Giáo án môn TIẾNG ANH (ENGLISH SUBJECT):
+      1. MỤC TIÊU BÀI HỌC (I. OBJECTIVES):
+         - BẮT BUỘC chèn thêm mục Năng lực số (Digital Competence) và Năng lực AI (AI Competence) vào ngay dưới mục "2. Competence" (sau "a. General competences" và "b. Specific competences"):
+           ${hasManualNLS ? `* THẺ NLS (BẮT BUỘC BỌC TRONG <nls>...</nls>):
+           <nls>
+           - c. Digital Competence:
+             ${info.manualNLS?.map(item => `- [${item.code}] (${item.name}): [Translate learning outcome to English]`).join("\n             ") || "- [1.1.TC1a] (Browsing, searching and filtering data, information and digital content): Students can use digital search engines and online dictionaries to find vocabulary and grammar explanations."}
+           </nls>` : ""}
+           ${hasManualAI ? `* THẺ AI (BẮT BUỘC BỌC TRONG <ai>...</ai>):
+           <ai>
+           - ${hasManualNLS ? "d." : "c."} Artificial Intelligence (AI) Competence:
+             ${info.manualAI?.map(item => `- [${item.code}] (${item.name}): [Translate AI learning outcome to English]`).join("\n             ") || "- [NLb.TC1] (AI Ethics & Critical Thinking): Students can interact responsibly with AI tools (ChatGPT/Copilot) and cross-check AI-generated sentences with the textbook."}
+           </ai>` : ""}
+
+      2. THIẾT BỊ DẠY HỌC (II. TEACHING AIDS / MATERIALS):
+         - Bổ sung công cụ số và AI vào danh sách thiết bị dạy học bằng Tiếng Anh:
+           ${hasManualNLS ? `<nls>- Digital tools: [Online dictionaries (Cambridge/Oxford), search engines, Quizlet, Padlet, Google Slides, projector...]</nls>` : ""}
+           ${hasManualAI ? `<ai>- AI tools: [Generative AI assistants (ChatGPT, Copilot), AI pronunciation checkers...]</ai>` : ""}
+
+      3. TIẾN TRÌNH DẠY HỌC (III. TEACHING PROCEDURES / LESSON PROCEDURES):
+         - 🚨 BẮT BUỘC TÍCH HỢP ĐẦY ĐỦ CÁC HOẠT ĐỘNG DẠY HỌC (Activity 1: Warm-up, Activity 2: Knowledge Formation / Presentation, Activity 3: Practice, Activity 4: Production / Application):
+         - Tại TẤT CẢ các hoạt động, trong cả hoạt động của Giáo viên (Teacher's activities / Step 1 & 4) và hoạt động của Học sinh (Students' activities / Step 2 & 3), BẮT BUỘC phải chèn các nhiệm vụ số và nhiệm vụ AI bằng Tiếng Anh 100%, được bọc trong thẻ <nls>...</nls> và <ai>...</ai>:
+           Ví dụ mẫu:
+           <nls>- Digital task [1.1.TC1a]: Teacher instructs students to use digital devices to search for words/images related to the topic on Google / Cambridge Dictionary.</nls>
+           <nls>- Students search on their tablets/smartphones, take notes of pronunciation and sample sentences, and share findings on Padlet.</nls>
+           <ai>- AI task [NLb.TC1]: Teacher guides students to use an AI assistant with the prompt: 'Give 3 example sentences using...' and requires them to cross-check grammar with textbook rules.</ai>
+           <ai>- Students run the AI prompt, review the generated sentences, and critically evaluate the accuracy.</ai>
+         - Trong mục sản phẩm (c. Outcome / Products): Bổ sung sản phẩm số và AI (ví dụ: "<nls>- Digital product: Online vocabulary notes, Padlet sticky notes</nls>", "<ai>- AI product: AI-generated practice sentences verified and corrected by students</ai>").
+
+      4. MÃ NĂNG LỰC: Bắt buộc dùng đúng mã số chuẩn quốc gia ([1.1.TC1a], [1.3.TC2a], [NLb.TC1], [6.A1.2]...).
       =============================================================================
       ` : "";
 
@@ -183,48 +201,95 @@ async function startServer() {
         =============================================================================
         `;
 
-        if (hasManualNLS && hasManualAI) {
-          modeDirective = `🚨 CHẾ ĐỘ: TÍCH HỢP CẢ NLS VÀ AI THEO DANH SÁCH NGƯỜI DÙNG ĐÃ CHỌN.`;
-          structureGoalRequirement = `
-           1. Về kiến thức
-           2. Về năng lực:
-              a. Năng lực chung
-              b. Năng lực đặc thù môn học
-              c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
-                 <nls>c. Năng lực số
-                 - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
-                 </nls>
-              d. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
-                 <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-                 - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
-                 </ai>
-           3. Về phẩm chất`;
-        } else if (hasManualNLS) {
-          modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP NĂNG LỰC SỐ (NLS) - TUYỆT ĐỐI KHÔNG TÍCH HỢP AI.`;
-          structureGoalRequirement = `
-           1. Về kiến thức
-           2. Về năng lực:
-              a. Năng lực chung
-              b. Năng lực đặc thù môn học
-              c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
-                 <nls>c. Năng lực số
-                 - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
-                 </nls>
-                 (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI)
-           3. Về phẩm chất`;
+        if (isEnglishSubject) {
+          if (hasManualNLS && hasManualAI) {
+            modeDirective = `🚨 MODE: INTEGRATE BOTH DIGITAL COMPETENCE (NLS) AND AI COMPETENCE FOR ENGLISH LESSON PLAN.`;
+            structureGoalRequirement = `
+           I. OBJECTIVES
+           1. Knowledge: [Keep original]
+           2. Competence:
+              - a. General competences: [Keep original]
+              - b. Specific competences: [Keep original]
+              <nls>
+              - c. Digital Competence:
+${info.manualNLS?.map(item => `                - [${item.code}] (${item.name}): [Translate learning outcome to English]`).join("\n")}
+              </nls>
+              <ai>
+              - d. Artificial Intelligence (AI) Competence:
+${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [Translate AI learning outcome to English]`).join("\n")}
+              </ai>
+           3. Attitude & Personal qualities: [Keep original]`;
+          } else if (hasManualNLS) {
+            modeDirective = `🚨 MODE: INTEGRATE DIGITAL COMPETENCE (NLS) ONLY FOR ENGLISH LESSON PLAN.`;
+            structureGoalRequirement = `
+           I. OBJECTIVES
+           1. Knowledge: [Keep original]
+           2. Competence:
+              - a. General competences: [Keep original]
+              - b. Specific competences: [Keep original]
+              <nls>
+              - c. Digital Competence:
+${info.manualNLS?.map(item => `                - [${item.code}] (${item.name}): [Translate learning outcome to English]`).join("\n")}
+              </nls>
+           3. Attitude & Personal qualities: [Keep original]`;
+          } else {
+            modeDirective = `🚨 MODE: INTEGRATE AI COMPETENCE ONLY FOR ENGLISH LESSON PLAN.`;
+            structureGoalRequirement = `
+           I. OBJECTIVES
+           1. Knowledge: [Keep original]
+           2. Competence:
+              - a. General competences: [Keep original]
+              - b. Specific competences: [Keep original]
+              <ai>
+              - c. Artificial Intelligence (AI) Competence:
+${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [Translate AI learning outcome to English]`).join("\n")}
+              </ai>
+           3. Attitude & Personal qualities: [Keep original]`;
+          }
         } else {
-          modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI) - TUYỆT ĐỐI KHÔNG TÍCH HỢP NLS.`;
-          structureGoalRequirement = `
-           1. Về kiến thức
-           2. Về năng lực:
-              a. Năng lực chung
-              b. Năng lực đặc thù môn học
-              c. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
-                 <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
-                 - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
-                 </ai>
-                 (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ)
-           3. Về phẩm chất`;
+          if (hasManualNLS && hasManualAI) {
+            modeDirective = `🚨 CHẾ ĐỘ: TÍCH HỢP CẢ NLS VÀ AI THEO DANH SÁCH NGƯỜI DÙNG ĐÃ CHỌN.`;
+            structureGoalRequirement = `
+             1. Về kiến thức
+             2. Về năng lực:
+                a. Năng lực chung
+                b. Năng lực đặc thù môn học
+                c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
+                   <nls>c. Năng lực số
+                   - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
+                   </nls>
+                d. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
+                   <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
+                   - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
+                   </ai>
+             3. Về phẩm chất`;
+          } else if (hasManualNLS) {
+            modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP NĂNG LỰC SỐ (NLS) - TUYỆT ĐỐI KHÔNG TÍCH HỢP AI.`;
+            structureGoalRequirement = `
+             1. Về kiến thức
+             2. Về năng lực:
+                a. Năng lực chung
+                b. Năng lực đặc thù môn học
+                c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
+                   <nls>c. Năng lực số
+                   - [Mã NLS chi tiết] (Tên miền): [Yêu cầu cần đạt NLS theo đúng mã đã chọn]
+                   </nls>
+                   (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI)
+             3. Về phẩm chất`;
+          } else {
+            modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI) - TUYỆT ĐỐI KHÔNG TÍCH HỢP NLS.`;
+            structureGoalRequirement = `
+             1. Về kiến thức
+             2. Về năng lực:
+                a. Năng lực chung
+                b. Năng lực đặc thù môn học
+                c. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
+                   <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
+                   - [Mã AI chi tiết] (Tên miền): [Yêu cầu cần đạt AI theo đúng mã đã chọn]
+                   </ai>
+                   (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ)
+             3. Về phẩm chất`;
+          }
         }
       } else {
         integrationStrategyDirective = `
