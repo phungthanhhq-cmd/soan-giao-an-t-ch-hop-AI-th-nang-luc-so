@@ -855,44 +855,22 @@ QUY TẮC ĐỊNH DẠNG KỸ THUẬT:
    - KHÔNG ĐƯỢC đặt các mã này bên trong các thẻ định dạng in đậm (**), in nghiêng (*), gạch chân (<u>).
    - Giữ nguyên thẻ <sub> và <sup> cho công thức hóa học và chỉ số (ví dụ H<sub>2</sub>O, cm<sup>2</sup>).
 
-2. HƯỚNG DẪN TỔ CHỨC MỤC TIÊU VÀ HOẠT ĐỘNG TÍCH HỢP (QUY TẮC GHI ĐẦY ĐỦ VÀ CHÍNH XÁC MÃ SỐ):
-   - Trong Mục I. MỤC TIÊU -> 2. Về năng lực:
-     a. Năng lực chung
-     b. Năng lực đặc thù môn học
-     c. Năng lực số (nếu có NLS theo PPCT hoặc người dùng chọn): Bao bọc toàn bộ bằng thẻ <nls>...</nls> theo đúng định dạng:
-        <nls>c. Năng lực số
-        - [Mã tiêu chí NLS cụ thể] (Tên thành tố/miền NLS): [Yêu cầu cần đạt NLS đầy đủ theo đúng mã đã chọn/PPCT]
-        (Ví dụ: - 1.1.TC2a (1.1. Duyệt, tìm kiếm và lọc dữ liệu): Minh họa được nhu cầu thông tin cá nhân và giải thích mục đích tìm kiếm.)
-        (Ví dụ: - 1.3.TC2a (1.3. Quản lý dữ liệu, thông tin và nội dung số): Tổ chức lưu trữ, sắp xếp dữ liệu học tập khoa học.)
-        (TUYỆT ĐỐI KHÔNG ghi chung chung kiểu "NLS 1.1 (Bậc 3)", BẮT BUỘC PHẢI GHI ĐỦ MÃ CHI TIẾT 1.1.TC2a, 1.3.TC2a...)
-        </nls>
-     d. Năng lực Trí tuệ Nhân tạo (AI) (nếu có AI theo PPCT hoặc người dùng chọn): Bao bọc toàn bộ bằng thẻ <ai>...</ai> theo đúng định dạng:
-        <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-        - [Mã tiêu chí AI cụ thể] (Tên thành tố/miền AI): [Yêu cầu cần đạt AI đầy đủ theo đúng mã đã chọn/PPCT]
-        (Ví dụ: - NLb.TC2 (NLb: Đạo đức AI - QĐ 3439): Nhận biết và phân loại các rủi ro an toàn của AI (rủi ro dữ liệu, thuật toán thiên vị, lừa đảo); Tự giác bảo vệ dữ liệu cá nhân và bản quyền; Hiểu vai trò người dùng kiểm soát và chịu trách nhiệm với kết quả cuối cùng do AI tạo ra.)
-        (Ví dụ: - NLc.TC2 (NLc: Các kĩ thuật và ứng dụng AI - QĐ 3439): Phân biệt 3 phương pháp học máy (có giám sát, không giám sát, học tăng cường); Hiểu cách AI nhận diện cảm xúc...)
-        (TUYỆT ĐỐI KHÔNG ghi chung chung kiểu "AI.4 (Bậc 3)", BẮT BUỘC PHẢI GHI ĐỦ MÃ CHI TIẾT NLb.TC2, NLc.TC2, NLa.TC1...)
-        </ai>
-
-   - Trong Mục II. TIẾN TRÌNH DẠY HỌC (QUY TẮC BẮT BUỘC VỀ SỰ TƯƠNG ỨNG GIỮA HOẠT ĐỘNG CỦA GV VÀ HS):
-     🚨 GHI RÕ MÃ NĂNG LỰC ĐƯỢC ÁP DỤNG TRONG NGOẶC VUÔNG (Ví dụ: [1.1.TC2a], [1.3.TC2a], [NLb.TC2], [NLc.TC2]) và triển khai đầy đủ 4 bước cho tất cả các hoạt động:
-     - MỌI HOẠT ĐỘNG DẠY HỌC trong bài:
-       + Hoạt động 1: Mở đầu / Khởi động
-       + Hoạt động 2: Hình thành kiến thức mới / Khám phá
-       + Hoạt động 3: Luyện tập (BẮT BUỘC PHẢI CÓ ĐỦ 4 BƯỚC VÀ GIỮ NGUYÊN 100% CÂU HỎI TRẮC NGHIỆM/BÀI TẬP)
-       + Hoạt động 4: Vận dụng (BẮT BUỘC PHẢI CÓ ĐỦ 4 BƯỚC)
-     - Trong mục **d. Tổ chức thực hiện** (hoặc bảng 2 cột Tổ chức thực hiện | Sản phẩm), BẮT BUỘC PHẢI TRIỂN KHAI ĐỦ 4 BƯỚC RÕ RÀNG:
-       + BƯỚC 1: CHUYỂN GIAO NHIỆM VỤ (GV làm gì): GV giao nhiệm vụ bài học gốc (câu hỏi, bài tập, phiếu học tập - MÀU ĐEN) + giao nhiệm vụ số/AI rõ ràng (công cụ cụ thể như Google, Padlet, Kahoot, ChatGPT, Copilot, GeoGebra, PhET...; cung cấp câu lệnh prompt mẫu; giao thời gian và yêu cầu kiểm chứng). Bọc duy nhất phần nhiệm vụ số/AI bổ sung bằng <nls>...</nls> hoặc <ai>...</ai>.
-       + BƯỚC 2: THỰC HIỆN NHIỆM VỤ (HS làm gì - BẮT BUỘC PHẢI CÓ): Nêu chi tiết hành động của học sinh (làm bài tập gốc - MÀU ĐEN, thao tác trên máy tính/điện thoại, truy cập ứng dụng/công cụ AI, nhập prompt, đọc kết quả, đối chiếu với SGK để phát hiện lỗi/ảo giác, thảo luận nhóm và ghi chép vào vở/phiếu học tập). Bọc duy nhất phần hành động số/AI bổ sung bằng <nls>...</nls> hoặc <ai>...</ai>.
-       + BƯỚC 3: BÁO CÁO, THẢO LUẬN (HS trình bày & phản biện): HS chia sẻ kết quả bài học (MÀU ĐEN) và kết quả số (chiếu màn hình, đọc bài làm, chia sẻ link Padlet, trình bày kết quả so sánh giữa AI và SGK, phản biện ý kiến). Bọc phần bổ sung bằng <nls>...</nls> hoặc <ai>...</ai>.
-       + BƯỚC 4: ĐÁNH GIÁ, KẾT LUẬN (GV nhận xét & chuẩn hóa): GV nhận xét bài làm và kiến thức gốc (MÀU ĐEN), đánh giá kỹ năng sử dụng công nghệ/AI của HS, giáo dục về liêm chính học thuật và an toàn thông tin, chốt kiến thức chuẩn. Bọc phần bổ sung bằng <nls>...</nls> hoặc <ai>...</ai>.
-       + 🚨 CHI TIẾT HÓA MỤC SẢN PHẨM HỌC TẬP (Mục 'b. Sản phẩm' hoặc Cột Sản phẩm):
-         - TUYỆT ĐỐI KHÔNG dùng các câu mô tả chung chung, hình thức như: "Học sinh nêu được ý chính về...", "Học sinh trả lời được câu hỏi...", "Biết cách sử dụng AI...", "Hoàn thành bài tập 1, 2, 3...".
-         - BẮT BUỘC PHẢI GHI RÕ NỘI DUNG CỤ THỂ, ĐẦY ĐỦ CỦA SẢN PHẨM:
-           * Ghi rõ nội dung câu trả lời chuẩn, lời giải chi tiết, đáp án của từng câu hỏi/bài tập trong bài học.
-           * Liệt kê cụ thể từng ý chính, định nghĩa, công thức, quy tắc, bảng biểu, sơ đồ mà học sinh tạo ra (Ví dụ: thay vì ghi "Nêu đặc điểm...", phải ghi rõ cụ thể từng đặc điểm 1, 2, 3... là gì).
-           * Đối với sản phẩm tích hợp NLS/AI (bọc trong <nls>...</nls> hoặc <ai>...</ai>): Ghi rõ nội dung sản phẩm số cụ thể (ví dụ: Bản tóm tắt/so sánh cụ thể gồm những nội dung gì; Câu trả lời đã được đối chiếu/kiểm chứng từ ChatGPT với SGK; File trình chiếu hoặc sơ đồ tư duy trên Canva/Mindmeister với các nhánh nội dung cụ thể; Kết quả tra cứu cụ thể; Câu lệnh prompt cụ thể học sinh đã thực hiện và kết quả thu được...).
-     - ⛔ CẤM TUYỆT ĐỐI việc viết sơ sài hoặc bỏ sót các bước ở Hoạt động 3 và 4!
+2. 🚨 QUY TẮC BẢO TỒN NGUYÊN BẢN 100% BỐ CỤC VÀ ĐỀ MỤC GIÁO ÁN GỐC (CHẾ ĐỘ CHÈN NỘI DUNG - INJECTION ONLY):
+   - 🎯 BẢO TỒN NGUYÊN VĂN TỪ ĐẦU ĐẾN CUỐI:
+     + Giữ nguyên 100% toàn bộ mẫu, phong cách, bố cục, các tiểu mục (ví dụ: 1.1, 1.2, 2.1, 2.2, 2.3...), trích dẫn thơ/văn, câu hỏi, bài tập, đáp án và bảng biểu của giáo án gốc người dùng tải lên.
+     + KHÔNG ĐƯỢC tự ý gộp, tách, xóa, thay đổi tên đề mục, hoặc viết lại lời văn của giáo án gốc.
+     + KHÔNG ĐƯỢC ép giáo án gốc vào bất kỳ mẫu cứng nhắc nào khác. Giáo án gốc trình bày thế nào thì giữ nguyên như thế ấy.
+   
+   - 🔴 CƠ CHẾ CHÈN (INJECT) NĂNG LỰC SỐ & AI VÀO ĐÚNG VỊ TRÍ:
+     + Trong Mục I. MỤC TIÊU:
+       * Giữ nguyên 100% tất cả các mục tiêu gốc của giáo án (kiến thức, năng lực chung, năng lực đặc thù, phẩm chất - chữ MÀU ĐEN).
+       * Chỉ chèn thêm mục Năng lực số (<nls>c. Năng lực số: - [Mã] (Tên miền): [YCCĐ]...</nls>) và/hoặc Năng lực AI (<ai>d. Năng lực Trí tuệ Nhân tạo: - [Mã] (Tên miền): [YCCĐ]...</ai>) vào phần Năng lực.
+     + Trong Mục II. THIẾT BỊ DẠY HỌC:
+       * Giữ nguyên 100% thiết bị gốc, chỉ chèn thêm thiết bị/công cụ số và AI vào danh sách nếu có (bọc trong thẻ <nls> hoặc <ai>).
+     + Trong Mục III. TIẾN TRÌNH DẠY HỌC (và tất cả các hoạt động, tiểu mục 2.1, 2.2...):
+       * Giữ nguyên 100% toàn bộ các hoạt động, nội dung, sản phẩm và tiến trình gốc của giáo viên (MÀU ĐEN).
+       * CHỈ CHÈN THÊM các dòng nhiệm vụ/hướng dẫn số & AI (kèm mã [1.1.TC2a], [NLb.TC2]...) bọc trong <nls>...</nls> và <ai>...</ai> vào các bước của GV và HS, và chèn sản phẩm số/AI tương ứng vào mục Sản phẩm.
+       * Tuyệt đối không xóa, không sửa, không tóm tắt bất kỳ câu chữ nào của bài học gốc.
 
 QUY TẮC BẢO TOÀN ĐỊNH DẠNG VÀ THỂ THỨC VĂN BẢN (NGHIÊM NGẶT 100%):
 - BẢO TOÀN 100% THỂ THỨC VĂN BẢN CỦA GIÁO ÁN GỐC:

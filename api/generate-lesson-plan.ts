@@ -215,11 +215,8 @@ ${syncedAIFormatted}
         if (hasManualNLS && hasManualAI) {
           modeDirective = `🚨 MODE: INTEGRATE BOTH DIGITAL COMPETENCE (NLS) AND AI COMPETENCE FOR ENGLISH LESSON PLAN.`;
           structureGoalRequirement = `
-           I. OBJECTIVES
-           1. Knowledge: [Keep original]
-           2. Competence:
-              - a. General competences: [Keep original]
-              - b. Specific competences: [Keep original]
+           - KEEP 100% OF THE ORIGINAL OBJECTIVES (Knowledge, General/Specific Competences, Attitude/Personal Qualities).
+           - ONLY INJECT THE DIGITAL & AI COMPETENCES UNDER COMPETENCES:
               <nls>
               - c. Digital Competence:
 ${info.manualNLS?.map(item => `                - [${item.code}] (${item.name}): [Translate learning outcome to English]`).join("\n")}
@@ -227,95 +224,73 @@ ${info.manualNLS?.map(item => `                - [${item.code}] (${item.name}): 
               <ai>
               - d. Artificial Intelligence (AI) Competence:
 ${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [Translate AI learning outcome to English]`).join("\n")}
-              </ai>
-           3. Attitude & Personal qualities: [Keep original]`;
+              </ai>`;
         } else if (hasManualNLS) {
           modeDirective = `🚨 MODE: INTEGRATE DIGITAL COMPETENCE (NLS) ONLY FOR ENGLISH LESSON PLAN.`;
           structureGoalRequirement = `
-           I. OBJECTIVES
-           1. Knowledge: [Keep original]
-           2. Competence:
-              - a. General competences: [Keep original]
-              - b. Specific competences: [Keep original]
+           - KEEP 100% OF THE ORIGINAL OBJECTIVES.
+           - ONLY INJECT DIGITAL COMPETENCE UNDER COMPETENCES:
               <nls>
               - c. Digital Competence:
 ${info.manualNLS?.map(item => `                - [${item.code}] (${item.name}): [Translate learning outcome to English]`).join("\n")}
-              </nls>
-           3. Attitude & Personal qualities: [Keep original]`;
+              </nls>`;
         } else {
           modeDirective = `🚨 MODE: INTEGRATE AI COMPETENCE ONLY FOR ENGLISH LESSON PLAN.`;
           structureGoalRequirement = `
-           I. OBJECTIVES
-           1. Knowledge: [Keep original]
-           2. Competence:
-              - a. General competences: [Keep original]
-              - b. Specific competences: [Keep original]
+           - KEEP 100% OF THE ORIGINAL OBJECTIVES.
+           - ONLY INJECT AI COMPETENCE UNDER COMPETENCES:
               <ai>
               - c. Artificial Intelligence (AI) Competence:
 ${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [Translate AI learning outcome to English]`).join("\n")}
-              </ai>
-           3. Attitude & Personal qualities: [Keep original]`;
+              </ai>`;
         }
       } else {
         if (hasManualNLS && hasManualAI) {
           modeDirective = `🚨 CHẾ ĐỘ: TÍCH HỢP CẢ NLS VÀ AI THEO DANH SÁCH NGƯỜI DÙNG ĐÃ CHỌN.`;
           structureGoalRequirement = `
-             1. Về kiến thức
-             2. Về năng lực:
-                a. Năng lực chung
-                b. Năng lực đặc thù môn học
-                c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
-                   <nls>c. Năng lực số
-                   ${nlsFormattedLines}
-                   </nls>
-                d. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
-                   <ai>d. Năng lực Trí tuệ Nhân tạo (AI)
-                   ${aiFormattedLines}
-                   </ai>
-             3. Về phẩm chất`;
+             - GIỮ NGUYÊN 100% CẤU TRÚC VÀ NỘI DUNG MỤC TIÊU CỦA GIÁO ÁN GỐC (Kiến thức, Năng lực chung, Năng lực đặc thù, Phẩm chất - chữ màu đen).
+             - CHỈ CHÈN THÊM MỤC NĂNG LỰC SỐ VÀ AI VÀO PHẦN NĂNG LỰC:
+               <nls>
+               c. Năng lực số:
+               ${nlsFormattedLines}
+               </nls>
+               <ai>
+               d. Năng lực Trí tuệ Nhân tạo (AI):
+               ${aiFormattedLines}
+               </ai>`;
         } else if (hasManualNLS) {
           modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP NĂNG LỰC SỐ (NLS) - TUYỆT ĐỐI KHÔNG TÍCH HỢP AI.`;
           structureGoalRequirement = `
-             1. Về kiến thức
-             2. Về năng lực:
-                a. Năng lực chung
-                b. Năng lực đặc thù môn học
-                c. Năng lực số (bắt buộc bao bọc bằng <nls>...</nls> để bôi đỏ):
-                   <nls>c. Năng lực số
-                   ${nlsFormattedLines}
-                   </nls>
-                   (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI)
-             3. Về phẩm chất`;
+             - GIỮ NGUYÊN 100% CẤU TRÚC VÀ NỘI DUNG MỤC TIÊU CỦA GIÁO ÁN GỐC (chữ màu đen).
+             - CHỈ CHÈN THÊM MỤC NĂNG LỰC SỐ VÀO PHẦN NĂNG LỰC:
+               <nls>
+               c. Năng lực số:
+               ${nlsFormattedLines}
+               </nls>
+               (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC AI)`;
         } else {
           modeDirective = `🚨 CHẾ ĐỘ: CHỈ TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI) - TUYỆT ĐỐI KHÔNG TÍCH HỢP NLS.`;
           structureGoalRequirement = `
-             1. Về kiến thức
-             2. Về năng lực:
-                a. Năng lực chung
-                b. Năng lực đặc thù môn học
-                c. Năng lực Trí tuệ Nhân tạo (AI) (bắt buộc bao bọc bằng <ai>...</ai> để bôi đỏ):
-                   <ai>c. Năng lực Trí tuệ Nhân tạo (AI)
-                   ${aiFormattedLines}
-                   </ai>
-                   (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ)
-             3. Về phẩm chất`;
+             - GIỮ NGUYÊN 100% CẤU TRÚC VÀ NỘI DUNG MỤC TIÊU CỦA GIÁO ÁN GỐC (chữ màu đen).
+             - CHỈ CHÈN THÊM MỤC NĂNG LỰC AI VÀO PHẦN NĂNG LỰC:
+               <ai>
+               c. Năng lực Trí tuệ Nhân tạo (AI):
+               ${aiFormattedLines}
+               </ai>
+               (⛔ CẤM TUYỆT ĐỐI KHÔNG ĐƯỢC THÊM MỤC NĂNG LỰC SỐ)`;
         }
       }
     } else {
       integrationStrategyDirective = `
       =============================================================================
       🚨 TRƯỜNG HỢP 3: KHÔNG CÓ PPCT VÀ NGƯỜI DÙNG KHÔNG CHỌN MÃ TÍCH HỢP NÀO:
-      - Chuẩn hóa cấu trúc giáo án gốc theo 4 bước rõ ràng, giữ nguyên 100% kiến thức và bài tập gốc.
+      - Giữ nguyên 100% nguyên văn toàn bộ cấu trúc và nội dung giáo án gốc.
       - ⛔ TUYỆT ĐỐI KHÔNG tự ý thêm các mục NLS hay AI mới vào giáo án.
       =============================================================================
       `;
-      modeDirective = `🚨 CHẾ ĐỘ: CHUẨN HÓA GIÁO ÁN GỐC (KHÔNG TÍCH HỢP NLS VÀ KHÔNG TÍCH HỢP AI).`;
+      modeDirective = `🚨 CHẾ ĐỘ: GIỮ NGUYÊN GIÁO ÁN GỐC (KHÔNG TÍCH HỢP NLS VÀ KHÔNG TÍCH HỢP AI).`;
       structureGoalRequirement = `
-           1. Về kiến thức
-           2. Về năng lực:
-              a. Năng lực chung
-              b. Năng lực đặc thù môn học
-           3. Về phẩm chất`;
+           - Giữ nguyên 100% toàn bộ mục tiêu gốc của giáo án.`;
     }
 
     const userPrompt = `
@@ -340,13 +315,11 @@ ${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [
       ${options.detailedReport ? "- Kèm theo bảng giải thích chi tiết mã năng lực đã chọn ở cuối bài." : ""}
       
       YÊU CẦU VỀ ĐỊNH DẠNG & NGUYÊN TẮC BẢO TOÀN (BẮT BUỘC):
-      1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG GIÁO ÁN GỐC & CẤM TUYỆT ĐỐI TÓM TẮT TIẾT HỌC:
+      1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG VÀ CẤU TRÚC GIÁO ÁN GỐC (CHẾ ĐỘ CHÈN NỘI DUNG - INJECTION ONLY):
          - ⛔ CẤM TUYỆT ĐỐI VIẾT CÁC DÒNG RÚT GỌN NHƯ: "(Các tiết học tiếp theo 45-53 giữ nguyên cấu trúc...)", "(Tương tự như trên...)", "(Các tiết còn lại giữ nguyên...)".
-         - KHI GIÁO ÁN GỒM NHIỀU TIẾT (Ví dụ: Bài 4 gồm 12 tiết, Tiết 42-53): BẮT BUỘC phải xuất đầy đủ 100% chi tiết TẤT CẢ các tiết học (Tiết 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53...), từng hoạt động, từng bước, từng câu hỏi và đáp án từ đầu đến cuối mà KHÔNG ĐƯỢC BỎ BẤT KỲ MỘT TIẾT NÀO!
-         - Bạn PHẢI GIỮ NGUYÊN 100% TẤT CẢ NỘI DUNG, TỪ NGỮ, CÂU HỎI, ĐÁP ÁN, SẢN PHẨM HỌC TẬP, CÁC BƯỚC THỰC HIỆN CỦA GIÁO VIÊN TRONG BẢN GỐC.
-         - CẤM TUYỆT ĐỐI việc viết tắt hay thay thế nội dung gốc bằng dấu ba chấm ('...'), ('[Nội dung như SGK]'), ('[Giữ nguyên...]').
-         - TRONG CÁC BẢNG BIỂU (ví dụ bảng: Tổ chức thực hiện | Sản phẩm): BẠN PHẢI GIỮ LẠI TOÀN BỘ CHỮ trong cột "Tổ chức thực hiện" và cột "Sản phẩm", chỉ chèn thêm các nhiệm vụ/câu hỏi NLS/AI tích hợp màu đỏ vào vị trí thích hợp.
-         - NGUYÊN TẮC VÀNG: CHỈ THÊM PHẦN TÍCH HỢP VÀO - TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU.
+         - BẢO TOÀN 100% TOÀN BỘ CẤU TRÚC, ĐỀ MỤC, TIỂU MỤC (ví dụ: 1.1, 1.2, 2.1, 2.2, 2.3...), CÂU CHỮ, ĐOẠN VĂN, BÀI THƠ TRÍCH DẪN, CÂU HỎI, ĐÁP ÁN, SẢN PHẨM HỌC TẬP VÀ BẢNG BIỂU TỪ GIÁO ÁN GỐC NGƯỜI DÙNG TẢI LÊN.
+         - BẠN LÀ CÔNG CỤ CHÈN THÊM (INJECTION): Giữ nguyên 100% lời văn gốc (màu đen), chỉ chèn thêm các nhiệm vụ/sản phẩm NLS/AI tích hợp màu đỏ vào vị trí thích hợp.
+         - NGUYÊN TẮC VÀNG: CHỈ THÊM PHẦN TÍCH HỢP VÀO - TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA, THAY ĐỔI, VIẾT LẠI HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU.
       2. ĐỊNH DẠNG ĐẦU VÀO: Nội dung giáo án gốc bên dưới có thể là HTML (được chuyển từ DOCX). Các công thức toán học đã được thay thế bằng các mã giữ chỗ có dạng [MATH_ID_...].
       3. NHIỆM VỤ: Bạn phải chuyển đổi nội dung này sang MARKDOWN, đồng thời TÍCH HỢP nội dung theo đúng chế độ được chọn.
       4. BẢO TOÀN CẤU TRÚC BẢNG: 
@@ -363,24 +336,14 @@ ${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [
          ${enableAI ? "- TẤT CẢ các nội dung tích hợp Năng lực AI (cả mục tiêu AI và các hoạt động AI bổ sung trong Tiến trình dạy học/Bảng biểu) BẮT BUỘC phải được bao bọc bằng thẻ <ai>...</ai>." : ""}
          (Hệ thống sẽ tự động bôi màu ĐỎ cho toàn bộ các phần nằm trong thẻ này trên bản xem trước và khi xuất file Word DOCX).
       
-      7. 🎯 QUY TẮC HOÀN THIỆN ĐỒNG BỘ ĐẦY ĐỦ 4 BƯỚC CHO TẤT CẢ CÁC HOẠT ĐỘNG (BẮT BUỘC):
-         - MỌI HOẠT ĐỘNG trong tiến trình dạy học:
-           + Hoạt động 1: Khởi động / Mở đầu
-           + Hoạt động 2: Hình thành kiến thức / Khám phá
-           + Hoạt động 3: Luyện tập (BẮT BUỘC PHẢI CHIA ĐỦ 4 BƯỚC VÀ GIỮ NGUYÊN 100% CÂU HỎI TRẮC NGHIỆM/BÀI TẬP)
-           + Hoạt động 4: Vận dụng (BẮT BUỘC PHẢI CHIA ĐỦ 4 BƯỚC)
-         - Trong mục **d. Tổ chức thực hiện** (hoặc bảng 2 cột Tổ chức thực hiện | Sản phẩm), BẮT BUỘC PHẢI CÓ ĐỦ 4 BƯỚC RÕ RÀNG:
-           + BƯỚC 1 (Chuyển giao nhiệm vụ): Nêu rõ GV giao nhiệm vụ bài học gốc + giao nhiệm vụ số/AI (công cụ số/AI, câu lệnh prompt cụ thể, tiêu chuẩn kiểm chứng). (Bọc phần tích hợp trong thẻ màu đỏ)
-           + BƯỚC 2 (Thực hiện nhiệm vụ - BẮT BUỘC PHẢI CÓ HOẠT ĐỘNG CỦA HS): Nêu rõ HS làm gì tương ứng (làm bài tập gốc, mở máy/điện thoại, thao tác công cụ số/AI, nhập prompt, tra cứu, đối chiếu kết quả với SGK để nhận diện tính chính xác/ảo giác AI, ghi nhận vào vở/phiếu học tập). (Bọc phần tích hợp trong thẻ màu đỏ)
-           + BƯỚC 3 (Báo cáo, thảo luận): Nêu rõ HS trình bày kết quả bài học và kết quả số/AI, chia sẻ link/màn hình, phản biện và trao đổi. (Bọc phần tích hợp trong thẻ màu đỏ)
-           + BƯỚC 4 (Đánh giá, kết luận): Nêu rõ GV nhận xét bài làm, đánh giá kết quả làm việc số/kỹ năng tương tác AI của HS, giáo dục liêm chính học thuật và chốt kiến thức chuẩn. (Bọc phần tích hợp trong thẻ màu đỏ)
-           + 🚨 YÊU CẦU ĐẶC BIỆT CHI TIẾT HÓA MỤC SẢN PHẨM HỌC TẬP (Mục 'b. Sản phẩm' hoặc Cột Sản phẩm):
-             * TUYỆT ĐỐI KHÔNG dùng câu mô tả chung chung, hình thức như: "Học sinh nêu được các ý chính về...", "Học sinh trả lời được câu hỏi...", "Biết cách sử dụng AI...", "Hoàn thành các bài tập 1, 2, 3...".
-             * BẠN BẮT BUỘC PHẢI GHI CỤ THỂ VÀ ĐẦY ĐỦ TỪNG Ý CHÍNH ĐÓ LÀ GÌ:
-               - Ghi rõ nội dung câu trả lời chuẩn, lời giải chi tiết, đáp án của từng bài tập/câu hỏi trong bài học gốc.
-               - Liệt kê cụ thể từng ý chính, định nghĩa, khái niệm, công thức, số liệu, bảng biểu mà học sinh cần đạt được (Ví dụ: thay vì ghi "Nêu đặc điểm...", phải ghi rõ: 1. Đặc điểm A: ... 2. Đặc điểm B: ...).
-               - Đối với sản phẩm tích hợp NLS/AI (bọc trong thẻ <nls> hoặc <ai>): Ghi rõ nội dung sản phẩm số cụ thể (ví dụ: Bản tóm tắt/so sánh cụ thể gồm những ý gì; Câu trả lời đã được đối chiếu/kiểm chứng từ ChatGPT với SGK; File trình chiếu hoặc sơ đồ tư duy trên Canva/Mindmeister với các nhánh nội dung cụ thể; Kết quả tra cứu cụ thể; Prompt cụ thể học sinh đã thực hiện và kết quả kiểm duyệt...).
-         - ⛔ CẤM TUYỆT ĐỐI việc viết tắt hoặc bỏ sót bước ở Hoạt động 3 và 4 như "... (Các câu hỏi trắc nghiệm giữ nguyên) ..." hoặc chỉ ghi dấu gạch đầu dòng mà không chia đủ 4 bước!
+      7. 🎯 NGUYÊN TẮC CHÈN NHIỆM VỤ TÍCH HỢP VÀO TIẾN TRÌNH DẠY HỌC:
+         - GIỮ NGUYÊN 100% toàn bộ các hoạt động, tiểu mục (2.1, 2.2...), các bước và lời văn gốc của giáo viên và học sinh (MÀU ĐEN).
+         - TẠI CÁC BƯỚC THỰC HIỆN CỦA GV VÀ HS (hoặc trong bảng 2 cột): Chèn thêm các dòng nhiệm vụ/hướng dẫn số & AI (bọc trong thẻ <nls>...</nls> hoặc <ai>...</ai>):
+           + BƯỚC 1 (Chuyển giao nhiệm vụ): GV giao nhiệm vụ bài học gốc (MÀU ĐEN) + giao nhiệm vụ số/AI (công cụ, prompt mẫu, yêu cầu kiểm chứng - MÀU ĐỎ trong thẻ <nls>/<ai>).
+           + BƯỚC 2 (Thực hiện nhiệm vụ): HS làm bài tập gốc (MÀU ĐEN) + thao tác công cụ số/AI, đối chiếu kết quả với SGK (MÀU ĐỎ trong thẻ <nls>/<ai>).
+           + BƯỚC 3 (Báo cáo, thảo luận): HS trình bày bài làm gốc (MÀU ĐEN) + chia sẻ kết quả số/AI và phản biện (MÀU ĐỎ trong thẻ <nls>/<ai>).
+           + BƯỚC 4 (Đánh giá, kết luận): GV nhận xét kiến thức gốc (MÀU ĐEN) + nhận xét kỹ năng số/AI và liêm chính học thuật (MÀU ĐỎ trong thẻ <nls>/<ai>).
+           + MỤC SẢN PHẨM: Giữ nguyên 100% tất cả nội dung sản phẩm gốc của bài học, chỉ chèn thêm dòng sản phẩm số/AI tương ứng (MÀU ĐỎ trong thẻ <nls>/<ai>).
 
       8. ĐỊNH DẠNG VÀ THỂ THỨC VĂN BẢN (NGHIÊM NGẶT 100%):
          - BẢO TOÀN 100% THỂ THỨC VĂN BẢN CỦA GIÁO ÁN GỐC:
@@ -393,7 +356,7 @@ ${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [
 
       ĐỊNH DẠNG ĐẦU RA (NGHIÊM NGẶT):
       - Trả về toàn bộ nội dung giáo án dưới dạng Markdown.
-      - Cấu trúc mục TIÊU BÀI HỌC bắt buộc:
+      - Cấu trúc mục TIÊU BÀI HỌC:
 ${structureGoalRequirement}
       - Trong phần TIẾN TRÌNH DẠY HỌC: Giữ nguyên toàn bộ nội dung từng hoạt động gốc, chỉ chèn thêm các hoạt động tích hợp đồng bộ cả hoạt động của GV và HS được bao bọc bằng thẻ <nls>...</nls> hoặc <ai>...</ai>.
       - KHÔNG ĐƯỢC CÓ LỜI DẪN NGOÀI LỀ.

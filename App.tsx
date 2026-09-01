@@ -566,33 +566,31 @@ const App: React.FC = () => {
               )
             )}
 
-            {/* Horizontal Input Row for NLS and AI */}
-            {(enableNLS || enableAI) && (
-              <div className={`grid gap-6 ${enableNLS && enableAI ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'}`}>
-                {/* Manual NLS Input Section (Conditional) */}
-                {enableNLS && (
-                  <ManualNLSInput 
-                      entries={manualNLSEntries}
-                      setEntries={setManualNLSEntries}
-                      schoolLevel={schoolLevel}
-                      grade={grade}
-                  />
-                )}
+            {/* Full-width Horizontal Input Cards for NLS and AI (4-column horizontal layout) */}
+            <div className="flex flex-col space-y-5">
+              {/* Manual NLS Input Section */}
+              <ManualNLSInput 
+                  entries={manualNLSEntries}
+                  setEntries={setManualNLSEntries}
+                  schoolLevel={schoolLevel}
+                  grade={grade}
+                  enabled={enableNLS}
+                  onToggleEnabled={() => setEnableNLS(!enableNLS)}
+              />
 
-                {/* Manual AI Input Section (Conditional - Theo TT 02 & QĐ 3439) */}
-                {enableAI && (
-                  <ManualAIInput 
-                      entries={manualAIEntries}
-                      setEntries={setManualAIEntries}
-                      schoolLevel={schoolLevel}
-                      grade={grade}
-                  />
-                )}
-              </div>
-            )}
+              {/* Manual AI Input Section */}
+              <ManualAIInput 
+                  entries={manualAIEntries}
+                  setEntries={setManualAIEntries}
+                  schoolLevel={schoolLevel}
+                  grade={grade}
+                  enabled={enableAI}
+                  onToggleEnabled={() => setEnableAI(!enableAI)}
+              />
+            </div>
 
             {!enableNLS && !enableAI && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-800 text-xs flex items-center space-x-3">
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-800 text-xs flex items-center space-x-3 shadow-xs">
                 <Info className="shrink-0 text-amber-600" size={18} />
                 <span>
                   Bạn đang chọn <strong>không tích hợp NLS và AI</strong>. Hệ thống sẽ chuẩn hóa bố cục, bảng biểu và công thức toán/hóa học từ giáo án gốc mà không bổ sung mục năng lực mới.
