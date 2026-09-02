@@ -35,36 +35,30 @@ const buildUserPrompt = (info: LessonInfo, options: ProcessingOptions): string =
        ${hasManualAI ? `<ai>- AI tools: [Generative AI assistants (ChatGPT, Copilot, Gemini), AI pronunciation apps (ELSA/Google Pronounce)...]</ai>` : ""}
 
   3. 🎯 TIẾN TRÌNH DẠY HỌC (III. TEACHING PROCEDURES / LESSON PROCEDURES):
-     - 🚨 BẮT BUỘC TÍCH HỢP CHI TIẾT ĐẦY ĐỦ VÀO TẤT CẢ 4 BƯỚC THỰC HIỆN NHIỆM VỤ (4-STEP INSTRUCTIONAL CYCLE) TẠI CÁC HOẠT ĐỘNG (Activity 1: Warm-up, Activity 2: Knowledge Formation / Presentation, Activity 3: Practice, Activity 4: Production / Application):
-     - ⛔ KHÔNG ĐƯỢC viết sơ sài hoặc chỉ ghi 1-2 dòng chung chung.
-     - TẤT CẢ CÁC NỘI DUNG CHÈN VÀO BẮT BUỘC PHẢI BẰNG TIẾNG ANH 100% VÀ ĐƯỢC BỌC TRONG THẺ <nls>...</nls> hoặc <ai>...</ai> (ĐỂ ĐƯỢC BÔI MÀU ĐỎ KHI XUẤT RA):
-     
-     CHI TIẾT CHÈN VÀO 4 BƯỚC THỰC HIỆN NHIỆM VỤ (CHO CẢ DẠNG VĂN BẢN VÀ DẠNG BẢNG 2 CỘT Teacher's activities / Students' activities):
-     
-     * Bước 1: Giao nhiệm vụ (Step 1: Delivering the task / Teacher's instructions):
-       - GV giao nhiệm vụ bài học gốc (MÀU ĐEN - giữ nguyên 100%).
-       ${hasManualNLS ? `- <nls>Teacher assigns the digital task: Instructs students to use digital tools (e.g. Cambridge/Oxford Dictionary, Google Search, Canva, Quizlet, Padlet) with specific search keywords and requirements [Mã NLS như [1.1.TC1a] hoặc [2.1.TC1a]].</nls>` : ""}
-       ${hasManualAI ? `- <ai>Teacher assigns the AI task: Guides students to interact with an AI tool (e.g. ChatGPT, Gemini, Copilot) using a structured prompt: '[Prompt template in English]' to generate vocabulary examples, dialogues, or ideas, and emphasizes academic integrity [Mã AI như [NLb.TC1] hoặc [6.A1.2]].</ai>` : ""}
+     - 🚨 NGUYÊN TẮC BẢO TOÀN CẤU TRÚC GỐC 100% - NGHIÊM CẤM PHÁT SINH KÝ TỰ & TIÊU ĐỀ LẠ:
+       ⛔ TUYỆT ĐỐI CẤM TỰ Ý THÊM CÁC TỪ/TIỀN TỐ/TIÊU ĐỀ NHƯ: "Step 1:", "Step 2:", "Step 3:", "Step 4:", "Step...", "Step 1: Delivering the task:", "Teacher assigns the digital task:", "Students execute the digital task:" NẾU GIÁO ÁN GỐC KHÔNG CÓ!
+       - Giữ đúng 100% cấu trúc, tiêu đề và phân chia bảng cột của giáo án người dùng (dù là Bảng 2 cột Teacher's activities / Students' activities, hay dạng mục a-b-c-d, hay dạng gạch đầu dòng).
+       - TẤT CẢ CÁC CÂU LỆNH TÍCH HỢP CHÈN THÊM PHẢI BẰNG TIẾNG ANH 100% VÀ ĐƯỢC BỌC TRONG THẺ <nls>...</nls> hoặc <ai>...</ai> (ĐỂ ĐƯỢC BÔI ĐỎ):
+       
+       * Tại phần Hoạt động của Giáo viên (Teacher's activities / Teacher's instructions):
+         - Giữ nguyên 100% lời nói/hướng dẫn gốc của GV (MÀU ĐEN).
+         ${hasManualNLS ? `- Chèn trực tiếp câu hành động số (không thêm chữ "Step..."): <nls>- Teacher instructs students to use digital tools (e.g. Cambridge Dictionary, Google Search, Canva, Quizlet, Padlet) with specific search queries to look up vocabulary and pronunciation [1.1.TC1a].</nls>` : ""}
+         ${hasManualAI ? `- Chèn trực tiếp câu hành động AI (không thêm chữ "Step..."): <ai>- Teacher guides students to interact with an AI assistant using the prompt: '[Prompt template in English]' and reminds them to critically evaluate the generated output [NLb.TC1].</ai>` : ""}
 
-     * Bước 2: Thực hiện nhiệm vụ (Step 2: Performing the task / Students' activities):
-       - HS thực hiện bài học gốc (MÀU ĐEN - giữ nguyên 100%).
-       ${hasManualNLS ? `- <nls>Students execute the digital task: Open digital applications on tablets/smartphones/computers, look up meanings, pronunciation, collocations, or design slides/infographics, and collaborate in pairs/groups via digital boards.</nls>` : ""}
-       ${hasManualAI ? `- <ai>Students execute the AI task: Enter the suggested prompt into the AI tool, analyze and cross-check the AI-generated sentences/ideas with textbook rules and teacher's guidance, identifying any inaccurate or unnatural language.</ai>` : ""}
+       * Tại phần Hoạt động của Học sinh (Students' activities / Tasks):
+         - Giữ nguyên 100% hoạt động bài học gốc của HS (MÀU ĐEN).
+         ${hasManualNLS ? `- Chèn trực tiếp câu hành động số (không thêm chữ "Step..."): <nls>- Students open digital tools to search for words, practice pronunciation, or collaborate via online boards (Padlet/Canva).</nls>` : ""}
+         ${hasManualAI ? `- Chèn trực tiếp câu hành động AI (không thêm chữ "Step..."): <ai>- Students enter the prompt into the AI tool, critically analyze and cross-check AI responses with textbook grammar rules, and refine their answers.</ai>` : ""}
 
-     * Bước 3: Báo cáo kết quả và thảo luận (Step 3: Reporting & Discussion / Outcome sharing):
-       - HS báo cáo bài học gốc (MÀU ĐEN - giữ nguyên 100%).
-       ${hasManualNLS ? `- <nls>Students report digital findings: Project/share their digital products (Padlet posts, Canva slides, quiz results) to the class, explain how they filtered and verified the online information.</nls>` : ""}
-       ${hasManualAI ? `- <ai>Students report AI-assisted results: Present the refined output, explain how they modified the prompt or corrected the AI draft, and answer peers' questions about language accuracy.</ai>` : ""}
+       * Tại phần Nhận xét, đánh giá và kết luận (Teacher's feedback / Assessment / Conclusion):
+         - Giữ nguyên 100% nhận xét bài học gốc (MÀU ĐEN).
+         ${hasManualNLS ? `- Chèn trực tiếp câu đánh giá số (không thêm chữ "Step..."): <nls>- Teacher assesses students' digital information search effectiveness and collaborative skills on digital platforms.</nls>` : ""}
+         ${hasManualAI ? `- Chèn trực tiếp câu đánh giá AI (không thêm chữ "Step..."): <ai>- Teacher evaluates students' critical thinking when using AI, prompt precision, and reinforces academic honesty.</ai>` : ""}
 
-     * Bước 4: Nhận xét, đánh giá và kết luận (Step 4: Assessment & Conclusion / Feedback):
-       - GV nhận xét kiến thức ngôn ngữ gốc (MÀU ĐEN - giữ nguyên 100%).
-       ${hasManualNLS ? `- <nls>Teacher assesses digital competence: Evaluates students' digital search skills, tool proficiency, teamwork efficiency on digital platforms, and summarizes key digital takeaways.</nls>` : ""}
-       ${hasManualAI ? `- <ai>Teacher assesses AI competence: Comments on students' critical thinking when using AI, prompt engineering skills, academic honesty, and reinforces the principle of human-centered verification.</ai>` : ""}
-
-     * Trong mục Sản phẩm (c. Outcome / Product / Expected Learning Outcomes):
-       - Giữ nguyên 100% sản phẩm ngôn ngữ gốc (MÀU ĐEN).
-       ${hasManualNLS ? `- <nls>- Digital product: Online vocabulary notes, Padlet wall/board submissions, Canva flashcards/infographics created by students.</nls>` : ""}
-       ${hasManualAI ? `- <ai>- AI product: AI-assisted dialogue/paragraph drafts critically reviewed, verified and finalized by students.</ai>` : ""}
+       * Trong mục Sản phẩm (Outcome / Expected products / Products):
+         - Giữ nguyên 100% sản phẩm ngôn ngữ gốc (MÀU ĐEN).
+         ${hasManualNLS ? `- <nls>- Digital product: Online vocabulary notes, Padlet wall submissions, or Canva slides created by students.</nls>` : ""}
+         ${hasManualAI ? `- <ai>- AI product: AI-assisted practice drafts critically reviewed, verified and finalized by students.</ai>` : ""}
 
   4. MÃ NĂNG LỰC: Bắt buộc dùng đúng mã số chuẩn quốc gia ([1.1.TC1a], [1.3.TC2a], [NLb.TC1], [6.A1.2]...).
   =============================================================================
@@ -480,34 +474,87 @@ const postProcessResult = (text: string, lessonInfo?: LessonInfo): string => {
   fixed = fixed.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</nls>\n$1");
   fixed = fixed.replace(/<ai>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</ai>\n$1");
 
+  // 3. CLEAN UP ROBOTIC STEP PREFIXES & PROMPT ARTIFACTS:
+  fixed = fixed.replace(/<nls>\s*[-*•]?\s*Teacher assigns the digital task\s*:\s*/gi, "<nls>- Teacher instructs students to ");
+  fixed = fixed.replace(/<nls>\s*[-*•]?\s*Students execute the digital task\s*:\s*/gi, "<nls>- Students ");
+  fixed = fixed.replace(/<nls>\s*[-*•]?\s*Students report digital findings\s*:\s*/gi, "<nls>- Students report: ");
+  fixed = fixed.replace(/<nls>\s*[-*•]?\s*Teacher assesses digital competence\s*:\s*/gi, "<nls>- Teacher evaluates: ");
+  fixed = fixed.replace(/<ai>\s*[-*•]?\s*Teacher assigns the AI task\s*:\s*/gi, "<ai>- Teacher guides students to ");
+  fixed = fixed.replace(/<ai>\s*[-*•]?\s*Students execute the AI task\s*:\s*/gi, "<ai>- Students ");
+  fixed = fixed.replace(/<ai>\s*[-*•]?\s*Students report AI-assisted results\s*:\s*/gi, "<ai>- Students report: ");
+  fixed = fixed.replace(/<ai>\s*[-*•]?\s*Teacher assesses AI competence\s*:\s*/gi, "<ai>- Teacher evaluates: ");
+
+  fixed = fixed.replace(/<nls>\s*[-*•]?\s*Step\s*[1-4]\s*[:\.]?\s*(?:Delivering the task|Performing the task|Reporting & Discussion|Reporting and Discussion|Assessment & Conclusion|Assessment and Conclusion|Feedback)?\s*[:\.\-]?\s*/gi, "<nls>- ");
+  fixed = fixed.replace(/<ai>\s*[-*•]?\s*Step\s*[1-4]\s*[:\.]?\s*(?:Delivering the task|Performing the task|Reporting & Discussion|Reporting and Discussion|Assessment & Conclusion|Assessment and Conclusion|Feedback)?\s*[:\.\-]?\s*/gi, "<ai>- ");
+
   fixed = fixed.replace(/<nls>\s*<\/nls>/gi, "");
   fixed = fixed.replace(/<ai>\s*<\/ai>/gi, "");
 
   return fixed;
 };
 
+export const cleanApiKey = (raw: string | undefined | null): string => {
+  if (!raw) return '';
+  return raw
+    .replace(/[\u200B-\u200D\uFEFF\u00A0\u202F\r\n\t]/g, '')
+    .trim()
+    .replace(/^["'`]|["'`]$/g, '')
+    .replace(/^(?:api[-_\s]?key|key|bearer)[:\s=]+/i, '')
+    .trim();
+};
+
+export async function testGeminiApiKey(rawKey: string): Promise<{ success: boolean; message: string; model?: string }> {
+  const key = cleanApiKey(rawKey);
+  if (!key) {
+    return { success: false, message: "Vui lòng nhập API Key trước khi kiểm tra." };
+  }
+
+  const ai = new GoogleGenAI({ apiKey: key });
+  const testModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite"];
+
+  for (const model of testModels) {
+    try {
+      const res = await ai.models.generateContent({
+        model,
+        contents: "Xin chào, phản hồi 'OK'",
+      });
+      if (res.text) {
+        return { success: true, message: `Kết nối thành công với Google AI Studio (Model: ${model})`, model };
+      }
+    } catch (e: any) {
+      const errMsg = String(e?.message || e);
+      if (errMsg.includes("API_KEY_INVALID") || errMsg.includes("403") || errMsg.includes("401")) {
+        return { success: false, message: "Mã API Key không hợp lệ hoặc đang chờ Google kích hoạt. Vui lòng kiểm tra lại." };
+      }
+      if (errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED")) {
+        return { success: true, message: "Mã API Key chính xác nhưng đang tạm hết quota gọi trong phút này. Bạn vẫn có thể lưu và sử dụng bình thường.", model };
+      }
+    }
+  }
+  return { success: false, message: "Không thể kết nối đến máy chủ Google Gemini với mã API Key này." };
+}
+
 async function generateLessonPlanClientSide(
   info: LessonInfo,
   options: ProcessingOptions,
   apiKey: string
 ): Promise<string> {
-  const cleanApiKey = apiKey ? apiKey.trim().replace(/^["']|["']$/g, '') : '';
-  if (!cleanApiKey) {
-    throw new Error("Trang web đang chạy trên Netlify/Web tĩnh. Vui lòng bấm nút 'CẤU HÌNH API KEY' ở góc trên để dán API Key Gemini của bạn để ứng dụng hoạt động!");
+  const cleanKey = cleanApiKey(apiKey);
+  if (!cleanKey) {
+    throw new Error("Chưa có API Key. Vui lòng bấm nút 'CẤU HÌNH API KEY' ở thanh trên cùng để dán API Key Gemini của bạn.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: cleanApiKey });
+  const ai = new GoogleGenAI({ apiKey: cleanKey });
   const userPrompt = buildUserPrompt(info, options);
 
   const modelsToTry = [
-    "gemini-3.6-flash",
     "gemini-2.5-flash",
     "gemini-2.0-flash",
     "gemini-1.5-flash",
     "gemini-2.0-flash-lite",
-    "gemini-3.7-flash",
-    "gemini-flash-latest",
-    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-2.5-pro",
+    "gemini-1.5-pro",
   ];
 
   const callModel = async (modelId: string) => {
@@ -526,39 +573,39 @@ async function generateLessonPlanClientSide(
   let lastClientErr = "";
   for (const modelId of modelsToTry) {
     try {
+      console.log(`[Client AI Direct] Đang thử kết nối model: ${modelId}...`);
       const resText = await callModel(modelId);
       if (resText && resText.trim().length > 0) {
         return postProcessResult(resText, info);
       }
     } catch (err: any) {
       lastClientErr = String(err?.message || err);
-      console.warn(`[Client AI] Model ${modelId} error:`, lastClientErr);
+      console.warn(`[Client AI Direct] Model ${modelId} báo:`, lastClientErr);
     }
   }
 
   if (lastClientErr.includes("API_KEY_INVALID") || lastClientErr.includes("API key not valid") || lastClientErr.includes("403") || lastClientErr.includes("401")) {
-    throw new Error("Mã API Key chưa hợp lệ hoặc đang chờ Google kích hoạt (Lưu ý: API Key mới tạo trên Google AI Studio có thể mất 1-2 phút để hệ thống Google đồng bộ). Vui lòng đợi ít phút rồi thử lại.");
+    throw new Error("Mã API Key chưa hợp lệ hoặc đang chờ Google kích hoạt (Lưu ý: API Key mới tạo trên Google AI Studio có thể mất 1-2 phút để hệ thống Google đồng bộ). Vui lòng kiểm tra lại chìa khóa.");
   }
   if (lastClientErr.includes("429") || lastClientErr.includes("RESOURCE_EXHAUSTED") || lastClientErr.includes("quota")) {
     throw new Error("API Key này đã hết lượt gọi trong phút này (Quota Exceeded). Vui lòng đợi 1-2 phút hoặc đổi API Key khác.");
   }
   throw new Error(`Lỗi kết nối Gemini AI: ${lastClientErr}`);
-
-  throw new Error("Không nhận được kết quả từ Gemini AI.");
 }
 
 export const generateNLSLessonPlan = async (
   info: LessonInfo,
   options: ProcessingOptions
 ): Promise<string> => {
-  const userApiKey = localStorage.getItem("USER_GEMINI_API_KEY") || "";
+  const rawUserApiKey = localStorage.getItem("USER_GEMINI_API_KEY") || "";
+  const userApiKey = cleanApiKey(rawUserApiKey);
 
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    if (userApiKey.trim()) {
-      headers["x-api-key"] = userApiKey.trim();
+    if (userApiKey) {
+      headers["x-api-key"] = userApiKey;
     }
 
     const response = await fetch("/api/generate-lesson-plan", {
@@ -567,9 +614,9 @@ export const generateNLSLessonPlan = async (
       body: JSON.stringify({ info, options }),
     });
 
-    // Handle Netlify / Static hosting where /api route does not exist (returns 404 or index.html)
+    // Handle static hosting or missing server proxy
     if (response.status === 404) {
-      console.log("[GeminiService] Server /api route returned 404. Switching to client-side Gemini execution...");
+      console.log("[GeminiService] Server /api route không khả dụng (404). Tự động chuyển sang chế độ Client-side Gemini...");
       return await generateLessonPlanClientSide(info, options, userApiKey);
     }
 
@@ -579,40 +626,41 @@ export const generateNLSLessonPlan = async (
       data = JSON.parse(responseText);
     } catch (parseErr) {
       console.error("Phản hồi không phải dạng JSON:", responseText);
-      if (!response.ok) {
-        if (response.status === 413) {
-          throw new Error("Dung lượng giáo án quá lớn. Vui lòng rút ngắn nội dung hoặc giảm dung lượng file.");
-        }
-        if (response.status === 504 || response.status === 502) {
-          throw new Error("Hệ thống mất quá nhiều thời gian để xử lý. Vui lòng thử lại sau ít phút.");
-        }
-        // Fall back to client side if HTML error page was returned
+      if (userApiKey) {
+        console.log("[GeminiService] Máy chủ trả về non-JSON. Tự động chuyển sang xử lý trực tiếp từ Client...");
         return await generateLessonPlanClientSide(info, options, userApiKey);
       }
       throw new Error("Định dạng dữ liệu trả về từ máy chủ không hợp lệ.");
     }
 
     if (!response.ok) {
-      // If error is 401 (Invalid API Key) or 400 with invalid key, check if user supplied key and fall back to client side to give direct feedback
-      if (response.status === 401 || response.status === 403) {
-        if (userApiKey.trim()) {
+      // If server returned an error (e.g. 400, 401, 403, 500, 504) and user has a client API key, fallback immediately
+      if (userApiKey) {
+        console.warn(`[GeminiService] Server trả về mã ${response.status} (${data.error || 'error'}). Đang tự động chuyển sang gọi trực tiếp từ Trình duyệt (Client-side Fallback)...`);
+        try {
           return await generateLessonPlanClientSide(info, options, userApiKey);
+        } catch (clientErr: any) {
+          throw clientErr;
         }
       }
       throw new Error(data.error || `Lỗi từ Server AI (${response.status})`);
     }
 
     if (!data.text) {
+      if (userApiKey) {
+        return await generateLessonPlanClientSide(info, options, userApiKey);
+      }
       throw new Error("Server AI trả về kết quả rỗng.");
     }
 
     return postProcessResult(data.text, info);
   } catch (err: any) {
-    console.error("Lỗi khi kết nối API:", err);
+    console.warn("Lỗi khi kết nối qua Server API, đang thử nghiệm cơ chế tự động tương thích đa nền tảng:", err);
     
-    // If backend fetch completely failed (e.g., offline or host down), attempt client-side execution if user has key
-    if (userApiKey.trim() && err.message?.includes("Failed to fetch")) {
+    // Auto-fallback for all machines if server fetch failed (CORS, offline, timeout, network error)
+    if (userApiKey) {
       try {
+        console.log("[GeminiService] Kích hoạt chế độ xử lý trực tiếp Client-side Gemini...");
         return await generateLessonPlanClientSide(info, options, userApiKey);
       } catch (clientErr: any) {
         throw clientErr;

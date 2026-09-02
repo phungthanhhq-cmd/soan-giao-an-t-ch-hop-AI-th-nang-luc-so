@@ -36,11 +36,21 @@ export default async function handler(req: any, res: any) {
                    process.env.GEMINI_KEY || 
                    process.env.GEMINI_API;
 
-    const apiKey = rawKey ? rawKey.trim().replace(/^["']|["']$/g, '') : '';
+    const cleanKey = (key: string | undefined | null): string => {
+      if (!key) return '';
+      return key
+        .replace(/[\u200B-\u200D\uFEFF\u00A0\u202F\r\n\t]/g, '')
+        .trim()
+        .replace(/^["'`]|["'`]$/g, '')
+        .replace(/^(?:api[-_\s]?key|key|bearer)[:\s=]+/i, '')
+        .trim();
+    };
+
+    const apiKey = cleanKey(rawKey);
 
     if (!apiKey) {
       return res.status(400).json({
-        error: "Chưa thiết lập Gemini API Key. Vui lòng nhấn nút 'CẤU HÌNH API KEY' ở thanh trên cùng để dán API Key của bạn.",
+        error: "Chưa cấu hình Gemini API Key. Vui lòng bấm nút 'CẤU HÌNH API KEY' ở thanh trên cùng để dán API Key của bạn.",
       });
     }
 
@@ -54,14 +64,13 @@ export default async function handler(req: any, res: any) {
     });
 
     const modelsToTry = [
-      "gemini-3.6-flash",
       "gemini-2.5-flash",
       "gemini-2.0-flash",
       "gemini-1.5-flash",
       "gemini-2.0-flash-lite",
-      "gemini-3.7-flash",
-      "gemini-flash-latest",
-      "gemini-3.1-flash-lite",
+      "gemini-3.6-flash",
+      "gemini-2.5-pro",
+      "gemini-1.5-pro",
     ];
 
     const enableNLS = info.integrationModes ? info.integrationModes.enableNLS : true;
@@ -96,36 +105,30 @@ export default async function handler(req: any, res: any) {
          ${hasManualAI ? `<ai>- AI tools: [Generative AI assistants (ChatGPT, Copilot, Gemini), AI pronunciation apps (ELSA/Google Pronounce)...]</ai>` : ""}
 
     3. 🎯 TIẾN TRÌNH DẠY HỌC (III. TEACHING PROCEDURES / LESSON PROCEDURES):
-       - 🚨 BẮT BUỘC TÍCH HỢP CHI TIẾT ĐẦY ĐỦ VÀO TẤT CẢ 4 BƯỚC THỰC HIỆN NHIỆM VỤ (4-STEP INSTRUCTIONAL CYCLE) TẠI CÁC HOẠT ĐỘNG (Activity 1: Warm-up, Activity 2: Knowledge Formation / Presentation, Activity 3: Practice, Activity 4: Production / Application):
-       - ⛔ KHÔNG ĐƯỢC viết sơ sài hoặc chỉ ghi 1-2 dòng chung chung.
-       - TẤT CẢ CÁC NỘI DUNG CHÈN VÀO BẮT BUỘC PHẢI BẰNG TIẾNG ANH 100% VÀ ĐƯỢC BỌC TRONG THẺ <nls>...</nls> hoặc <ai>...</ai> (ĐỂ ĐƯỢC BÔI MÀU ĐỎ KHI XUẤT RA):
-       
-       CHI TIẾT CHÈN VÀO 4 BƯỚC THỰC HIỆN NHIỆM VỤ (CHO CẢ DẠNG VĂN BẢN VÀ DẠNG BẢNG 2 CỘT Teacher's activities / Students' activities):
-       
-       * Bước 1: Giao nhiệm vụ (Step 1: Delivering the task / Teacher's instructions):
-         - GV giao nhiệm vụ bài học gốc (MÀU ĐEN - giữ nguyên 100%).
-         ${hasManualNLS ? `- <nls>Teacher assigns the digital task: Instructs students to use digital tools (e.g. Cambridge/Oxford Dictionary, Google Search, Canva, Quizlet, Padlet) with specific search keywords and requirements [Mã NLS như [1.1.TC1a] hoặc [2.1.TC1a]].</nls>` : ""}
-         ${hasManualAI ? `- <ai>Teacher assigns the AI task: Guides students to interact with an AI tool (e.g. ChatGPT, Gemini, Copilot) using a structured prompt: '[Prompt template in English]' to generate vocabulary examples, dialogues, or ideas, and emphasizes academic integrity [Mã AI như [NLb.TC1] hoặc [6.A1.2]].</ai>` : ""}
+       - 🚨 NGUYÊN TẮC BẢO TOÀN CẤU TRÚC GỐC 100% - NGHIÊM CẤM PHÁT SINH KÝ TỰ & TIÊU ĐỀ LẠ:
+         ⛔ TUYỆT ĐỐI CẤM TỰ Ý THÊM CÁC TỪ/TIỀN TỐ/TIÊU ĐỀ NHƯ: "Step 1:", "Step 2:", "Step 3:", "Step 4:", "Step...", "Step 1: Delivering the task:", "Teacher assigns the digital task:", "Students execute the digital task:" NẾU GIÁO ÁN GỐC KHÔNG CÓ!
+         - Giữ đúng 100% cấu trúc, tiêu đề và phân chia bảng cột của giáo án người dùng (dù là Bảng 2 cột Teacher's activities / Students' activities, hay dạng mục a-b-c-d, hay dạng gạch đầu dòng).
+         - TẤT CẢ CÁC CÂU LỆNH TÍCH HỢP CHÈN THÊM PHẢI BẰNG TIẾNG ANH 100% VÀ ĐƯỢC BỌC TRONG THẺ <nls>...</nls> hoặc <ai>...</ai> (ĐỂ ĐƯỢC BÔI ĐỎ):
+         
+         * Tại phần Hoạt động của Giáo viên (Teacher's activities / Teacher's instructions):
+           - Giữ nguyên 100% lời nói/hướng dẫn gốc của GV (MÀU ĐEN).
+           ${hasManualNLS ? `- Chèn trực tiếp câu hành động số (không thêm chữ "Step..."): <nls>- Teacher instructs students to use digital tools (e.g. Cambridge Dictionary, Google Search, Canva, Quizlet, Padlet) with specific search queries to look up vocabulary and pronunciation [1.1.TC1a].</nls>` : ""}
+           ${hasManualAI ? `- Chèn trực tiếp câu hành động AI (không thêm chữ "Step..."): <ai>- Teacher guides students to interact with an AI assistant using the prompt: '[Prompt template in English]' and reminds them to critically evaluate the generated output [NLb.TC1].</ai>` : ""}
 
-       * Bước 2: Thực hiện nhiệm vụ (Step 2: Performing the task / Students' activities):
-         - HS thực hiện bài học gốc (MÀU ĐEN - giữ nguyên 100%).
-         ${hasManualNLS ? `- <nls>Students execute the digital task: Open digital applications on tablets/smartphones/computers, look up meanings, pronunciation, collocations, or design slides/infographics, and collaborate in pairs/groups via digital boards.</nls>` : ""}
-         ${hasManualAI ? `- <ai>Students execute the AI task: Enter the suggested prompt into the AI tool, analyze and cross-check the AI-generated sentences/ideas with textbook rules and teacher's guidance, identifying any inaccurate or unnatural language.</ai>` : ""}
+         * Tại phần Hoạt động của Học sinh (Students' activities / Tasks):
+           - Giữ nguyên 100% hoạt động bài học gốc của HS (MÀU ĐEN).
+           ${hasManualNLS ? `- Chèn trực tiếp câu hành động số (không thêm chữ "Step..."): <nls>- Students open digital tools to search for words, practice pronunciation, or collaborate via online boards (Padlet/Canva).</nls>` : ""}
+           ${hasManualAI ? `- Chèn trực tiếp câu hành động AI (không thêm chữ "Step..."): <ai>- Students enter the prompt into the AI tool, critically analyze and cross-check AI responses with textbook grammar rules, and refine their answers.</ai>` : ""}
 
-       * Bước 3: Báo cáo kết quả và thảo luận (Step 3: Reporting & Discussion / Outcome sharing):
-         - HS báo cáo bài học gốc (MÀU ĐEN - giữ nguyên 100%).
-         ${hasManualNLS ? `- <nls>Students report digital findings: Project/share their digital products (Padlet posts, Canva slides, quiz results) to the class, explain how they filtered and verified the online information.</nls>` : ""}
-         ${hasManualAI ? `- <ai>Students report AI-assisted results: Present the refined output, explain how they modified the prompt or corrected the AI draft, and answer peers' questions about language accuracy.</ai>` : ""}
+         * Tại phần Nhận xét, đánh giá và kết luận (Teacher's feedback / Assessment / Conclusion):
+           - Giữ nguyên 100% nhận xét bài học gốc (MÀU ĐEN).
+           ${hasManualNLS ? `- Chèn trực tiếp câu đánh giá số (không thêm chữ "Step..."): <nls>- Teacher assesses students' digital information search effectiveness and collaborative skills on digital platforms.</nls>` : ""}
+           ${hasManualAI ? `- Chèn trực tiếp câu đánh giá AI (không thêm chữ "Step..."): <ai>- Teacher evaluates students' critical thinking when using AI, prompt precision, and reinforces academic honesty.</ai>` : ""}
 
-       * Bước 4: Nhận xét, đánh giá và kết luận (Step 4: Assessment & Conclusion / Feedback):
-         - GV nhận xét kiến thức ngôn ngữ gốc (MÀU ĐEN - giữ nguyên 100%).
-         ${hasManualNLS ? `- <nls>Teacher assesses digital competence: Evaluates students' digital search skills, tool proficiency, teamwork efficiency on digital platforms, and summarizes key digital takeaways.</nls>` : ""}
-         ${hasManualAI ? `- <ai>Teacher assesses AI competence: Comments on students' critical thinking when using AI, prompt engineering skills, academic honesty, and reinforces the principle of human-centered verification.</ai>` : ""}
-
-       * Trong mục Sản phẩm (c. Outcome / Product / Expected Learning Outcomes):
-         - Giữ nguyên 100% sản phẩm ngôn ngữ gốc (MÀU ĐEN).
-         ${hasManualNLS ? `- <nls>- Digital product: Online vocabulary notes, Padlet wall/board submissions, Canva flashcards/infographics created by students.</nls>` : ""}
-         ${hasManualAI ? `- <ai>- AI product: AI-assisted dialogue/paragraph drafts critically reviewed, verified and finalized by students.</ai>` : ""}
+         * Trong mục Sản phẩm (Outcome / Expected products / Products):
+           - Giữ nguyên 100% sản phẩm ngôn ngữ gốc (MÀU ĐEN).
+           ${hasManualNLS ? `- <nls>- Digital product: Online vocabulary notes, Padlet wall submissions, or Canva slides created by students.</nls>` : ""}
+           ${hasManualAI ? `- <ai>- AI product: AI-assisted practice drafts critically reviewed, verified and finalized by students.</ai>` : ""}
 
     4. MÃ NĂNG LỰC: Bắt buộc dùng đúng mã số chuẩn quốc gia ([1.1.TC1a], [1.3.TC2a], [NLb.TC1], [6.A1.2]...).
     =============================================================================
@@ -532,6 +535,19 @@ ${structureGoalRequirement}
       // 2. PREVENT RED COLOR LEAK:
       text = text.replace(/<nls>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</nls>\n$1");
       text = text.replace(/<ai>(\s*(?:[3-9]\.\s*Phẩm chất|[3-9]\.\s*Về phẩm chất|[3-9]\.\s*Qualities|[3-9]\.\s*Attitudes|II\.\s*TIẾN TRÌNH|II\.\s*LESSON PROCEDURE|II\.\s*PROCEDURES|III\.\s*TIẾN TRÌNH|\d+\.\s*Hoạt động|\d+\.\s*Activity|\bBước\s*[1-4]\b|\bStep\s*[1-4]\b|[a-d]\)\s*Mục tiêu|[a-d]\)\s*Objectives|[a-d]\)\s*Nội dung|[a-d]\)\s*Content|[a-d]\)\s*Sản phẩm|[a-d]\)\s*Products|[a-d]\)\s*Tổ chức|[a-d]\)\s*Implementation))/gi, "</ai>\n$1");
+
+      // 3. CLEAN UP ROBOTIC STEP PREFIXES & PROMPT ARTIFACTS:
+      text = text.replace(/<nls>\s*[-*•]?\s*Teacher assigns the digital task\s*:\s*/gi, "<nls>- Teacher instructs students to ");
+      text = text.replace(/<nls>\s*[-*•]?\s*Students execute the digital task\s*:\s*/gi, "<nls>- Students ");
+      text = text.replace(/<nls>\s*[-*•]?\s*Students report digital findings\s*:\s*/gi, "<nls>- Students report: ");
+      text = text.replace(/<nls>\s*[-*•]?\s*Teacher assesses digital competence\s*:\s*/gi, "<nls>- Teacher evaluates: ");
+      text = text.replace(/<ai>\s*[-*•]?\s*Teacher assigns the AI task\s*:\s*/gi, "<ai>- Teacher guides students to ");
+      text = text.replace(/<ai>\s*[-*•]?\s*Students execute the AI task\s*:\s*/gi, "<ai>- Students ");
+      text = text.replace(/<ai>\s*[-*•]?\s*Students report AI-assisted results\s*:\s*/gi, "<ai>- Students report: ");
+      text = text.replace(/<ai>\s*[-*•]?\s*Teacher assesses AI competence\s*:\s*/gi, "<ai>- Teacher evaluates: ");
+
+      text = text.replace(/<nls>\s*[-*•]?\s*Step\s*[1-4]\s*[:\.]?\s*(?:Delivering the task|Performing the task|Reporting & Discussion|Reporting and Discussion|Assessment & Conclusion|Assessment and Conclusion|Feedback)?\s*[:\.\-]?\s*/gi, "<nls>- ");
+      text = text.replace(/<ai>\s*[-*•]?\s*Step\s*[1-4]\s*[:\.]?\s*(?:Delivering the task|Performing the task|Reporting & Discussion|Reporting and Discussion|Assessment & Conclusion|Assessment and Conclusion|Feedback)?\s*[:\.\-]?\s*/gi, "<ai>- ");
 
       text = text.replace(/<nls>\s*<\/nls>/gi, "");
       text = text.replace(/<ai>\s*<\/ai>/gi, "");
