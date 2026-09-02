@@ -75,7 +75,8 @@ export default async function handler(req: any, res: any) {
     const englishDirective = isEnglishSubject ? `
     =============================================================================
     🚨 ĐẶC QUY TẮC BẮT BUỘC RIÊNG CHO MÔN TIẾNG ANH (ENGLISH LESSON PLAN INTEGRATION MANDATE):
-    Giáo án môn TIẾNG ANH (ENGLISH SUBJECT):
+    Giáo án môn TIẾNG ANH (ENGLISH SUBJECT) - BẮT BUỘC TOÀN BỘ NỘI DUNG TÍCH HỢP ĐỀU BẰNG TIẾNG ANH (100% IN ENGLISH):
+
     1. MỤC TIÊU BÀI HỌC (I. OBJECTIVES):
        - BẮT BUỘC chèn thêm mục Năng lực số (Digital Competence) và Năng lực AI (AI Competence) vào ngay dưới mục "2. Competence" (sau "a. General competences" và "b. Specific competences"):
          ${hasManualNLS ? `* THẺ NLS (BẮT BUỘC BỌC TRONG <nls>...</nls>):
@@ -91,18 +92,40 @@ export default async function handler(req: any, res: any) {
 
     2. THIẾT BỊ DẠY HỌC (II. TEACHING AIDS / MATERIALS):
        - Bổ sung công cụ số và AI vào danh sách thiết bị dạy học bằng Tiếng Anh:
-         ${hasManualNLS ? `<nls>- Digital tools: [Online dictionaries (Cambridge/Oxford), search engines, Quizlet, Padlet, Google Slides, projector...]</nls>` : ""}
-         ${hasManualAI ? `<ai>- AI tools: [Generative AI assistants (ChatGPT, Copilot), AI pronunciation checkers...]</ai>` : ""}
+         ${hasManualNLS ? `<nls>- Digital tools: [Online dictionaries (Cambridge/Oxford), search engines, Quizlet, Kahoot, Padlet, Canva, projector/interactive board...]</nls>` : ""}
+         ${hasManualAI ? `<ai>- AI tools: [Generative AI assistants (ChatGPT, Copilot, Gemini), AI pronunciation apps (ELSA/Google Pronounce)...]</ai>` : ""}
 
-    3. TIẾN TRÌNH DẠY HỌC (III. TEACHING PROCEDURES / LESSON PROCEDURES):
-       - 🚨 BẮT BUỘC TÍCH HỢP ĐẦY ĐỦ CÁC HOẠT ĐỘNG DẠY HỌC (Activity 1: Warm-up, Activity 2: Knowledge Formation / Presentation, Activity 3: Practice, Activity 4: Production / Application):
-       - Tại TẤT CẢ các hoạt động, trong cả hoạt động của Giáo viên (Teacher's activities / Step 1 & 4) và hoạt động của Học sinh (Students' activities / Step 2 & 3), BẮT BUỘC phải chèn các nhiệm vụ số và nhiệm vụ AI bằng Tiếng Anh 100%, được bọc trong thẻ <nls>...</nls> và <ai>...</ai>:
-         Ví dụ mẫu:
-         <nls>- Digital task [1.1.TC1a]: Teacher instructs students to use digital devices to search for words/images related to the topic on Google / Cambridge Dictionary.</nls>
-         <nls>- Students search on their tablets/smartphones, take notes of pronunciation and sample sentences, and share findings on Padlet.</nls>
-         <ai>- AI task [NLb.TC1]: Teacher guides students to use an AI assistant with the prompt: 'Give 3 example sentences using...' and requires them to cross-check grammar with textbook rules.</ai>
-         <ai>- Students run the AI prompt, review the generated sentences, and critically evaluate the accuracy.</ai>
-       - Trong mục sản phẩm (c. Outcome / Products): Bổ sung sản phẩm số và AI (ví dụ: "<nls>- Digital product: Online vocabulary notes, Padlet sticky notes</nls>", "<ai>- AI product: AI-generated practice sentences verified and corrected by students</ai>").
+    3. 🎯 TIẾN TRÌNH DẠY HỌC (III. TEACHING PROCEDURES / LESSON PROCEDURES):
+       - 🚨 BẮT BUỘC TÍCH HỢP CHI TIẾT ĐẦY ĐỦ VÀO TẤT CẢ 4 BƯỚC THỰC HIỆN NHIỆM VỤ (4-STEP INSTRUCTIONAL CYCLE) TẠI CÁC HOẠT ĐỘNG (Activity 1: Warm-up, Activity 2: Knowledge Formation / Presentation, Activity 3: Practice, Activity 4: Production / Application):
+       - ⛔ KHÔNG ĐƯỢC viết sơ sài hoặc chỉ ghi 1-2 dòng chung chung.
+       - TẤT CẢ CÁC NỘI DUNG CHÈN VÀO BẮT BUỘC PHẢI BẰNG TIẾNG ANH 100% VÀ ĐƯỢC BỌC TRONG THẺ <nls>...</nls> hoặc <ai>...</ai> (ĐỂ ĐƯỢC BÔI MÀU ĐỎ KHI XUẤT RA):
+       
+       CHI TIẾT CHÈN VÀO 4 BƯỚC THỰC HIỆN NHIỆM VỤ (CHO CẢ DẠNG VĂN BẢN VÀ DẠNG BẢNG 2 CỘT Teacher's activities / Students' activities):
+       
+       * Bước 1: Giao nhiệm vụ (Step 1: Delivering the task / Teacher's instructions):
+         - GV giao nhiệm vụ bài học gốc (MÀU ĐEN - giữ nguyên 100%).
+         ${hasManualNLS ? `- <nls>Teacher assigns the digital task: Instructs students to use digital tools (e.g. Cambridge/Oxford Dictionary, Google Search, Canva, Quizlet, Padlet) with specific search keywords and requirements [Mã NLS như [1.1.TC1a] hoặc [2.1.TC1a]].</nls>` : ""}
+         ${hasManualAI ? `- <ai>Teacher assigns the AI task: Guides students to interact with an AI tool (e.g. ChatGPT, Gemini, Copilot) using a structured prompt: '[Prompt template in English]' to generate vocabulary examples, dialogues, or ideas, and emphasizes academic integrity [Mã AI như [NLb.TC1] hoặc [6.A1.2]].</ai>` : ""}
+
+       * Bước 2: Thực hiện nhiệm vụ (Step 2: Performing the task / Students' activities):
+         - HS thực hiện bài học gốc (MÀU ĐEN - giữ nguyên 100%).
+         ${hasManualNLS ? `- <nls>Students execute the digital task: Open digital applications on tablets/smartphones/computers, look up meanings, pronunciation, collocations, or design slides/infographics, and collaborate in pairs/groups via digital boards.</nls>` : ""}
+         ${hasManualAI ? `- <ai>Students execute the AI task: Enter the suggested prompt into the AI tool, analyze and cross-check the AI-generated sentences/ideas with textbook rules and teacher's guidance, identifying any inaccurate or unnatural language.</ai>` : ""}
+
+       * Bước 3: Báo cáo kết quả và thảo luận (Step 3: Reporting & Discussion / Outcome sharing):
+         - HS báo cáo bài học gốc (MÀU ĐEN - giữ nguyên 100%).
+         ${hasManualNLS ? `- <nls>Students report digital findings: Project/share their digital products (Padlet posts, Canva slides, quiz results) to the class, explain how they filtered and verified the online information.</nls>` : ""}
+         ${hasManualAI ? `- <ai>Students report AI-assisted results: Present the refined output, explain how they modified the prompt or corrected the AI draft, and answer peers' questions about language accuracy.</ai>` : ""}
+
+       * Bước 4: Nhận xét, đánh giá và kết luận (Step 4: Assessment & Conclusion / Feedback):
+         - GV nhận xét kiến thức ngôn ngữ gốc (MÀU ĐEN - giữ nguyên 100%).
+         ${hasManualNLS ? `- <nls>Teacher assesses digital competence: Evaluates students' digital search skills, tool proficiency, teamwork efficiency on digital platforms, and summarizes key digital takeaways.</nls>` : ""}
+         ${hasManualAI ? `- <ai>Teacher assesses AI competence: Comments on students' critical thinking when using AI, prompt engineering skills, academic honesty, and reinforces the principle of human-centered verification.</ai>` : ""}
+
+       * Trong mục Sản phẩm (c. Outcome / Product / Expected Learning Outcomes):
+         - Giữ nguyên 100% sản phẩm ngôn ngữ gốc (MÀU ĐEN).
+         ${hasManualNLS ? `- <nls>- Digital product: Online vocabulary notes, Padlet wall/board submissions, Canva flashcards/infographics created by students.</nls>` : ""}
+         ${hasManualAI ? `- <ai>- AI product: AI-assisted dialogue/paragraph drafts critically reviewed, verified and finalized by students.</ai>` : ""}
 
     4. MÃ NĂNG LỰC: Bắt buộc dùng đúng mã số chuẩn quốc gia ([1.1.TC1a], [1.3.TC2a], [NLb.TC1], [6.A1.2]...).
     =============================================================================
@@ -315,17 +338,19 @@ ${info.manualAI?.map(item => `                - [${item.code}] (${item.name}): [
       ${options.detailedReport ? "- Kèm theo bảng giải thích chi tiết mã năng lực đã chọn ở cuối bài." : ""}
       
       YÊU CẦU VỀ ĐỊNH DẠNG & NGUYÊN TẮC BẢO TOÀN (BẮT BUỘC):
-      1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG VÀ CẤU TRÚC GIÁO ÁN GỐC (CHẾ ĐỘ CHÈN NỘI DUNG - INJECTION ONLY):
+      1. 🚨 NGUYÊN TẮC TỐI THƯỢNG - BẢO TOÀN 100% NGUYÊN VẸN NỘI DUNG VÀ MẪU GIÁO ÁN GỐC CỦA NGƯỜI DÙNG (CHẾ ĐỘ CHÈN NỘI DUNG - INJECTION ONLY):
+         - 📌 BẢO TOÀN 100% MẪU RIÊNG CỦA TỪNG GIÁO VIÊN: Mỗi người dùng có mẫu giáo án khác nhau (mẫu theo trường, tổ bộ môn, CV 5512, CV 2345, mẫu song ngữ, mẫu trải nghiệm...). Bạn BẮT BUỘC giữ đúng 100% cấu trúc, đề mục, thứ tự và bố cục như bản gốc họ tải lên. Tuyệt đối không áp đặt mẫu lạ lên giáo án của họ.
          - ⛔ CẤM TUYỆT ĐỐI VIẾT CÁC DÒNG RÚT GỌN NHƯ: "(Các tiết học tiếp theo 45-53 giữ nguyên cấu trúc...)", "(Tương tự như trên...)", "(Các tiết còn lại giữ nguyên...)".
          - BẢO TOÀN 100% TOÀN BỘ CẤU TRÚC, ĐỀ MỤC, TIỂU MỤC (ví dụ: 1.1, 1.2, 2.1, 2.2, 2.3...), CÂU CHỮ, ĐOẠN VĂN, BÀI THƠ TRÍCH DẪN, CÂU HỎI, ĐÁP ÁN, SẢN PHẨM HỌC TẬP VÀ BẢNG BIỂU TỪ GIÁO ÁN GỐC NGƯỜI DÙNG TẢI LÊN.
          - BẠN LÀ CÔNG CỤ CHÈN THÊM (INJECTION): Giữ nguyên 100% lời văn gốc (màu đen), chỉ chèn thêm các nhiệm vụ/sản phẩm NLS/AI tích hợp màu đỏ vào vị trí thích hợp.
          - NGUYÊN TẮC VÀNG: CHỈ THÊM PHẦN TÍCH HỢP VÀO - TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA, THAY ĐỔI, VIẾT LẠI HAY RÚT GỌN NỘI DUNG GỐC DÙ CHỈ 1 CÂU.
       2. ĐỊNH DẠNG ĐẦU VÀO: Nội dung giáo án gốc bên dưới có thể là HTML (được chuyển từ DOCX). Các công thức toán học đã được thay thế bằng các mã giữ chỗ có dạng [MATH_ID_...].
       3. NHIỆM VỤ: Bạn phải chuyển đổi nội dung này sang MARKDOWN, đồng thời TÍCH HỢP nội dung theo đúng chế độ được chọn.
-      4. BẢO TOÀN CẤU TRÚC BẢNG: 
-         - Giữ nguyên tất cả các Bảng (Table) của giáo án gốc (chuyển sang Markdown Table). KHÔNG ĐƯỢC làm mất bảng hoặc biến bảng thành văn bản thường.
-         - Giữ nguyên các tiêu đề, danh sách.
-         - Giữ nguyên các đoạn in đậm/nghiêng.
+      4. 📊 BẢO TOÀN 100% CẤU TRÚC BẢNG BIỂU & DẠNG CHIA CỘT (TABLE PRESERVATION): 
+         - Nếu giáo án gốc ở dạng BẢNG (Bảng 2 cột: Hoạt động của GV / Hoạt động của HS; Bảng 3 cột: Hoạt động - Nội dung - Phương pháp; Bảng 4 cột: Mục tiêu - Nội dung - Sản phẩm - Tổ chức thực hiện...) -> BẮT BUỘC giữ nguyên 100% dạng Bảng (chuyển sang Markdown Table chuẩn) với đúng số cột và tiêu đề cột gốc. TUYỆT ĐỐI KHÔNG phá vỡ bảng thành văn bản thường.
+         - Khi chèn nội dung NLS/AI vào bảng: chèn trực tiếp vào ô tương ứng trong bảng (cột GV thì chèn nhiệm vụ GV màu đỏ, cột HS thì chèn nhiệm vụ HS màu đỏ).
+         - Nếu giáo án gốc ở dạng VĂN BẢN TUẦN TỰ (không có bảng) -> Giữ nguyên dạng văn bản tuần tự, không tự ý vẽ thêm bảng nếu bản gốc không có.
+         - Giữ nguyên toàn bộ các tiêu đề, danh sách, đoạn in đậm/nghiêng gốc.
       5. BẢO TOÀN CÔNG THỨC TOÁN HỌC VÀ HÓA HỌC (QUAN TRỌNG NHẤT): 
          - Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC thay đổi, dịch, hay xóa các mã giữ chỗ [MATH_ID_...]. Phải giữ nguyên vẹn các mã này trong văn bản đầu ra.
          - KHÔNG ĐƯỢC đặt các mã này bên trong các thẻ định dạng như in đậm (**), in nghiêng (*), gạch chân (<u>).
