@@ -510,7 +510,7 @@ export async function testGeminiApiKey(rawKey: string): Promise<{ success: boole
   }
 
   const ai = new GoogleGenAI({ apiKey: key });
-  const testModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite"];
+  const testModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-latest"];
 
   for (const model of testModels) {
     try {
@@ -531,7 +531,48 @@ export async function testGeminiApiKey(rawKey: string): Promise<{ success: boole
       }
     }
   }
-  return { success: false, message: "Không thể kết nối đến máy chủ Google Gemini với mã API Key này." };
+  return { success: false, message: "Không thể kết nối đến máy chủ Google Gemini với mã API Key này. Vui lòng kiểm tra kết nối mạng hoặc thử lại." };
+}
+
+function parseGeminiClientError(rawErr: any): string {
+  if (!rawErr) return "Lỗi không xác định khi kết nối đến Gemini AI";
+  let msg = typeof rawErr === "string" ? rawErr : rawErr?.message || String(rawErr);
+
+  // Try extracting inner message if it's a JSON string
+  for (let i = 0; i < 3; i++) {
+    if (typeof msg === "string" && (msg.trim().startsWith("{") || msg.trim().startsWith("["))) {
+      try {
+        const parsed = JSON.parse(msg.trim());
+        if (parsed?.error?.message) {
+          msg = parsed.error.message;
+        } else if (parsed?.message) {
+          msg = parsed.message;
+        } else {
+          break;
+        }
+      } catch (_) {
+        break;
+      }
+    }
+  }
+
+  if (typeof msg === "object" && msg !== null) {
+    if ((msg as any).error?.message) msg = (msg as any).error.message;
+    else if ((msg as any).message) msg = (msg as any).message;
+    else msg = JSON.stringify(msg);
+  }
+
+  const clean = String(msg);
+  if (clean.includes("API_KEY_INVALID") || clean.includes("API key not valid") || clean.includes("403") || clean.includes("401") || clean.includes("invalid API key")) {
+    return "Mã API Key chưa hợp lệ hoặc đang chờ Google kích hoạt (Lưu ý: Chìa khóa mới tạo trên Google AI Studio có thể mất 1-2 phút để hệ thống Google đồng bộ).";
+  }
+  if (clean.includes("429") || clean.includes("RESOURCE_EXHAUSTED") || clean.includes("quota")) {
+    return "Mã API Key này tạm thời đạt giới hạn lượt gọi miễn phí trong phút này (Quota Exceeded). Vui lòng đợi 1 phút và nhấn nút 'Thử lại ngay'.";
+  }
+  if (clean.includes("404") || clean.includes("NOT_FOUND") || clean.includes("not found")) {
+    return "Mô hình AI đang được điều hướng trên Google AI Studio. Vui lòng nhấn nút 'Thử lại ngay'.";
+  }
+  return clean;
 }
 
 async function generateLessonPlanClientSide(
@@ -548,13 +589,10 @@ async function generateLessonPlanClientSide(
   const userPrompt = buildUserPrompt(info, options);
 
   const modelsToTry = [
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-2.0-flash-lite",
     "gemini-3.6-flash",
-    "gemini-2.5-pro",
-    "gemini-1.5-pro",
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-flash-lite",
   ];
 
   const callModel = async (modelId: string) => {
@@ -570,7 +608,7 @@ async function generateLessonPlanClientSide(
     return res.text || "";
   };
 
-  let lastClientErr = "";
+  let lastClientErr: any = "";
   for (const modelId of modelsToTry) {
     try {
       console.log(`[Client AI Direct] Đang thử kết nối model: ${modelId}...`);
@@ -579,18 +617,13 @@ async function generateLessonPlanClientSide(
         return postProcessResult(resText, info);
       }
     } catch (err: any) {
-      lastClientErr = String(err?.message || err);
-      console.warn(`[Client AI Direct] Model ${modelId} báo:`, lastClientErr);
+      lastClientErr = err;
+      console.warn(`[Client AI Direct] Model ${modelId} báo:`, err?.message || err);
     }
   }
 
-  if (lastClientErr.includes("API_KEY_INVALID") || lastClientErr.includes("API key not valid") || lastClientErr.includes("403") || lastClientErr.includes("401")) {
-    throw new Error("Mã API Key chưa hợp lệ hoặc đang chờ Google kích hoạt (Lưu ý: API Key mới tạo trên Google AI Studio có thể mất 1-2 phút để hệ thống Google đồng bộ). Vui lòng kiểm tra lại chìa khóa.");
-  }
-  if (lastClientErr.includes("429") || lastClientErr.includes("RESOURCE_EXHAUSTED") || lastClientErr.includes("quota")) {
-    throw new Error("API Key này đã hết lượt gọi trong phút này (Quota Exceeded). Vui lòng đợi 1-2 phút hoặc đổi API Key khác.");
-  }
-  throw new Error(`Lỗi kết nối Gemini AI: ${lastClientErr}`);
+  const parsedMsg = parseGeminiClientError(lastClientErr);
+  throw new Error(parsedMsg);
 }
 
 export const generateNLSLessonPlan = async (

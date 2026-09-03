@@ -528,15 +528,32 @@ const App: React.FC = () => {
                   <div>
                     <h4 className="font-bold text-sm text-rose-900">Thông báo từ Hệ thống AI</h4>
                     <p className="text-xs font-medium text-rose-700 mt-1 leading-relaxed">{error}</p>
+                    {apiKeyInput && (
+                      <p className="text-[11px] text-slate-500 mt-1.5 flex items-center">
+                        <CheckCircle2 size={12} className="text-emerald-500 mr-1" />
+                        Chìa khóa của bạn ({apiKeyInput.slice(0, 6)}...{apiKeyInput.slice(-4)}) vẫn được lưu an toàn trên máy.
+                      </p>
+                    )}
                   </div>
                 </div>
-                <button
-                  onClick={() => setIsApiKeyModalOpen(true)}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center shrink-0 self-end sm:self-center cursor-pointer"
-                >
-                  <KeyRound size={14} className="mr-1.5" />
-                  DÁN / ĐỔI API KEY NGAY
-                </button>
+                <div className="flex items-center space-x-2 shrink-0 self-end sm:self-center">
+                  <button
+                    onClick={handleProcess}
+                    disabled={loading}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center cursor-pointer"
+                  >
+                    <RefreshCw size={13} className="mr-1.5" />
+                    THỬ LẠI NGAY
+                  </button>
+                  <button
+                    onClick={() => setIsApiKeyModalOpen(true)}
+                    className="px-3 py-2 bg-white hover:bg-rose-100 text-rose-700 border border-rose-300 font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center cursor-pointer"
+                    title="Đổi mã API Key khác"
+                  >
+                    <KeyRound size={13} className="mr-1" />
+                    Đổi Key khác
+                  </button>
+                </div>
               </div>
             )}
             
